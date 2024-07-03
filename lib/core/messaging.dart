@@ -37,10 +37,14 @@ mixin Messaging on Component {
   }
 
   void send<T extends Message>(T message) {
-    final listener = listeners[T];
+    logInfo(message);
+    logInfo(message.runtimeType);
+
+    final listener = listeners[message.runtimeType];
     if (listener == null || listener.isEmpty) {
-      logWarn('no listener for $T in $listeners');
+      logWarn('no listener for ${message.runtimeType} in $listeners');
     } else {
+      logInfo('sending ${message.runtimeType} to ${listener.length} listeners');
       listener.forEach((it) => it(message));
     }
   }

@@ -1,8 +1,16 @@
+import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 
+import '../core/common.dart';
 import 'brick_id.dart';
 
 export 'brick_id.dart';
+
+class SpawnExtraFromBrick with Message {
+  final Brick brick;
+
+  SpawnExtraFromBrick(this.brick);
+}
 
 class Brick {
   final BrickId id;
@@ -11,24 +19,30 @@ class Brick {
 
   late final center = (topLeft + bottomRight) / 2;
 
+  late final bool indestructible = id.strength == 0;
+
   Brick(this.id, this.topLeft, this.bottomRight);
 
   int _hits = 0;
-  bool _destroyed = false;
 
   int get hits => _hits;
 
-  bool get destroyed => _destroyed;
+  bool get destroyed => !indestructible && _hits >= id.strength;
 
-  void hit() {
+  bool spawned = false;
+
+  void hit([bool full_force = false]) {
+    hit_highlight += 0.1;
+    if (indestructible) return;
+
     if (_hits < id.strength) {
-      // _hits++;
-      // hit_highlight += 0.1;
-      _hits = id.strength;
-      _destroyed = true;
-    } else {
-      _destroyed = true;
+      if (full_force) {
+        _hits = id.strength;
+      } else {
+        _hits++;
+      }
     }
+    logInfo('hit $id: hits: $hits strength: ${id.strength}');
   }
 
   double hit_highlight = 0;

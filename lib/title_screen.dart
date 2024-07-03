@@ -1,4 +1,5 @@
 import 'package:flame/components.dart';
+import 'package:flutternoid/core/soundboard.dart';
 
 import 'core/common.dart';
 import 'core/screens.dart';
@@ -11,6 +12,8 @@ class TitleScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
   onLoad() async {
     await spriteXY('title.png', xCenter, yCenter);
     textXY('Insert coin', xCenter, gameHeight + 19, anchor: Anchor.bottomCenter).add(BlinkEffect());
+
+    soundboard.preload();
   }
 
   @override
@@ -18,5 +21,6 @@ class TitleScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
     super.onMount();
     playAudio('arkanoid.ogg');
     onKey('<Space>', () => showScreen(Screen.game));
+    backgroundMusic('voyage_of_vaus.mp3');
   }
 }

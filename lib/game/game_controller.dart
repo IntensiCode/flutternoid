@@ -1,7 +1,14 @@
+import 'dart:math';
+
 import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
+import 'package:flutternoid/core/random.dart';
+import 'package:flutternoid/game/power_ups.dart';
 import 'package:flutternoid/input/shortcuts.dart';
+import 'package:flutternoid/util/extensions.dart';
+import 'package:supercharged/supercharged.dart';
 
+import '../core/common.dart';
 import '../core/game.dart';
 import '../core/messaging.dart';
 import '../core/soundboard.dart';
@@ -11,6 +18,8 @@ import '../util/auto_dispose.dart';
 import '../util/on_message.dart';
 import 'background_screen.dart';
 import 'ball.dart';
+import 'extra_id.dart';
+import 'flash_text.dart';
 import 'game_configuration.dart';
 import 'game_frame.dart';
 import 'game_object.dart';
@@ -25,6 +34,8 @@ class GameController extends PositionComponent with AutoDispose, GameScriptFunct
 
   final keys = Keys();
   final level = Level();
+  final flash_text = FlashText();
+  final power_ups = PowerUps();
   final player = Player();
 
   GamePhase _phase = GamePhase.start_game;
@@ -107,6 +118,8 @@ class GameController extends PositionComponent with AutoDispose, GameScriptFunct
     await add(Shadows());
     await add(keys);
     await add(level);
+    await add(flash_text);
+    await add(power_ups);
     await add(player);
     await add(GameFrame());
   }
@@ -115,11 +128,32 @@ class GameController extends PositionComponent with AutoDispose, GameScriptFunct
   void onMount() {
     super.onMount();
     onMessage<PlayerReady>((it) => add(Ball()));
-    onKey('b', () => add(Ball()));
-    onKey('r', () {
-      removeAll(children.whereType<Ball>());
-      add(Ball());
-    });
+    onMessage<MultiBall>((_) => _split_ball());
+
+    if (dev) {
+      onKey('1', () => sendMessage(SpawnExtra(ExtraId.laser)));
+      onKey('2', () => sendMessage(SpawnExtra(ExtraId.catcher)));
+      onKey('3', () => sendMessage(SpawnExtra(ExtraId.expander)));
+      onKey('4', () => sendMessage(SpawnExtra(ExtraId.disruptor)));
+      onKey('5', () => sendMessage(SpawnExtra(ExtraId.slow_down)));
+      onKey('6', () => sendMessage(SpawnExtra(ExtraId.multi_ball)));
+      onKey('7', () => sendMessage(SpawnExtra(ExtraId.extra_life)));
+      onKey('b', () => add(Ball()));
+      onKey('r', () {
+        removeAll(children.whereType<Ball>());
+        add(Ball());
+      });
+    }
+  }
+
+  // Component
+
+  @override
+  void updateTree(double dt) {
+    if (phase == GamePhase.confirm_exit) return;
+    if (phase == GamePhase.game_paused) return;
+    if (phase == GamePhase.game_over) return;
+    super.updateTree(dt);
   }
 
   //
@@ -154,14 +188,17 @@ class GameController extends PositionComponent with AutoDispose, GameScriptFunct
   //   return data;
   // }
 
-  // Component
+  // Implementation
 
-  @override
-  void updateTree(double dt) {
-    if (phase == GamePhase.confirm_exit) return;
-    if (phase == GamePhase.game_paused) return;
-    if (phase == GamePhase.game_over) return;
-    super.updateTree(dt);
+  void _split_ball() {
+    final ball = children.whereType<Ball>().maxBy((a, b) => (b.position.y - a.position.y).sign.toInt());
+    if (ball == null) {
+      add(Ball());
+    } else {
+      final inverted = ball.velocity.inverted();
+      inverted.rotate(rng.nextDoublePM(pi / 4));
+      add(Ball.spawned(ball, inverted));
+    }
   }
 
   void _advance_level() {

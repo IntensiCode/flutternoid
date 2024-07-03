@@ -160,7 +160,7 @@ mixin GameScriptFunctions on Component, AutoDispose {
   }
 
   void backgroundMusic(String filename) async {
-    filename = "background/$filename";
+    filename = "music/$filename";
 
     dispose('afterTenSeconds');
     dispose('backgroundMusic');

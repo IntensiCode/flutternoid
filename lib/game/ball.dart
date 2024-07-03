@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:dart_minilog/dart_minilog.dart';
@@ -7,10 +8,14 @@ import 'package:flutter/cupertino.dart';
 
 import '../core/common.dart';
 import '../core/functions.dart';
+import '../core/soundboard.dart';
+import '../util/auto_dispose.dart';
 import '../util/debug.dart';
 import '../util/extensions.dart';
 import '../util/geom.dart';
+import '../util/on_message.dart';
 import 'brick.dart';
+import 'extra_id.dart';
 import 'game_context.dart';
 import 'game_object.dart';
 import 'player.dart';
@@ -23,22 +28,38 @@ enum BallState {
   active,
 }
 
-class Ball extends Component with HasPaint, GameObject {
+class Ball extends Component with AutoDispose, HasPaint, GameObject {
   late final Player _player;
   late final double _half_bat_width;
   late final double _half_bat_height;
   late final SpriteSheet sprites;
 
   final position = Vector2.zero();
+  final velocity = Vector2.zero();
+  final caught_offset = Vector2(0, -3);
 
   var state = BallState.appearing;
   var state_progress = 0.0;
+  var slow_down = 0.0;
+  var disruptor = 0.0;
 
-  final _speed = Vector2.zero();
+  bool _clear_bat = false;
+  bool _lost = false;
+
+  Ball();
+
+  Ball.spawned(Ball origin, Vector2 velocity) {
+    this.position.setFrom(origin.position);
+    this.velocity.setFrom(velocity);
+    this.velocity.scale(0.5);
+    this.state = BallState.active;
+    this.slow_down = origin.slow_down;
+    this._clear_bat = origin._clear_bat;
+  }
 
   push(double dx, double dy) {
-    _speed.x += dx * 0.8;
-    _speed.y += dy;
+    velocity.x += dx * 0.8;
+    velocity.y += dy;
     state = BallState.active;
   }
 
@@ -46,7 +67,7 @@ class Ball extends Component with HasPaint, GameObject {
 
   @override
   onLoad() async {
-    priority = 1;
+    priority = 2;
 
     paint = pixelPaint();
 
@@ -62,15 +83,27 @@ class Ball extends Component with HasPaint, GameObject {
       anchor: Anchor.bottomLeft,
     ));
     add(DebugText(
-      text: () => 'bs: ${_speed.x.toStringAsFixed(2)}, ${_speed.y.toStringAsFixed(2)}',
+      text: () => 'bs: ${velocity.x.toStringAsFixed(2)}, ${velocity.y.toStringAsFixed(2)}',
       position: Vector2(0, visual.game_pixels.y - 8),
       anchor: Anchor.bottomLeft,
     ));
     add(DebugText(
-      text: () => 'bs: ${_speed.length.toStringAsFixed(2)}',
+      text: () => 'bs: ${velocity.length.toStringAsFixed(2)}',
       position: Vector2(0, visual.game_pixels.y - 14),
       anchor: Anchor.bottomLeft,
     ));
+    add(DebugText(
+      text: () => 'sd: ${slow_down.toStringAsFixed(2)}',
+      position: Vector2(0, visual.game_pixels.y - 20),
+      anchor: Anchor.bottomLeft,
+    ));
+  }
+
+  @override
+  void onMount() {
+    super.onMount();
+    onMessage<SlowDown>((it) => slow_down = configuration.slow_down_time);
+    onMessage<Disruptor>((it) => disruptor = configuration.disruptor_time);
   }
 
   @override
@@ -90,7 +123,7 @@ class Ball extends Component with HasPaint, GameObject {
 
   void _on_appearing(double dt) {
     position.setFrom(_player.position);
-    position.y -= 6.0;
+    position.y -= 3.0;
 
     state_progress += dt * 4;
     if (state_progress >= 1.0) {
@@ -104,12 +137,20 @@ class Ball extends Component with HasPaint, GameObject {
 
   void _on_caught(double dt) {
     position.setFrom(_player.position);
-    position.y -= 6.0;
+    position.add(caught_offset);
+    if (caught_offset.x < 0) caught_offset.x += 20 * dt;
+    if (caught_offset.x > 0) caught_offset.x -= 20 * dt;
+    if (caught_offset.y < -_half_bat_height) caught_offset.y += 10 * dt;
+    if (caught_offset.y > -_half_bat_height) caught_offset.y -= 10 * dt;
   }
 
-  var slow_down = false;
-
   void _on_active(double dt) {
+    if (slow_down > 0) slow_down -= min(slow_down, dt);
+    if (disruptor > 0) {
+      disruptor -= min(disruptor, dt);
+      logInfo(disruptor);
+    }
+
     // dt = slow_down ? _apply_slow_down(dt) : dt;
     _apply_speed(dt);
 
@@ -127,57 +168,68 @@ class Ball extends Component with HasPaint, GameObject {
     _check_ball_lost();
   }
 
-  double _apply_slow_down(double dt) {
-    const slow_down_area = 80;
-    if (position.y > visual.game_pixels.y - slow_down_area) {
-      final slow_down = position.y - (visual.game_pixels.y - slow_down_area);
-      return dt /= 1 + slow_down / slow_down_area * 10;
-    }
-    // if (position.y < slow_down_area) {
-    //   final slow_down = slow_down_area - position.y;
-    //   return dt /= 1 + slow_down / slow_down_area * 4;
-    // }
-    return dt;
-  }
+  // double _apply_slow_down(double dt) {
+  //   if (position.y > visual.game_pixels.y - slow_down_area) {
+  //     final slow_down = position.y - (visual.game_pixels.y - slow_down_area);
+  //     return dt /= 1 + slow_down / slow_down_area * 10;
+  //   }
+  //   // if (position.y < slow_down_area) {
+  //   //   final slow_down = slow_down_area - position.y;
+  //   //   return dt /= 1 + slow_down / slow_down_area * 4;
+  //   // }
+  //   return dt;
+  // }
 
-  final _min_speed = 50.0;
-  final _max_speed = 150.0;
-  late final _min_speed_squared = _min_speed * _min_speed;
-  late final _max_speed_squared = _max_speed * _max_speed;
+  static const _min_speed = 50.0;
+  static const _max_speed = 150.0;
+  static const _min_speed_squared = _min_speed * _min_speed;
+  static const _max_speed_squared = _max_speed * _max_speed;
 
-  final _actual_speed = Vector2.zero();
+  static final _actual_speed = Vector2.zero();
 
   void _apply_speed(double dt) {
-    if (position.y > visual.game_pixels.y - 10) return;
+    // if (position.y > visual.game_pixels.y - 10) return;
 
-    if (_speed.y.abs() < _min_speed * 0.9) {
-      logInfo('fix min speed y $_speed');
-      _speed.y = _min_speed * _speed.y.sign;
-      if ((_speed.y * 100).round() == 0) _speed.y = -_min_speed;
-      logInfo('speed: $_speed');
+    if (velocity.y.abs() < _min_speed * 0.9) {
+      logInfo('fix min speed y $velocity');
+      velocity.y = _min_speed * velocity.y.sign;
+      if ((velocity.y * 100).round() == 0) velocity.y = -_min_speed;
+      logInfo('speed: $velocity');
     }
 
-    if (_speed.length2 < _min_speed_squared) {
+    if (velocity.length2 < _min_speed_squared) {
       logInfo('fix min speed 2');
-      _speed.normalize();
-      _speed.scale(_min_speed);
-      logInfo('speed: $_speed');
-    } else if (_speed.length2 > _max_speed_squared * 1.05) {
+      velocity.normalize();
+      velocity.scale(_min_speed);
+      logInfo('speed: $velocity');
+    } else if (velocity.length2 > _max_speed_squared * 1.05) {
       logInfo('fix max speed');
-      _speed.normalize();
-      _speed.scale(_max_speed);
-      logInfo('speed: $_speed');
+      velocity.normalize();
+      velocity.scale(_max_speed);
+      logInfo('speed: $velocity');
     }
-    _actual_speed.setFrom(_speed);
-    if (slow_down && position.y > visual.game_pixels.y - 50) _actual_speed.scale(0.5);
+    _actual_speed.setFrom(velocity);
+    if (slow_down > 0) {
+      final slow_down_pos = position.y - (visual.game_pixels.y - visual.slow_down_area);
+      if (slow_down_pos > 0) {
+        final factor = (slow_down_pos / visual.slow_down_area).clamp(0.0, 0.8);
+        _actual_speed.scale(1 - factor);
+      }
+    }
 
     _actual_speed.scale(dt);
     position.add(_actual_speed);
 
     // position.x += _speed.x * dt;
     // position.y += _speed.y * dt;
-    if (position.x < 0 || position.x > visual.game_pixels.x) _speed.x = -_speed.x;
-    if (position.y < 0) _speed.y = -_speed.y;
+    if (position.x < 0 || position.x > visual.game_pixels.x) {
+      velocity.x = -velocity.x;
+      soundboard.play(Sound.wall_hit);
+    }
+    if (position.y < 0) {
+      velocity.y = -velocity.y;
+      soundboard.play(Sound.wall_hit);
+    }
   }
 
   void _check_brick_hit() {
@@ -189,8 +241,12 @@ class Ball extends Component with HasPaint, GameObject {
       if (position.x > brick.bottomRight.x + threshold) continue;
       if (position.y < brick.topLeft.y - threshold) continue;
       if (position.y > brick.bottomRight.y + threshold) continue;
-      contacts.add(brick);
-      brick.hit();
+      brick.hit(disruptor > 0);
+      if (disruptor > 0 && brick.destroyed) {
+      } else {
+        contacts.add(brick);
+      }
+      soundboard.play(Sound.wall_hit);
 
       if (brick.bottomRight.x >= visual.game_pixels.x - 4) {
         logInfo(brick.bottomRight);
@@ -204,8 +260,8 @@ class Ball extends Component with HasPaint, GameObject {
     final width = visual.brick_width.toDouble();
     final height = visual.brick_height.toDouble();
 
-    final speed = _speed.length;
-    final speed_y = _speed.y;
+    final speed = velocity.length;
+    final speed_y = velocity.y;
 
     final single = contacts.singleOrNull;
     if (single != null) {
@@ -219,34 +275,34 @@ class Ball extends Component with HasPaint, GameObject {
       final dy = (y_dist - height / 2).sign;
       if (x_corner && y_corner) {
         if (single.topLeft.x == 0) {
-          _speed.y = -speed_y;
+          velocity.y = -speed_y;
         } else if (single.bottomRight.x >= visual.game_pixels.x - 1) {
-          _speed.y = -speed_y;
+          velocity.y = -speed_y;
         } else {
-          final nx = -_speed.y;
-          final ny = _speed.x;
-          _speed.x = nx.abs() * dx.sign;
-          _speed.y = ny.abs() * dy.sign;
+          final nx = -velocity.y;
+          final ny = velocity.x;
+          velocity.x = nx.abs() * dx.sign;
+          velocity.y = ny.abs() * dy.sign;
         }
         // _speed.x = dx;
         // _speed.y = dy;
         // _speed.normalize();
         // _speed.scale(speed);
       } else if (y_corner) {
-        _speed.y = -_speed.y;
+        velocity.y = -velocity.y;
       } else if (x_corner) {
         if (single.topLeft.x == 0) {
-          final nx = -_speed.y;
-          final ny = _speed.x;
-          _speed.x = nx;
-          _speed.y = ny;
+          final nx = -velocity.y;
+          final ny = velocity.x;
+          velocity.x = nx;
+          velocity.y = ny;
         } else if (single.bottomRight.x >= visual.game_pixels.x - 1) {
-          final nx = -_speed.y;
-          final ny = _speed.x;
-          _speed.x = nx;
-          _speed.y = ny;
+          final nx = -velocity.y;
+          final ny = velocity.x;
+          velocity.x = nx;
+          velocity.y = ny;
         } else {
-          _speed.x = -_speed.x;
+          velocity.x = -velocity.x;
         }
       } else {
         throw 'ok?';
@@ -256,36 +312,33 @@ class Ball extends Component with HasPaint, GameObject {
         if (contacts.first.topLeft.y == contacts.last.topLeft.y) {
           throw 'nono';
         }
-        _speed.x = -_speed.x;
+        velocity.x = -velocity.x;
       } else if (contacts.first.topLeft.y == contacts.last.topLeft.y) {
         if (contacts.first.topLeft.x == contacts.last.topLeft.x) {
           throw 'nono';
         }
-        _speed.y = -_speed.y;
+        velocity.y = -velocity.y;
       } else {
         throw 'oh my!';
       }
     } else if (contacts.length == 3) {
-      final nx = -_speed.y;
-      final ny = _speed.x;
-      _speed.x = nx;
-      _speed.y = ny;
+      final nx = -velocity.y;
+      final ny = velocity.x;
+      velocity.x = nx;
+      velocity.y = ny;
     } else {
       throw 'oh really?';
     }
 
-    _speed.normalize();
-    _speed.scale(speed);
+    velocity.normalize();
+    velocity.scale(speed);
   }
 
-  final _closest = Vector2.zero();
-  final _bounce_normal = Vector2.zero();
-  final _push = Vector2.zero();
-  final _temp = Vector2.zero();
+  static final _closest = Vector2.zero();
+  static final _bounce_normal = Vector2.zero();
+  static final _push = Vector2.zero();
 
   static const _ball_size = 2.0;
-
-  bool _clear_bat = false;
 
   void _check_bat_hit(double dt) {
     if (_clear_bat) {
@@ -322,32 +375,44 @@ class Ball extends Component with HasPaint, GameObject {
     _player.bounce_vector_or_zero(position, _ball_size, _bounce_normal, _push);
     if (_bounce_normal.isZero()) return;
 
+    if (_player.catches) {
+      state = BallState.caught;
+      velocity.setZero();
+      caught_offset.setFrom(position);
+      caught_offset.sub(_player.position);
+      logInfo(caught_offset);
+      soundboard.play(Sound.ball_held);
+    }
+
+    soundboard.play(Sound.wall_hit);
+
     logInfo('edge normal: $_bounce_normal');
     logInfo('edge push: $_push');
-    logInfo('speed: $_speed');
+    logInfo('speed: $velocity');
 
     if (_bounce_normal.y > 0) {
       logInfo('PUSH');
-      final speed = _speed.normalize();
-      _speed.add(_bounce_normal);
-      _speed.normalize();
-      _speed.scale(speed);
-      logInfo('push speed: $_speed');
+      final speed = velocity.normalize();
+      velocity.add(_bounce_normal);
+      velocity.normalize();
+      velocity.scale(speed);
+      logInfo('push speed: $velocity');
     } else {
       logInfo('BOUNCE');
-      bounce(_speed, _bounce_normal);
-      _speed.x += _player.x_speed * 0.5;
-      if (_speed.y > 0) {
+      bounce(velocity, _bounce_normal);
+      velocity.x += _player.x_speed * 0.5;
+      velocity.y -= _player.x_speed.abs() * 0.25;
+      if (velocity.y > 0) {
         logWarn('why? what?');
-        _speed.y = -_speed.y;
+        velocity.y = -velocity.y;
       }
-      logInfo('bounce speed: $_speed');
+      logInfo('bounce speed: $velocity');
     }
 
     if (!_push.isZero()) {
-      _speed.add(_push);
-      _speed.add(_push);
-      logInfo('after push speed: $_speed');
+      velocity.add(_push);
+      velocity.add(_push);
+      logInfo('after push speed: $velocity');
       logInfo('pos before push: $position');
       // if (_push.x < 0) {
       //   position.x = _player.position.x - _half_bat_width - _ball_size;
@@ -358,9 +423,9 @@ class Ball extends Component with HasPaint, GameObject {
       logInfo('pos after push: $position');
     }
 
-    if (_speed.isZero() || _speed.y == 0) {
+    if (velocity.isZero() || velocity.y == 0) {
       logWarn('ZERO (Y) SPEED CORRECTION');
-      _speed.y = -_min_speed;
+      velocity.y = -_min_speed;
     }
 
     final dist = player.distance_and_closest(position, _closest);
@@ -368,11 +433,11 @@ class Ball extends Component with HasPaint, GameObject {
   }
 
   void _check_ball_lost() {
-    if (position.y > visual.game_pixels.y) {
-      _speed.setZero();
-      state = BallState.caught;
-      // removeFromParent();
+    if (position.y > visual.game_pixels.y - 10 && !_lost) {
+      _lost = true;
+      soundboard.play(Sound.ball_lost);
     }
+    if (position.y > visual.game_pixels.y) removeFromParent();
   }
 
   @override

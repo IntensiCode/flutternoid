@@ -5,26 +5,25 @@ import 'package:flame_audio/flame_audio.dart';
 import 'common.dart';
 
 enum Sound {
-  bomb,
-  clear,
-  death_row,
-  detonate,
-  detonated,
-  eraser,
-  excellent,
+  ball_held,
+  ball_lost,
+  bat_expand,
+  catcher,
+  disruptor,
+  expander,
   explosion,
-  highball,
+  extra_life,
+  game_over,
+  get_ready,
   hiscore,
-  jamjam,
+  laser,
   level_complete,
-  line,
-  multi_random,
-  placed,
-  random,
-  score,
-  selected,
-  slowdown,
+  multi_ball,
+  slow_down,
+  wall_hit,
 }
+
+String sound_extension = '.ogg';
 
 final soundboard = Soundboard();
 
@@ -52,7 +51,7 @@ class Soundboard extends Component {
   preload() async {
     for (final it in Sound.values) {
       logVerbose('cache $it');
-      await FlameAudio.audioCache.load('sound/${it.name}.ogg');
+      await FlameAudio.audioCache.load('sound/${it.name}$sound_extension');
     }
   }
 
@@ -98,7 +97,7 @@ class Soundboard extends Component {
         player.dispose();
       }
 
-      final it = await FlameAudio.play('sound/${sound.name}.ogg', volume: volume * master);
+      final it = await FlameAudio.play('sound/${sound.name}$sound_extension', volume: volume * master);
       it.setPlayerMode(PlayerMode.lowLatency);
       it.setReleaseMode(ReleaseMode.stop);
       it.onPlayerStateChanged.listen((it) {

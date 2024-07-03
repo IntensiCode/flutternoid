@@ -2,12 +2,15 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:collection/collection.dart';
+import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 import 'package:flame/sprite.dart';
 import 'package:flame_tiled/flame_tiled.dart';
 
 import '../core/common.dart';
 import '../core/functions.dart';
+import '../core/messaging.dart';
+import '../core/random.dart';
 import '../util/extensions.dart';
 import '../util/tiled_extensions.dart';
 import 'brick.dart';
@@ -46,14 +49,15 @@ class Level extends PositionComponent with GameObject, HasPaint {
 
   @override
   onLoad() async {
-    priority = 1;
+    priority = 2;
 
     paint = pixelPaint();
 
     sprites = await sheetIWH('game_blocks.png', visual.brick_width, visual.brick_height, spacing: 1);
 
+    final which = level_number_starting_at_1.toString().padLeft(2, '0');
     final map = await TiledComponent.load(
-      'level01.tmx',
+      'level$which.tmx',
       Vector2(12.0, 6.0),
       layerPaintFactory: (it) => pixelPaint(),
     );
@@ -107,6 +111,12 @@ class Level extends PositionComponent with GameObject, HasPaint {
         if (brick == null) continue;
         if (brick.hit_highlight > 0) brick.hit_highlight -= min(brick.hit_highlight, dt);
         if (brick.destroyed && brick.destroy_progress < 1.0) brick.destroy_progress += dt * 4;
+        if (brick.destroyed && !brick.spawned) {
+          final probability = 0.05 + (brick.id.index ~/ 5) * 0.1;
+          logInfo(probability);
+          if (rng.nextDouble() < probability) sendMessage(SpawnExtraFromBrick(brick));
+          brick.spawned = true;
+        }
         if (brick.gone) row[x] = null;
       }
     }
