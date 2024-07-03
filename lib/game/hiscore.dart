@@ -1,0 +1,98 @@
+import 'dart:convert';
+
+import 'package:dart_minilog/dart_minilog.dart';
+import 'package:flame/components.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'game_object.dart';
+
+final hiscore = Hiscore();
+
+class Hiscore extends Component with HasGameData {
+  static const int max_name_length = 10;
+  static const int number_of_entries = 10;
+
+  final entries = List.generate(number_of_entries, _defaultRank);
+
+  HiscoreRank? latestRank;
+
+  static HiscoreRank _defaultRank(int idx) => HiscoreRank(100000 - idx * 10000, 10 - idx, 'INTENSICODE');
+
+  bool isNewHiscore(int score) => score > entries.first.score;
+
+  bool isHiscoreRank(int score) => score > entries.last.score;
+
+  void insert(int score, int level, String name) {
+    final rank = HiscoreRank(score, level, name);
+    for (int idx = 0; idx < entries.length; idx++) {
+      final check = entries[idx];
+      if (score <= check.score) continue;
+      if (check == rank) break;
+      entries.insert(idx, rank);
+      entries.removeLast();
+      break;
+    }
+    latestRank = rank;
+
+    try_store_state();
+  }
+
+  // Component
+
+  @override
+  onLoad() async => await try_restore_state();
+
+  // HasGameData
+
+  @override
+  void load_state(GameData data) {
+    entries.clear();
+
+    final it = data['entries'] as List<dynamic>;
+    entries.addAll(it.map((it) => HiscoreRank.load(it)));
+  }
+
+  @override
+  GameData save_state(GameData data) => data..['entries'] = entries.map((it) => it.save_state({})).toList();
+
+  // Implementation
+
+  try_store_state() async {
+    try {
+      final preferences = await SharedPreferences.getInstance();
+      preferences.setString('hiscore', jsonEncode(save_state({})));
+    } catch (it, trace) {
+      logError('Failed to store hiscore: $it', trace);
+    }
+  }
+
+  Future try_restore_state() async {
+    try {
+      final preferences = await SharedPreferences.getInstance();
+      if (preferences.containsKey('hiscore')) {
+        final json = preferences.getString('hiscore');
+        if (json != null) {
+          logVerbose(json);
+          load_state(jsonDecode(json));
+        }
+      }
+    } catch (it, trace) {
+      logError('Failed to restore hiscore: $it', trace);
+    }
+  }
+}
+
+class HiscoreRank {
+  final int score;
+  final int level;
+  final String name;
+
+  HiscoreRank(this.score, this.level, this.name);
+
+  HiscoreRank.load(GameData data) : this(data['score'], data['level'], data['name']);
+
+  GameData save_state(GameData data) => data
+    ..['score'] = score
+    ..['level'] = level
+    ..['name'] = name;
+}
