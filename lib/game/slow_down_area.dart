@@ -161,6 +161,6 @@ class SlowDownArea extends BodyComponent with AutoDispose, GameObject, ContactCa
 
   double _target_speed(Ball ball) {
     final factor = (ball.position.y.clamp(slow_down_top, slow_down_bottom) - slow_down_top) / slow_down_range;
-    return ball.min_speed + (ball.opt_speed - ball.min_speed) * (1 - factor);
+    return configuration.min_ball_speed + (configuration.opt_ball_speed - configuration.min_ball_speed) * (1 - factor);
   }
 }

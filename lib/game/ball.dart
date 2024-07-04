@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart' hide World;
 import 'package:flame/sprite.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
@@ -8,6 +9,7 @@ import 'package:flutter/cupertino.dart';
 
 import '../core/common.dart';
 import '../core/functions.dart';
+import '../core/random.dart';
 import '../core/soundboard.dart';
 import '../util/auto_dispose.dart';
 import '../util/extensions.dart';
@@ -23,12 +25,15 @@ enum BallState {
   appearing,
   caught,
   active,
+  pushed,
+  exploding,
 }
 
 class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks {
   late final Player _player;
   late final double _half_bat_height;
   late final SpriteSheet sprites;
+  late final FragmentShader shader;
 
   Ball? _spawn_origin;
   Vector2? _spawn_velocity;
@@ -36,13 +41,18 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
   final _caught_offset = Vector2(0, -3);
   final _update_position = Vector2.zero();
 
-  final max_speed = 200.0;
-  final opt_speed = 150.0;
-  final min_speed = 25.0;
+  var _state = BallState.appearing;
 
-  var state = BallState.appearing;
+  BallState get state => _state;
+
+  set state(BallState value) {
+    logInfo('new ball state: $value');
+    _state = value;
+  }
+
   var state_progress = 0.0;
   var disruptor = 0.0;
+  var _jiggle = 0.0;
 
   bool _lost = false;
 
@@ -60,8 +70,33 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
   }
 
   push(double dx, double dy) {
-    state = BallState.active;
+    state = BallState.pushed;
     body.linearVelocity.setValues(dx, dy);
+    body.setTransform(_update_position, 0);
+    if (_jiggle > 0) {
+      final factor = max(0.0, _jiggle - 0.25);
+      body.linearVelocity.rotate(rng.nextDoublePM(factor));
+    }
+  }
+
+  caught() {
+    state = BallState.caught;
+    velocity.setZero();
+    _caught_offset.setFrom(position);
+    _caught_offset.sub(_player.position);
+  }
+
+  jiggle(double force) => _jiggle = force;
+
+  explode() {
+    velocity.setZero();
+
+    renderBody = false;
+    debugMode = false;
+    paint.style = PaintingStyle.stroke;
+
+    state = BallState.exploding;
+    state_progress = 0.0;
   }
 
   // BodyComponent
@@ -89,18 +124,16 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
   @override
   void beginContact(Object other, Contact contact) {
     super.beginContact(other, contact);
+    if (other is Ball && other.state != BallState.active || this.state != BallState.active) {
+      contact.isEnabled = false;
+      return;
+    }
     if (other is Brick) {
       other.hit(disruptor > 0);
       if (disruptor > 0 && other.destroyed) contact.isEnabled = false;
     }
-    if (other is Player && state == BallState.active) {
-      if (other.in_catcher_mode) {
-        state = BallState.caught;
-        velocity.setZero();
-        _caught_offset.setFrom(position);
-        _caught_offset.sub(other.position);
-        contact.isEnabled = false;
-      }
+    if (other is Player && other.in_catcher_mode) {
+      contact.isEnabled = false;
     }
     soundboard.play(Sound.wall_hit);
   }
@@ -110,6 +143,8 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
   @override
   onLoad() async {
     super.onLoad();
+
+    shader = (await FragmentProgram.fromAsset('assets/shaders/explosion.frag')).fragmentShader();
 
     priority = 2;
 
@@ -136,6 +171,7 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
   @override
   void update(double dt) {
     if (debug != renderBody) renderBody = debug;
+    if (state != BallState.caught) _jiggle = 0.0;
     super.update(dt);
     switch (state) {
       case BallState.gone:
@@ -144,8 +180,16 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
         _on_appearing(dt);
       case BallState.caught:
         _on_caught(dt);
+      case BallState.pushed:
       case BallState.active:
         _on_active(dt);
+      case BallState.exploding:
+        state_progress += dt;
+        if (state_progress >= 1.0) {
+          state = BallState.gone;
+          logInfo('ball exploded');
+          removeFromParent();
+        }
     }
   }
 
@@ -157,7 +201,7 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
     state_progress += dt * 4;
     if (state_progress >= 1.0) {
       paint.opacity = 1;
-      state_progress = 1.0;
+      state_progress = 0.0;
       state = BallState.caught;
     } else {
       paint.opacity = state_progress;
@@ -175,22 +219,25 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
   }
 
   void _on_active(double dt) {
+    if (state == BallState.pushed&& position.y < _player.position.y - _player.bat_height) {
+      state = BallState.active;
+    }
     if (disruptor > 0) disruptor -= min(disruptor, dt);
     _check_ball_lost();
 
-    if (body.linearVelocity.length > max_speed) {
+    if (body.linearVelocity.length > configuration.max_ball_speed) {
       body.linearVelocity.normalize();
-      body.linearVelocity.scale(max_speed);
+      body.linearVelocity.scale(configuration.max_ball_speed);
     }
-    if (body.linearVelocity.y.abs() < min_speed) {
+    if (body.linearVelocity.y.abs() < configuration.min_ball_speed) {
       final speed = body.linearVelocity.length;
-      body.linearVelocity.y = min_speed * body.linearVelocity.y.sign;
+      body.linearVelocity.y = configuration.min_ball_speed * body.linearVelocity.y.sign;
       body.linearVelocity.normalize();
       body.linearVelocity.scale(speed);
     }
     if (body.linearVelocity.y.round() == 0) {
       final speed = body.linearVelocity.normalize();
-      body.linearVelocity.y = -min_speed;
+      body.linearVelocity.y = -configuration.min_ball_speed;
       body.linearVelocity.normalize();
       body.linearVelocity.scale(speed);
     }
@@ -214,13 +261,44 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
         _render_ball(canvas);
       case BallState.caught:
         _render_ball(canvas);
+      case BallState.pushed:
       case BallState.active:
         _render_ball(canvas);
+      case BallState.exploding:
+        _render_exploding(canvas);
     }
   }
 
+  void _render_exploding(Canvas canvas) {
+    shader.setFloat(0, 64);
+    shader.setFloat(1, 64);
+    shader.setFloat(2, state_progress);
+
+    final shaded = pixelPaint();
+    shaded.shader = shader;
+
+    final recorder = PictureRecorder();
+    Canvas(recorder).drawCircle(Offset.zero, 64, shaded);
+
+    final picture = recorder.endRecording();
+    final image = picture.toImageSync(64, 64);
+    canvas.translate(-32, -32);
+    canvas.drawImage(image, Offset.zero, paint);
+    image.dispose();
+    picture.dispose();
+  }
+
+  final _render_pos = Vector2.zero();
+
   void _render_ball(Canvas canvas) {
-    sprites.getSpriteById(0).render(canvas, anchor: Anchor.center, overridePaint: paint);
+    if (_jiggle > 0) {
+      final factor = Curves.easeIn.transform(_jiggle) * 2.5;
+      _render_pos.x = rng.nextDoublePM(factor);
+      _render_pos.y = rng.nextDoublePM(factor);
+      sprites.getSpriteById(0).render(canvas, position: _render_pos, anchor: Anchor.center, overridePaint: paint);
+    } else {
+      sprites.getSpriteById(0).render(canvas, anchor: Anchor.center, overridePaint: paint);
+    }
   }
 
   // HasGameData
@@ -230,19 +308,4 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
 
   @override
   GameData save_state(GameData data) => throw UnimplementedError();
-}
-
-extension BrickExtensions on Brick {
-  Vector2 relativePosition(Vector2 position, [Vector2? out]) {
-    out ??= Vector2.zero();
-    out.setFrom(position);
-    out.sub(topLeft);
-    return out;
-  }
-
-  double pos_and_dist(Vector2 position, Vector2 out) {
-    out.x = position.x.clamp(topLeft.x, bottomRight.x);
-    out.y = position.y.clamp(topLeft.y, bottomRight.y);
-    return position.distanceTo(out);
-  }
 }

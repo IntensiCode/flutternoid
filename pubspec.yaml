@@ -48,4 +48,5 @@ flutter:
     - assets/images/fonts/
     - assets/tiles/
   shaders:
+    - assets/shaders/explosion.frag
     - assets/shaders/wave.frag

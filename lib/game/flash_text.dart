@@ -25,7 +25,7 @@ class FlashText extends GameParticles<_FlashLetter> {
     y ??= player.position.y;
     if (_queue.isEmpty) _trigger(text, x, y);
     _queue.add((text, x, y));
-    _dequeue = 0.5;
+    _dequeue = 0.25;
   }
 
   void _trigger(String text, double x, double y) {

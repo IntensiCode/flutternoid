@@ -55,9 +55,13 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
   late final SpriteAnimationComponent left_thruster;
   late final SpriteAnimationComponent right_thruster;
 
-  final _acceleration = 1200.0;
-  final _deceleration = 1500.0;
-  final _max_speed = 300.0;
+  final _update_pos = Vector2.zero();
+  final _laser_pos = Vector2.zero();
+  final _force_hold = <Ball, double>{};
+
+  final _acceleration = 250.0;
+  final _deceleration = 1000.0;
+  final _max_speed = 250.0;
 
   var state = PlayerState.entering;
   var state_progress = 0.0;
@@ -70,6 +74,10 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
   double _mode_change = 0;
   late PlayerMode _mode_origin;
 
+  var _thrust_left = 0.0;
+  var _thrust_right = 0.0;
+  bool _was_holding_fire = false;
+
   double get x_speed => body.linearVelocity.x;
 
   set x_speed(double value) => body.linearVelocity.x = value;
@@ -78,7 +86,9 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
 
   bool get in_normal_mode => mode.index % 3 == 0;
 
-  bool get in_catcher_mode => mode.index % 3 == 1;
+  bool get in_catcher_mode => mode.index % 3 == 1 || _was_holding_fire;
+
+  bool get _is_catcher => mode.index % 3 == 1;
 
   bool get in_laser_mode => mode.index % 3 == 2;
 
@@ -108,8 +118,22 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
   @override
   void beginContact(Object other, Contact contact) {
     super.beginContact(other, contact);
-    if (other is Ball && !in_catcher_mode) {
-      other.body.applyLinearImpulse(Vector2(player.x_speed, 0));
+    if (other is Ball) {
+      if (other.state != BallState.active) {
+        contact.isEnabled = false;
+      } else if (in_catcher_mode) {
+        contact.isEnabled = false;
+        if (other.state == BallState.active) {
+          logInfo('catching ball');
+          other.caught();
+        }
+        if (!_is_catcher) {
+          _force_hold[other] = configuration.force_hold_timeout;
+        }
+        soundboard.play(Sound.ball_held);
+      } else {
+        other.body.applyLinearImpulse(Vector2(player.x_speed, 0));
+      }
     }
   }
 
@@ -177,23 +201,23 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
   }
 
   void _on_catcher() {
-    if (in_catcher_mode) return;
+    mode_time = configuration.mode_time;
+    if (_is_catcher) return;
 
     _mode_origin = mode;
     _mode_change = 1.0;
     mode = PlayerMode.values[expand_level * 3 + PlayerMode.catcher1.index];
-    mode_time += configuration.mode_time;
 
     _update_body_fixture();
   }
 
   void _on_laser() {
+    mode_time = configuration.mode_time;
     if (in_laser_mode) return;
 
     _mode_origin = mode;
     _mode_change = 1.0;
     mode = PlayerMode.values[expand_level * 3 + PlayerMode.laser1.index];
-    mode_time += configuration.mode_time;
 
     body.destroyFixture(body.fixtures.single);
     body.createFixture(FixtureDef(PolygonShape()..set(_updated_shape()), restitution: 0.0, density: 1000));
@@ -240,7 +264,36 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
         _on_expansion(dt);
         _on_mode_change(dt);
         _on_thrusters(dt);
+        _on_force_hold(dt);
     }
+  }
+
+  _on_force_hold(double dt) {
+    for (final ball in _force_hold.keys) {
+      final time = _force_hold[ball];
+      if (time == null) continue;
+
+      var new_time = time - min(time, dt);
+      if (time <= dt) new_time = 0;
+      _force_hold[ball] = new_time;
+
+      if (new_time <= 0) {
+        ball.explode();
+        soundboard.play(Sound.explosion);
+      } else {
+        final timeout = configuration.force_hold_timeout;
+        ball.jiggle((timeout - new_time) / timeout);
+
+        if (new_time < 0.5 && time >= 0.5) {
+          soundboard.play(Sound.ball_held);
+        }
+        if (new_time < 0.25 && time >= 0.25) {
+          soundboard.play(Sound.ball_held);
+        }
+      }
+    }
+
+    _force_hold.removeWhere((_, time) => time <= 0);
   }
 
   void _on_thrusters(double dt) {
@@ -287,19 +340,14 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
     }
   }
 
-  final _update_pos = Vector2.zero();
-
-  var _thrust_left = 0.0;
-  var _thrust_right = 0.0;
-
   void _on_playing_move(double dt) {
     if (_keys.check(GameKey.left)) {
       if (x_speed >= 0) _thrust_right = 0.2;
-      if (x_speed > 0) x_speed -= _deceleration * dt;
+      if (x_speed >= 0) x_speed = -_max_speed / 4;
       x_speed -= _acceleration * dt;
     } else if (_keys.check(GameKey.right)) {
       if (x_speed <= 0) _thrust_left = 0.2;
-      if (x_speed < 0) x_speed += _deceleration * dt;
+      if (x_speed <= 0) x_speed = _max_speed / 4;
       x_speed += _acceleration * dt;
     } else {
       if (x_speed < 0) x_speed += _deceleration * dt;
@@ -324,24 +372,31 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
     body.setTransform(_update_pos, 0);
   }
 
-  final _laser_pos = Vector2.zero();
-
   void _on_playing_fire(double dt) {
-    if (_keys.check_and_consume(GameKey.fire1)) {
-      final caught = balls.where((it) => it.state == BallState.caught).firstOrNull;
-      caught?.push(x_speed * 0.5, -_max_speed * 0.5);
-      if (caught == null && in_laser_mode) {
-        _laser_pos.setFrom(position);
-        _laser_pos.x -= bat_width / 4;
-        laser.spawn(_laser_pos);
+    _was_holding_fire |= _keys.fire1;
 
-        _laser_pos.setFrom(position);
-        _laser_pos.x += bat_width / 4;
-        laser.spawn(_laser_pos);
+    if (!_was_holding_fire || _keys.fire1) return;
 
-        soundboard.play(Sound.laser_shot);
-      }
+    final caught = balls.where((it) => it.state == BallState.caught).firstOrNull;
+    if (caught != null) {
+      _was_holding_fire = false;
+      caught.push(x_speed * 0.5, configuration.opt_ball_speed * 0.5);
+      _force_hold.remove(caught);
+    } else if (caught == null && in_laser_mode) {
+      _was_holding_fire = false;
+
+      _laser_pos.setFrom(position);
+      _laser_pos.x -= bat_width / 4;
+      laser.spawn(_laser_pos);
+
+      _laser_pos.setFrom(position);
+      _laser_pos.x += bat_width / 4;
+      laser.spawn(_laser_pos);
+
+      soundboard.play(Sound.laser_shot);
     }
+
+    _was_holding_fire = false;
   }
 
   void _on_expansion(double dt) {
