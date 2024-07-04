@@ -52,6 +52,9 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
   late final SpriteSheet sprites;
   late final SpriteSheet explosion;
 
+  late final SpriteAnimationComponent left_thruster;
+  late final SpriteAnimationComponent right_thruster;
+
   final _acceleration = 1200.0;
   final _deceleration = 1500.0;
   final _max_speed = 300.0;
@@ -124,6 +127,18 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
     _keys = keys;
     sprites = await sheetIWH('game_bat.png', 36, 8);
     explosion = await sheetIWH('game_explosion.png', 32, 32);
+    final thrust = await sheetIWH('game_thrust.png', 7, 6);
+    add(left_thruster = SpriteAnimationComponent(
+      animation: thrust.createAnimation(row: 0, stepTime: 0.05),
+      anchor: Anchor.topRight,
+      position: Vector2(-bat_width / 2, -bat_height / 2 - 1),
+    ));
+    add(right_thruster = SpriteAnimationComponent(
+      animation: thrust.createAnimation(row: 1, stepTime: 0.05),
+      position: Vector2(bat_width / 2, -bat_height / 2 - 1),
+    ));
+    left_thruster.opacity = _thrust_left > 0 ? 1.0 : 0.0;
+    right_thruster.opacity = _thrust_right > 0 ? 1.0 : 0.0;
 
     body.setTransform(Vector2(visual.game_pixels.x / 2, visual.game_pixels.y * 0.9), 0);
     _update_body_fixture();
@@ -224,7 +239,15 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
         _on_playing_fire(dt);
         _on_expansion(dt);
         _on_mode_change(dt);
+        _on_thrusters(dt);
     }
+  }
+
+  void _on_thrusters(double dt) {
+    if (_thrust_left > 0) _thrust_left -= min(_thrust_left, dt);
+    if (_thrust_right > 0) _thrust_right -= min(_thrust_right, dt);
+    left_thruster.opacity = _thrust_left > 0 ? 1.0 : 0.0;
+    right_thruster.opacity = _thrust_right > 0 ? 1.0 : 0.0;
   }
 
   void _on_mode_change(double dt) {
@@ -266,11 +289,16 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
 
   final _update_pos = Vector2.zero();
 
+  var _thrust_left = 0.0;
+  var _thrust_right = 0.0;
+
   void _on_playing_move(double dt) {
     if (_keys.check(GameKey.left)) {
+      if (x_speed >= 0) _thrust_right = 0.2;
       if (x_speed > 0) x_speed -= _deceleration * dt;
       x_speed -= _acceleration * dt;
     } else if (_keys.check(GameKey.right)) {
+      if (x_speed <= 0) _thrust_left = 0.2;
       if (x_speed < 0) x_speed += _deceleration * dt;
       x_speed += _acceleration * dt;
     } else {
