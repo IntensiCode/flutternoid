@@ -47,3 +47,5 @@ flutter:
     - assets/images/
     - assets/images/fonts/
     - assets/tiles/
+  shaders:
+    - assets/shaders/wave.frag

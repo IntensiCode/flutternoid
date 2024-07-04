@@ -20,7 +20,5 @@ class VisualConfiguration {
     game_frame_size.y - border_size,
   );
 
-  late final slow_down_area = game_pixels.y / 2;
-
   late final background_offset = Vector2.all(-border_size - brick_inset);
 }

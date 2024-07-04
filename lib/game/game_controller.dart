@@ -27,6 +27,7 @@ import 'game_object.dart';
 import 'level.dart';
 import 'player.dart';
 import 'shadows.dart';
+import 'slow_down_area.dart';
 import 'visual_configuration.dart';
 
 class GameController extends PositionComponent with AutoDispose, GameScriptFunctions, HasAutoDisposeShortcuts {
@@ -38,6 +39,7 @@ class GameController extends PositionComponent with AutoDispose, GameScriptFunct
   final flash_text = FlashText();
   final power_ups = PowerUps();
   final laser = LaserWeapon();
+  final slow_down_area = SlowDownArea();
   late final player = Player(laser);
 
   GamePhase _phase = GamePhase.start_game;
@@ -125,6 +127,7 @@ class GameController extends PositionComponent with AutoDispose, GameScriptFunct
     await add(laser);
     await add(player);
     await add(GameFrame());
+    await add(slow_down_area);
   }
 
   @override
