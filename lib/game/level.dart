@@ -1,8 +1,8 @@
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:collection/collection.dart';
 import 'package:flame/components.dart';
+import 'package:flame/extensions.dart';
 import 'package:flame/sprite.dart';
 import 'package:flame_tiled/flame_tiled.dart';
 import 'package:kart/kart.dart';
@@ -17,6 +17,7 @@ import 'brick.dart';
 import 'extra_id.dart';
 import 'game_context.dart';
 import 'game_object.dart';
+import 'level_walls.dart';
 
 typedef Row = List<Brick?>;
 
@@ -48,6 +49,7 @@ class Level extends PositionComponent with GameObject, HasPaint {
 
   Brick? find_lowest_brick(Vector2 top_center, double height_below) {
     final matches = bricks
+        .where((it) => !it.destroyed)
         .where((it) => it.topLeft.x <= top_center.x && it.bottomRight.x >= top_center.x)
         .where((it) => it.topLeft.y <= top_center.y + height_below && it.bottomRight.y >= top_center.y);
     if (matches.isEmpty) return null;
@@ -88,14 +90,23 @@ class Level extends PositionComponent with GameObject, HasPaint {
         final brick = it == 0 ? null : Brick(BrickId.values[it - 1], topLeft, bottomRight);
         bricks.add(brick);
 
+        if (brick == null) continue;
+        add(brick);
+
         final extra = extra_rows?.getOrNull(y)?.getOrNull(x);
-        if (extra != null && brick != null) {
-          final id = map.tileByGid(extra)!.localId;
-          brick.extra_id = {ExtraId.values[id ~/ 9]};
-        }
+        if (extra == null) continue;
+
+        final id = map.tileByGid(extra)!.localId;
+        brick.extra_id = {ExtraId.values[id ~/ 9]};
       }
       brick_rows.add(bricks);
     }
+
+    const outset = 2.0;
+    final size = visual.game_pixels;
+    add(Wall(start: Vector2(-outset, -outset), end: Vector2(size.x + outset, -outset)));
+    add(Wall(start: Vector2(-outset, -outset), end: Vector2(-outset, size.y * 2)));
+    add(Wall(start: Vector2(size.x + outset, -outset), end: Vector2(size.x + outset, size.y * 2)));
   }
 
   @override
@@ -134,6 +145,7 @@ class Level extends PositionComponent with GameObject, HasPaint {
             sendMessage(SpawnExtraFromBrick(brick));
           }
           brick.spawned = true;
+          brick.removeFromParent();
         }
         if (brick.gone) row[x] = null;
       }
@@ -193,23 +205,8 @@ class Level extends PositionComponent with GameObject, HasPaint {
   // HasGameData
 
   @override
-  void load_state(GameData data) {
-//     next_tile.load_state(data['next_tile']);
-//     current_tile.load_state(data['current_tile']);
-//     level_number_starting_at_1 = data['level_number_starting_at_1'];
-//     remaining_lines_to_clear = data['remaining_lines_to_clear'];
-//     step_delay_in_seconds = data['step_delay_in_seconds'];
-//     _lines_to_fill_in = data['lines_to_fill_in'];
-//     _lines_fill_ticks = data['lines_fill_ticks'];
-  }
+  void load_state(GameData data) {}
 
   @override
   GameData save_state(GameData data) => data;
-//     ..['next_tile'] = next_tile.save_state({})
-//     ..['current_tile'] = current_tile.save_state({})
-//     ..['level_number_starting_at_1'] = level_number_starting_at_1
-//     ..['remaining_lines_to_clear'] = remaining_lines_to_clear
-//     ..['step_delay_in_seconds'] = step_delay_in_seconds
-//     ..['lines_to_fill_in'] = _lines_to_fill_in
-//     ..['lines_fill_ticks'] = _lines_fill_ticks;
 }

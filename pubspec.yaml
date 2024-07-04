@@ -17,6 +17,7 @@ dependencies:
   dart_minilog: ^0.0.2
   flame: ^1.18.0
   flame_audio: ^2.10.2
+  flame_forge2d: ^0.18.1
   flame_tiled: ^1.20.2
   flutter_animate: ^4.5.0
   get: ^4.6.6

@@ -3,7 +3,6 @@ import 'package:flame/sprite.dart';
 
 import '../core/common.dart';
 import '../core/functions.dart';
-import '../core/soundboard.dart';
 import '../util/auto_dispose.dart';
 import '../util/extensions.dart';
 import 'game_context.dart';
@@ -13,10 +12,8 @@ class LaserWeapon extends Component with AutoDispose {
 
   spawn(Vector2 top_center) {
     final it = _pool.removeLastOrNull() ?? LaserShot(_recycle);
-    it.reset(sprites, Vector2(player.position.x, player.position.y - 5.0));
+    it.reset(sprites, Vector2(top_center.x, top_center.y - 5.0));
     add(it);
-
-    soundboard.play(Sound.laser_shot);
   }
 
   // Component

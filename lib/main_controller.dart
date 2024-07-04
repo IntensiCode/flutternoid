@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
+import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:flutter/foundation.dart';
 
 import 'core/common.dart';
@@ -14,7 +15,7 @@ import 'title_screen.dart';
 import 'util/extensions.dart';
 import 'web_play_screen.dart';
 
-class MainController extends World implements ScreenNavigation {
+class MainController extends Forge2DWorld implements ScreenNavigation {
   final _stack = <Screen>[];
 
   @override

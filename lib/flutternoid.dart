@@ -2,6 +2,7 @@ import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
+import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart' hide Image, Shortcuts;
 
@@ -14,7 +15,7 @@ import 'main_controller.dart';
 import 'util/fonts.dart';
 import 'util/performance.dart';
 
-class Flutternoid extends FlameGame<MainController>
+class Flutternoid extends Forge2DGame<MainController>
     with HasKeyboardHandlerComponents, Messaging, Shortcuts, HasPerformanceTracker, ScrollDetector {
   //
   final _ticker = Ticker(ticks: tps);

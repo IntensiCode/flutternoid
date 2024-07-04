@@ -43,7 +43,7 @@ class Shadows extends Component {
     _render_pos.x += _shadow_offset;
     _render_pos.y += _shadow_offset;
 
-    final sprite = player.sprites.getSpriteById(9 + player.bat_mode.index);
+    final sprite = player.sprites.getSpriteById(9 + player.mode.index);
     sprite.render(canvas, position: _render_pos, anchor: Anchor.center, overridePaint: player.paint);
   }
 }

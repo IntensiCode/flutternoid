@@ -14,7 +14,6 @@ import 'brick.dart';
 import 'extra_id.dart';
 import 'game_context.dart';
 import 'player.dart';
-import 'player_extensions.dart';
 
 class SpawnExtra with Message {
   final ExtraId id;
@@ -49,10 +48,11 @@ class PowerUps extends Component with AutoDispose {
   }
 
   void _spawn_power_up(Brick origin) {
+    logInfo('spawning power up from $origin');
     final it = _pool.removeLastOrNull() ?? PowerUp(_recycle);
     final id = _pick_power_up(origin);
     if (id == null) return;
-    it.reset(sprites, id, origin.center);
+    it.reset(sprites, id, origin.spawn_center);
     add(it);
   }
 
@@ -108,7 +108,6 @@ class PowerUp extends SpriteAnimationComponent {
 
   @override
   onLoad() {
-    logInfo('power up instance loading');
     _player = player;
     paint = pixelPaint();
   }

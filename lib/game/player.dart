@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 import 'package:flame/sprite.dart';
+import 'package:flame_forge2d/flame_forge2d.dart';
 
 import '../core/common.dart';
 import '../core/functions.dart';
@@ -11,7 +12,6 @@ import '../core/messaging.dart';
 import '../core/soundboard.dart';
 import '../input/keys.dart';
 import '../util/auto_dispose.dart';
-import '../util/debug.dart';
 import '../util/extensions.dart';
 import '../util/on_message.dart';
 import 'ball.dart';
@@ -33,7 +33,7 @@ enum PlayerState {
   static PlayerState from(final String name) => PlayerState.values.firstWhere((e) => e.name == name);
 }
 
-enum BatMode {
+enum PlayerMode {
   normal1,
   catcher1,
   laser1,
@@ -45,75 +45,113 @@ enum BatMode {
   laser3,
 }
 
-class Player extends Component with AutoDispose, HasPaint, GameObject {
+class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObject {
   final LaserWeapon laser;
 
   late final Keys _keys;
   late final SpriteSheet sprites;
   late final SpriteSheet explosion;
-  late final Vector2 position;
 
-  final _acceleration = 1000;
-  final _deceleration = 1500;
+  final _acceleration = 1200.0;
+  final _deceleration = 1500.0;
   final _max_speed = 300.0;
 
   var state = PlayerState.entering;
   var state_progress = 0.0;
-  var bat_mode = BatMode.normal1;
+  var mode = PlayerMode.normal1;
   double bat_height = 6;
-  double x_speed = 0;
+
   double expanded = 0;
   int expand_level = 0;
   double mode_time = 0;
   double _mode_change = 0;
-  late BatMode _mode_origin;
+  late PlayerMode _mode_origin;
+
+  double get x_speed => body.linearVelocity.x;
+
+  set x_speed(double value) => body.linearVelocity.x = value;
 
   Player(this.laser);
 
-  bool get catches => bat_mode.index % 3 == 1;
+  bool get in_normal_mode => mode.index % 3 == 0;
 
-  bool get laser_active => bat_mode.index % 3 == 2;
+  bool get in_catcher_mode => mode.index % 3 == 1;
 
-  bool get hard_edge => (bat_mode.index % 3) == 2;
+  bool get in_laser_mode => mode.index % 3 == 2;
 
-  double get bat_edge => (bat_mode.index % 3) == 2 ? 2 : 4;
+  bool get hard_edge => (mode.index % 3) == 2;
 
-  double get bat_width => 26 + bat_mode.index ~/ 3 * 4 - 2;
+  double get bat_edge => (mode.index % 3) == 2 ? 2 : 4;
+
+  double get bat_width => 26 + mode.index ~/ 3 * 4 - 2;
+
+  double distance_and_closest(Vector2 it, [Vector2? out_closest]) {
+    out_closest ??= Vector2.zero();
+    out_closest.x = it.x.clamp(position.x - bat_width / 2, position.x + bat_width / 2);
+    out_closest.y = it.y.clamp(position.y - bat_height / 2, position.y + bat_height / 2);
+    return it.distanceTo(out_closest);
+  }
+
+  // BodyComponent
+
+  @override
+  Body createBody() => world.createBody(BodyDef(
+        gravityOverride: Vector2.zero(),
+        userData: this,
+        position: Vector2(visual.game_pixels.x / 2, visual.game_pixels.y * 0.9),
+        type: BodyType.static,
+      ));
+
+  @override
+  void beginContact(Object other, Contact contact) {
+    super.beginContact(other, contact);
+    if (other is Ball && !in_catcher_mode) {
+      other.body.applyLinearImpulse(Vector2(player.x_speed, 0));
+    }
+  }
 
   // Component
 
   @override
   onLoad() async {
+    super.onLoad();
+
     priority = 1;
 
     paint = pixelPaint();
+    paint.style = PaintingStyle.stroke;
 
     _keys = keys;
     sprites = await sheetIWH('game_bat.png', 36, 8);
     explosion = await sheetIWH('game_explosion.png', 32, 32);
-    position = Vector2(visual.game_pixels.x / 2, visual.game_pixels.y * 0.9);
 
-    add(DebugText(
-      text: () => 'pp: ${position.x.toStringAsFixed(2)}, ${position.y.toStringAsFixed(2)}',
-      position: Vector2(visual.game_pixels.x, visual.game_pixels.y - 2),
-      anchor: Anchor.bottomRight,
-    ));
-    add(DebugText(
-      text: () => 'ps: ${x_speed.toStringAsFixed(2)}',
-      position: Vector2(visual.game_pixels.x, visual.game_pixels.y - 8),
-      anchor: Anchor.bottomRight,
-    ));
-    add(DebugText(
-      text: () => 'ex1: ${expanded.toStringAsFixed(2)}',
-      position: Vector2(visual.game_pixels.x, visual.game_pixels.y - 14),
-      anchor: Anchor.bottomRight,
-    ));
-    add(DebugText(
-      text: () => 'ex2: $expand_level',
-      position: Vector2(visual.game_pixels.x, visual.game_pixels.y - 20),
-      anchor: Anchor.bottomRight,
-    ));
+    body.setTransform(Vector2(visual.game_pixels.x / 2, visual.game_pixels.y * 0.9), 0);
+    _update_body_fixture();
+    renderBody = debug;
   }
+
+  _update_body_fixture() {
+    if (body.fixtures.isNotEmpty) {
+      body.destroyFixture(body.fixtures.single);
+    }
+    body.createFixture(_updated_fixture());
+  }
+
+  FixtureDef _updated_fixture() => FixtureDef(
+        PolygonShape()..set(_updated_shape()),
+        restitution: 0.0,
+        density: 1000,
+      );
+
+  List<Vector2> _updated_shape() => [
+        Vector2(-bat_width / 2 - 1, -1),
+        Vector2(-bat_width / 2 + bat_edge - 1, -bat_height / 2),
+        Vector2(bat_width / 2 - bat_edge + 1, -bat_height / 2),
+        Vector2(bat_width / 2 + 1, -1),
+        Vector2(bat_width / 2 - bat_edge + 3, bat_height / 2),
+        Vector2(-bat_width / 2 + bat_edge - 3, bat_height / 2),
+        Vector2(-bat_width / 2 - 1, -1),
+      ];
 
   @override
   void onMount() {
@@ -124,37 +162,54 @@ class Player extends Component with AutoDispose, HasPaint, GameObject {
   }
 
   void _on_catcher() {
-    _mode_origin = bat_mode;
+    if (in_catcher_mode) return;
+
+    _mode_origin = mode;
     _mode_change = 1.0;
-    bat_mode = BatMode.values[expand_level * 3 + BatMode.catcher1.index];
+    mode = PlayerMode.values[expand_level * 3 + PlayerMode.catcher1.index];
     mode_time += configuration.mode_time;
+
+    _update_body_fixture();
   }
 
   void _on_laser() {
-    _mode_origin = bat_mode;
+    if (in_laser_mode) return;
+
+    _mode_origin = mode;
     _mode_change = 1.0;
-    bat_mode = BatMode.values[expand_level * 3 + BatMode.laser1.index];
+    mode = PlayerMode.values[expand_level * 3 + PlayerMode.laser1.index];
     mode_time += configuration.mode_time;
+
+    body.destroyFixture(body.fixtures.single);
+    body.createFixture(FixtureDef(PolygonShape()..set(_updated_shape()), restitution: 0.0, density: 1000));
   }
 
   void _on_mode_reset() {
-    _mode_origin = bat_mode;
+    if (in_normal_mode) return;
+
+    _mode_origin = mode;
     _mode_change = 1.0;
-    bat_mode = BatMode.values[expand_level * 3 + BatMode.normal1.index];
+    mode = PlayerMode.values[expand_level * 3 + PlayerMode.normal1.index];
+
+    body.destroyFixture(body.fixtures.single);
+    body.createFixture(FixtureDef(PolygonShape()..set(_updated_shape()), restitution: 0.0, density: 1000));
   }
 
   void _on_expander() {
-    if (expand_level < 2) expand_level++;
+    if (expand_level >= 2) return;
+    expand_level++;
     expanded = configuration.expand_time;
-    bat_mode = BatMode.values[expand_level * 3 + (bat_mode.index % 3)];
-    logInfo('expanded=$expanded, expand_level=$expand_level, bat_mode=$bat_mode');
+    mode = PlayerMode.values[expand_level * 3 + (mode.index % 3)];
     soundboard.play(Sound.bat_expand);
+
+    body.destroyFixture(body.fixtures.single);
+    body.createFixture(FixtureDef(PolygonShape()..set(_updated_shape()), restitution: 0.0, density: 1000));
   }
 
   @override
   void update(double dt) {
+    if (debug != renderBody) renderBody = debug;
     super.update(dt);
-
     switch (state) {
       case PlayerState.gone:
         break;
@@ -209,6 +264,8 @@ class Player extends Component with AutoDispose, HasPaint, GameObject {
     }
   }
 
+  final _update_pos = Vector2.zero();
+
   void _on_playing_move(double dt) {
     if (_keys.check(GameKey.left)) {
       if (x_speed > 0) x_speed -= _deceleration * dt;
@@ -225,23 +282,36 @@ class Player extends Component with AutoDispose, HasPaint, GameObject {
       x_speed = x_speed.sign * _max_speed;
     }
 
-    position.x += x_speed * dt;
+    _update_pos.setFrom(body.transform.p);
+    _update_pos.x += x_speed * dt;
 
     final x_stop = bat_width / 2;
-    if (position.x < x_stop) {
-      position.x = x_stop;
+    if (_update_pos.x < x_stop) {
+      _update_pos.x = x_stop;
     }
-    if (position.x > visual.game_pixels.x - x_stop) {
-      position.x = visual.game_pixels.x - x_stop;
+    if (_update_pos.x > visual.game_pixels.x - x_stop) {
+      _update_pos.x = visual.game_pixels.x - x_stop;
     }
+
+    body.setTransform(_update_pos, 0);
   }
+
+  final _laser_pos = Vector2.zero();
 
   void _on_playing_fire(double dt) {
     if (_keys.check_and_consume(GameKey.fire1)) {
       final caught = balls.where((it) => it.state == BallState.caught).firstOrNull;
       caught?.push(x_speed * 0.5, -_max_speed * 0.5);
-      if (caught == null && laser_active) {
-        laser.spawn(position);
+      if (caught == null && in_laser_mode) {
+        _laser_pos.setFrom(position);
+        _laser_pos.x -= bat_width / 4;
+        laser.spawn(_laser_pos);
+
+        _laser_pos.setFrom(position);
+        _laser_pos.x += bat_width / 4;
+        laser.spawn(_laser_pos);
+
+        soundboard.play(Sound.laser_shot);
       }
     }
   }
@@ -255,9 +325,9 @@ class Player extends Component with AutoDispose, HasPaint, GameObject {
     if (expand_level > 0) {
       expand_level--;
       if (expand_level > 0) expanded = configuration.expand_time;
-      bat_mode = BatMode.values[expand_level * 3 + (bat_mode.index % 3)];
+      mode = PlayerMode.values[expand_level * 3 + (mode.index % 3)];
     }
-    logInfo('expanded=$expanded, expand_level=$expand_level, bat_mode=$bat_mode');
+    logInfo('expanded=$expanded, expand_level=$expand_level, bat_mode=$mode');
     soundboard.play(Sound.bat_expand);
   }
 
@@ -293,15 +363,13 @@ class Player extends Component with AutoDispose, HasPaint, GameObject {
   void _render_bat(Canvas canvas) {
     if (_mode_change > 0) {
       final from = sprites.getSpriteById(_mode_origin.index);
-      final to = sprites.getSpriteById(bat_mode.index);
+      final to = sprites.getSpriteById(mode.index);
       _mode_paint.opacity = _mode_change;
-      from.render(canvas, position: position, overridePaint: _mode_paint, anchor: Anchor.center);
+      from.render(canvas, overridePaint: _mode_paint, anchor: Anchor.center);
       _mode_paint.opacity = 1 - _mode_change;
-      to.render(canvas, position: position, overridePaint: _mode_paint, anchor: Anchor.center);
+      to.render(canvas, overridePaint: _mode_paint, anchor: Anchor.center);
     } else {
-      sprites
-          .getSpriteById(bat_mode.index)
-          .render(canvas, position: position, overridePaint: paint, anchor: Anchor.center);
+      sprites.getSpriteById(mode.index).render(canvas, overridePaint: paint, anchor: Anchor.center);
     }
   }
 

@@ -198,8 +198,9 @@ class GameController extends PositionComponent with AutoDispose, GameScriptFunct
     if (ball == null) {
       add(Ball());
     } else {
-      final inverted = ball.velocity.inverted();
-      inverted.rotate(rng.nextDoublePM(pi / 4));
+      final inverted = ball.body.linearVelocity.inverted();
+      inverted.rotate(rng.nextDoublePM(pi / 8));
+      if (inverted.y > 0) inverted.y = -inverted.y;
       add(Ball.spawned(ball, inverted));
     }
   }
