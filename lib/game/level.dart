@@ -37,13 +37,21 @@ class Level extends PositionComponent with GameObject, HasPaint {
   var state = LevelState.appearing;
   double state_progress = 0.0;
 
-  Iterable<Brick> bricks() sync* {
+  Iterable<Brick> get bricks sync* {
     for (final row in brick_rows) {
       for (final brick in row) {
         if (brick == null) continue;
         yield brick;
       }
     }
+  }
+
+  Brick? find_lowest_brick(Vector2 top_center, double height_below) {
+    final matches = bricks
+        .where((it) => it.topLeft.x <= top_center.x && it.bottomRight.x >= top_center.x)
+        .where((it) => it.topLeft.y <= top_center.y + height_below && it.bottomRight.y >= top_center.y);
+    if (matches.isEmpty) return null;
+    return matches.reduce((a, b) => a.topLeft.y < b.topLeft.y ? a : b);
   }
 
   // Component

@@ -10,7 +10,7 @@ class ExtraLife with Message {}
 
 // order matches row in sprite sheet
 enum ExtraId {
-  laser(0.1),
+  laser(0.05),
   catcher(0.1),
   expander(0.3),
   disruptor(0.1),

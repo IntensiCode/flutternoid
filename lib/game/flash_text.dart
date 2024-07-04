@@ -21,8 +21,8 @@ class FlashText extends GameParticles<_FlashLetter> {
   var _dequeue = 0.0;
 
   void spawn(String text, [double? x, double? y]) {
-    x ??= visual.game_pixels.x / 2;
-    y ??= visual.game_pixels.y - 10;
+    x ??= player.position.x;
+    y ??= player.position.y;
     if (_queue.isEmpty) _trigger(text, x, y);
     _queue.add((text, x, y));
     _dequeue = 0.5;

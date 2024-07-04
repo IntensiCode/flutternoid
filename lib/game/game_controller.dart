@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 import 'package:flutternoid/core/random.dart';
+import 'package:flutternoid/game/laser_weapon.dart';
 import 'package:flutternoid/game/power_ups.dart';
 import 'package:flutternoid/input/shortcuts.dart';
 import 'package:flutternoid/util/extensions.dart';
@@ -36,7 +37,8 @@ class GameController extends PositionComponent with AutoDispose, GameScriptFunct
   final level = Level();
   final flash_text = FlashText();
   final power_ups = PowerUps();
-  final player = Player();
+  final laser = LaserWeapon();
+  late final player = Player(laser);
 
   GamePhase _phase = GamePhase.start_game;
 
@@ -120,6 +122,7 @@ class GameController extends PositionComponent with AutoDispose, GameScriptFunct
     await add(level);
     await add(flash_text);
     await add(power_ups);
+    await add(laser);
     await add(player);
     await add(GameFrame());
   }

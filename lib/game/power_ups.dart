@@ -22,7 +22,7 @@ class SpawnExtra with Message {
   SpawnExtra(this.id);
 }
 
-class PowerUps extends Component with AutoDispose, HasPaint {
+class PowerUps extends Component with AutoDispose {
   late final SpriteSheet sprites;
 
   // Component
@@ -30,7 +30,6 @@ class PowerUps extends Component with AutoDispose, HasPaint {
   @override
   onLoad() async {
     priority = 1;
-    paint = pixelPaint();
     sprites = await sheetIWH('game_extras.png', 10, 7);
   }
 
@@ -111,6 +110,7 @@ class PowerUp extends SpriteAnimationComponent {
   onLoad() {
     logInfo('power up instance loading');
     _player = player;
+    paint = pixelPaint();
   }
 
   final _dist = Vector2.zero();

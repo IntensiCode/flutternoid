@@ -146,10 +146,7 @@ class Ball extends Component with AutoDispose, HasPaint, GameObject {
 
   void _on_active(double dt) {
     if (slow_down > 0) slow_down -= min(slow_down, dt);
-    if (disruptor > 0) {
-      disruptor -= min(disruptor, dt);
-      logInfo(disruptor);
-    }
+    if (disruptor > 0) disruptor -= min(disruptor, dt);
 
     // dt = slow_down ? _apply_slow_down(dt) : dt;
     _apply_speed(dt);
@@ -235,7 +232,7 @@ class Ball extends Component with AutoDispose, HasPaint, GameObject {
   void _check_brick_hit() {
     const threshold = 2.0;
     final contacts = <Brick>[];
-    for (final brick in level.bricks()) {
+    for (final brick in level.bricks) {
       if (brick.destroyed) continue;
       if (position.x < brick.topLeft.x - threshold) continue;
       if (position.x > brick.bottomRight.x + threshold) continue;

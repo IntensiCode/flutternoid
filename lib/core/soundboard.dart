@@ -17,6 +17,7 @@ enum Sound {
   get_ready,
   hiscore,
   laser,
+  laser_shot,
   level_complete,
   multi_ball,
   slow_down,

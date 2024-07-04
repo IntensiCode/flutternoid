@@ -18,6 +18,7 @@ import 'ball.dart';
 import 'extra_id.dart';
 import 'game_context.dart';
 import 'game_object.dart';
+import 'laser_weapon.dart';
 
 class PlayerReady with Message {}
 
@@ -45,29 +46,39 @@ enum BatMode {
 }
 
 class Player extends Component with AutoDispose, HasPaint, GameObject {
+  final LaserWeapon laser;
+
   late final Keys _keys;
   late final SpriteSheet sprites;
   late final SpriteSheet explosion;
   late final Vector2 position;
 
+  final _acceleration = 1000;
+  final _deceleration = 1500;
+  final _max_speed = 300.0;
+
   var state = PlayerState.entering;
   var state_progress = 0.0;
-
   var bat_mode = BatMode.normal1;
+  double bat_height = 6;
+  double x_speed = 0;
+  double expanded = 0;
+  int expand_level = 0;
+  double mode_time = 0;
+  double _mode_change = 0;
+  late BatMode _mode_origin;
+
+  Player(this.laser);
+
+  bool get catches => bat_mode.index % 3 == 1;
+
+  bool get laser_active => bat_mode.index % 3 == 2;
 
   bool get hard_edge => (bat_mode.index % 3) == 2;
 
   double get bat_edge => (bat_mode.index % 3) == 2 ? 2 : 4;
 
   double get bat_width => 26 + bat_mode.index ~/ 3 * 4 - 2;
-  double bat_height = 6;
-
-  double x_speed = 0;
-
-  double expanded = 0;
-  int expand_level = 0;
-
-  bool get catches => bat_mode.index % 3 == 1;
 
   // Component
 
@@ -111,10 +122,6 @@ class Player extends Component with AutoDispose, HasPaint, GameObject {
     onMessage<Expander>((_) => _on_expander());
     onMessage<Laser>((_) => _on_laser());
   }
-
-  double mode_time = 0;
-  double _mode_change = 0;
-  late BatMode _mode_origin;
 
   void _on_catcher() {
     _mode_origin = bat_mode;
@@ -161,13 +168,17 @@ class Player extends Component with AutoDispose, HasPaint, GameObject {
         _on_playing_move(dt);
         _on_playing_fire(dt);
         _on_expansion(dt);
-        if (mode_time > 0) {
-          mode_time -= min(mode_time, dt);
-          if (mode_time <= 0) _on_mode_reset();
-        }
-        if (_mode_change > 0) {
-          _mode_change -= min(_mode_change, dt * 3);
-        }
+        _on_mode_change(dt);
+    }
+  }
+
+  void _on_mode_change(double dt) {
+    if (mode_time > 0) {
+      mode_time -= min(mode_time, dt);
+      if (mode_time <= 0) _on_mode_reset();
+    }
+    if (_mode_change > 0) {
+      _mode_change -= min(_mode_change, dt * 3);
     }
   }
 
@@ -198,10 +209,6 @@ class Player extends Component with AutoDispose, HasPaint, GameObject {
     }
   }
 
-  final _acceleration = 1200;
-  final _deceleration = 1500;
-  final _max_speed = 250.0;
-
   void _on_playing_move(double dt) {
     if (_keys.check(GameKey.left)) {
       if (x_speed > 0) x_speed -= _deceleration * dt;
@@ -231,9 +238,10 @@ class Player extends Component with AutoDispose, HasPaint, GameObject {
 
   void _on_playing_fire(double dt) {
     if (_keys.check_and_consume(GameKey.fire1)) {
-      final caught = balls.where((it) => it.state == BallState.caught);
-      for (final it in caught) {
-        it.push(x_speed * 0.5, -_max_speed * 0.5);
+      final caught = balls.where((it) => it.state == BallState.caught).firstOrNull;
+      caught?.push(x_speed * 0.5, -_max_speed * 0.5);
+      if (caught == null && laser_active) {
+        laser.spawn(position);
       }
     }
   }
