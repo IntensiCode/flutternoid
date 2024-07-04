@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 bool debug = kDebugMode;
 bool dev = kDebugMode;
 
-const tps = 240;
+const tps = 120;
 
 const double gameWidth = 320;
 const double gameHeight = 200;
