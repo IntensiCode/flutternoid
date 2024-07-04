@@ -255,7 +255,7 @@ class Ball extends Component with AutoDispose, HasPaint, GameObject {
     }
     if (contacts.isEmpty) return;
 
-    logInfo('contacts: $contacts');
+    // logInfo('contacts: $contacts');
 
     final width = visual.brick_width.toDouble();
     final height = visual.brick_height.toDouble();

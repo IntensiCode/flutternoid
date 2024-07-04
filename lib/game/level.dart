@@ -2,10 +2,10 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:collection/collection.dart';
-import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 import 'package:flame/sprite.dart';
 import 'package:flame_tiled/flame_tiled.dart';
+import 'package:kart/kart.dart';
 
 import '../core/common.dart';
 import '../core/functions.dart';
@@ -14,6 +14,7 @@ import '../core/random.dart';
 import '../util/extensions.dart';
 import '../util/tiled_extensions.dart';
 import 'brick.dart';
+import 'extra_id.dart';
 import 'game_context.dart';
 import 'game_object.dart';
 
@@ -56,7 +57,7 @@ class Level extends PositionComponent with GameObject, HasPaint {
     sprites = await sheetIWH('game_blocks.png', visual.brick_width, visual.brick_height, spacing: 1);
 
     final which = level_number_starting_at_1.toString().padLeft(2, '0');
-    final map = await TiledComponent.load(
+    final level_data = await TiledComponent.load(
       'level$which.tmx',
       Vector2(12.0, 6.0),
       layerPaintFactory: (it) => pixelPaint(),
@@ -67,15 +68,23 @@ class Level extends PositionComponent with GameObject, HasPaint {
     final width = visual.brick_width.toDouble();
     final height = visual.brick_height.toDouble();
 
-    final data = (map.getLayer('blocks') as TileLayer).data!;
-    final rows = data.slices(15);
-    for (var (y, row) in rows.indexed) {
+    final block_rows = (level_data.getLayer('blocks') as TileLayer).data!.slices(15);
+    final extra_rows = (level_data.getLayer('extras') as TileLayer?)?.data?.slices(15);
+    final map = level_data.tileMap.map;
+
+    for (var (y, row) in block_rows.indexed) {
       final bricks = <Brick?>[];
       for (var (x, it) in row.indexed) {
         final topLeft = Vector2(x * width, y * height);
         final bottomRight = topLeft + Vector2(width, height);
         final brick = it == 0 ? null : Brick(BrickId.values[it - 1], topLeft, bottomRight);
         bricks.add(brick);
+
+        final extra = extra_rows?.getOrNull(y)?.getOrNull(x);
+        if (extra != null && brick != null) {
+          final id = map.tileByGid(extra)!.localId;
+          brick.extra_id = {ExtraId.values[id ~/ 9]};
+        }
       }
       brick_rows.add(bricks);
     }
@@ -113,8 +122,9 @@ class Level extends PositionComponent with GameObject, HasPaint {
         if (brick.destroyed && brick.destroy_progress < 1.0) brick.destroy_progress += dt * 4;
         if (brick.destroyed && !brick.spawned) {
           final probability = 0.05 + (brick.id.index ~/ 5) * 0.1;
-          logInfo(probability);
-          if (rng.nextDouble() < probability) sendMessage(SpawnExtraFromBrick(brick));
+          if (brick.extra_id != null || rng.nextDouble() < probability) {
+            sendMessage(SpawnExtraFromBrick(brick));
+          }
           brick.spawned = true;
         }
         if (brick.gone) row[x] = null;

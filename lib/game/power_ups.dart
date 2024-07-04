@@ -51,13 +51,14 @@ class PowerUps extends Component with AutoDispose, HasPaint {
 
   void _spawn_power_up(Brick origin) {
     final it = _pool.removeLastOrNull() ?? PowerUp(_recycle);
-    final id = _pick_power_up(origin.id.extras);
+    final id = _pick_power_up(origin);
     if (id == null) return;
     it.reset(sprites, id, origin.center);
     add(it);
   }
 
-  ExtraId? _pick_power_up(Set<ExtraId> allowed) {
+  ExtraId? _pick_power_up(Brick brick) {
+    final allowed = brick.extra_id ?? brick.id.extras;
     if (allowed.isEmpty) return null;
 
     // pick random power up, based on probabilities in _extras:

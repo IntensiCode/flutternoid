@@ -3,6 +3,7 @@ import 'package:flame/components.dart';
 
 import '../core/common.dart';
 import 'brick_id.dart';
+import 'extra_id.dart';
 
 export 'brick_id.dart';
 
@@ -16,6 +17,8 @@ class Brick {
   final BrickId id;
   final Vector2 topLeft;
   final Vector2 bottomRight;
+
+  Set<ExtraId>? extra_id;
 
   late final center = (topLeft + bottomRight) / 2;
 
