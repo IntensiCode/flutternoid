@@ -20,6 +20,8 @@ import 'game_configuration.dart';
 import 'game_context.dart';
 import 'game_object.dart';
 import 'laser_weapon.dart';
+import 'wall.dart';
+import 'slow_down_area.dart';
 
 class PlayerReady with Message {}
 
@@ -79,9 +81,7 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
   var _thrust_right = 0.0;
   bool _was_holding_fire = false;
 
-  double get x_speed => body.linearVelocity.x;
-
-  set x_speed(double value) => body.linearVelocity.x = value;
+  double x_speed = 0.0;
 
   Player(this.laser);
 
@@ -110,24 +110,28 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
 
   @override
   Body createBody() => world.createBody(BodyDef(
+        fixedRotation: true,
+        linearDamping: 0.0,
         gravityOverride: Vector2.zero(),
         userData: this,
         position: Vector2(visual.game_pixels.x / 2, visual.game_pixels.y * 0.9),
-        type: BodyType.static,
+        type: BodyType.dynamic,
       ));
 
   @override
   void beginContact(Object other, Contact contact) {
     super.beginContact(other, contact);
-    if (other is Ball) {
+    if (other is Wall) {
+      contact.isEnabled = false;
+    } else if (other is SlowDownArea) {
+      contact.isEnabled = false;
+    } else if (other is Ball) {
       if (other.state != BallState.active) {
         contact.isEnabled = false;
       } else if (in_catcher_mode) {
         contact.isEnabled = false;
-        if (other.state == BallState.active) {
-          logInfo('catching ball');
-          other.caught();
-        }
+        logInfo('ball caught');
+        other.caught();
         if (!_is_catcher) {
           _force_hold[other] = configuration.force_hold_timeout;
         }
@@ -135,6 +139,8 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
       } else {
         other.body.applyLinearImpulse(Vector2(player.x_speed, 0));
       }
+    } else {
+      logInfo('unknown contact: $other');
     }
   }
 
@@ -171,8 +177,8 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
   }
 
   _update_body_fixture() {
-    if (body.fixtures.isNotEmpty) {
-      body.destroyFixture(body.fixtures.single);
+    while (body.fixtures.isNotEmpty) {
+      body.destroyFixture(body.fixtures.first);
     }
     body.createFixture(_updated_fixture());
   }
@@ -220,8 +226,7 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
     _mode_change = 1.0;
     mode = PlayerMode.values[expand_level * 3 + PlayerMode.laser1.index];
 
-    body.destroyFixture(body.fixtures.single);
-    body.createFixture(FixtureDef(PolygonShape()..set(_updated_shape()), restitution: 0.0, density: 1000));
+    _update_body_fixture();
   }
 
   void _on_mode_reset() {
@@ -231,8 +236,7 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
     _mode_change = 1.0;
     mode = PlayerMode.values[expand_level * 3 + PlayerMode.normal1.index];
 
-    body.destroyFixture(body.fixtures.single);
-    body.createFixture(FixtureDef(PolygonShape()..set(_updated_shape()), restitution: 0.0, density: 1000));
+    _update_body_fixture();
   }
 
   void _on_expander() {
@@ -242,8 +246,7 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
     mode = PlayerMode.values[expand_level * 3 + (mode.index % 3)];
     soundboard.play(Sound.bat_expand);
 
-    body.destroyFixture(body.fixtures.single);
-    body.createFixture(FixtureDef(PolygonShape()..set(_updated_shape()), restitution: 0.0, density: 1000));
+    _update_body_fixture();
   }
 
   @override
@@ -361,15 +364,10 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
 
     _update_pos.setFrom(body.transform.p);
     _update_pos.x += x_speed * dt;
-
-    final x_stop = bat_width / 2;
-    if (_update_pos.x < x_stop) {
-      _update_pos.x = x_stop;
+    if (body.transform.p.y != visual.game_pixels.y * 0.9) {
+      _update_pos.y = visual.game_pixels.y * 0.9;
     }
-    if (_update_pos.x > visual.game_pixels.x - x_stop) {
-      _update_pos.x = visual.game_pixels.x - x_stop;
-    }
-
+    _update_pos.x = _update_pos.x.clamp(bat_width / 2 + 0.5, visual.game_pixels.x - bat_width / 2 - 0.5);
     body.setTransform(_update_pos, 0);
   }
 
@@ -381,7 +379,7 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
     final caught = balls.where((it) => it.state == BallState.caught).firstOrNull;
     if (caught != null) {
       _was_holding_fire = false;
-      caught.push(x_speed * 0.5, configuration.opt_ball_speed * 0.5);
+      caught.push(x_speed * 0.5, -configuration.opt_ball_speed * 0.5);
       _force_hold.remove(caught);
     } else if (caught == null && in_laser_mode) {
       _was_holding_fire = false;

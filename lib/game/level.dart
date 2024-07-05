@@ -17,7 +17,7 @@ import 'brick.dart';
 import 'extra_id.dart';
 import 'game_context.dart';
 import 'game_object.dart';
-import 'level_walls.dart';
+import 'wall.dart';
 
 typedef Row = List<Brick?>;
 

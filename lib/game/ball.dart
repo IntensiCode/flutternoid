@@ -70,13 +70,23 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
     _spawn_velocity = velocity;
   }
 
+  final _push_delta = Vector2.zero();
+
   push(double dx, double dy) {
     state = BallState.pushed;
-    body.linearVelocity.setValues(dx, dy);
-    body.setTransform(_update_position, 0);
+
+    body.linearVelocity.setZero();
+
+    _push_delta.setValues(dx,dy);
+    _update_position.setFrom(position);
+
+    // body.linearVelocity.setValues(dx, dy);
+    // body.setTransform(_update_position, 0);
+
     if (_jiggle > 0) {
       final factor = max(0.0, _jiggle - 0.25);
-      body.linearVelocity.rotate(rng.nextDoublePM(factor));
+      _push_delta.rotate(rng.nextDoublePM(factor));
+      // body.linearVelocity.rotate(rng.nextDoublePM(factor));
     }
   }
 
@@ -114,7 +124,9 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
 
     final body = BodyDef(
       bullet: true,
+      fixedRotation: true,
       gravityOverride: Vector2.zero(),
+      position: Vector2(visual.game_pixels.x / 2, visual.game_pixels.y * 0.8),
       userData: this,
       type: BodyType.dynamic,
     );
@@ -135,8 +147,19 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
     }
     if (other is Player && other.in_catcher_mode) {
       contact.isEnabled = false;
+    } else {
+      soundboard.play(Sound.wall_hit);
     }
-    soundboard.play(Sound.wall_hit);
+  }
+
+  @override
+  void postSolve(Object other, Contact contact, ContactImpulse impulse) {
+    super.postSolve(other, contact, impulse);
+    if (other is Brick) {
+      if (body.linearVelocity.x.abs() < configuration.min_ball_x_speed_after_brick_hit) {
+        body.linearVelocity.x += body.linearVelocity.x.sign;
+      }
+    }
   }
 
   // Component
@@ -182,6 +205,7 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
       case BallState.caught:
         _on_caught(dt);
       case BallState.pushed:
+        _on_pushed(dt);
       case BallState.active:
         _on_active(dt);
       case BallState.exploding:
@@ -192,6 +216,20 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
           removeFromParent();
         }
     }
+  }
+
+  void _on_pushed(double dt) {
+    if (state == BallState.pushed && position.y < _player.position.y - _player.bat_height) {
+      body.linearVelocity.setFrom(_push_delta);
+      body.applyLinearImpulse(_push_delta, wake: true);
+      state = BallState.active;
+    }
+
+    _update_position.setFrom(_push_delta);
+    _update_position.scale(dt);
+    _update_position.add(position);
+
+    body.setTransform(_update_position, 0);
   }
 
   void _on_appearing(double dt) {
@@ -220,9 +258,6 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
   }
 
   void _on_active(double dt) {
-    if (state == BallState.pushed && position.y < _player.position.y - _player.bat_height) {
-      state = BallState.active;
-    }
     if (disruptor > 0) disruptor -= min(disruptor, dt);
     _check_ball_lost();
 

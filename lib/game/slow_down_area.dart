@@ -60,7 +60,11 @@ class SlowDownArea extends BodyComponent with AutoDispose, GameObject, ContactCa
   @override
   void beginContact(Object other, Contact contact) {
     super.beginContact(other, contact);
-    if (other is Ball) _speeds[other] = _slow_down_time;
+    if (other is Ball) {
+      _speeds[other] = _slow_down_time;
+    } else {
+      contact.isEnabled = false;
+    }
   }
 
   @override

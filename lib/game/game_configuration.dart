@@ -13,4 +13,5 @@ class GameConfiguration {
   final max_ball_speed = 150.0;
   final opt_ball_speed = 100.0;
   final min_ball_speed = 25.0;
+  final min_ball_x_speed_after_brick_hit = 10;
 }
