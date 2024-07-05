@@ -16,6 +16,7 @@ import '../util/extensions.dart';
 import '../util/on_message.dart';
 import 'ball.dart';
 import 'extra_id.dart';
+import 'game_configuration.dart';
 import 'game_context.dart';
 import 'game_object.dart';
 import 'laser_weapon.dart';
@@ -59,9 +60,9 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
   final _laser_pos = Vector2.zero();
   final _force_hold = <Ball, double>{};
 
-  final _acceleration = 250.0;
-  final _deceleration = 1000.0;
-  final _max_speed = 250.0;
+  final _acceleration = 350.0;
+  final _deceleration = 700.0;
+  final _max_speed = 210.0;
 
   var state = PlayerState.entering;
   var state_progress = 0.0;
@@ -343,11 +344,11 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
   void _on_playing_move(double dt) {
     if (_keys.check(GameKey.left)) {
       if (x_speed >= 0) _thrust_right = 0.2;
-      if (x_speed >= 0) x_speed = -_max_speed / 4;
+      if (x_speed >= 0) x_speed = -_max_speed / 8;
       x_speed -= _acceleration * dt;
     } else if (_keys.check(GameKey.right)) {
       if (x_speed <= 0) _thrust_left = 0.2;
-      if (x_speed <= 0) x_speed = _max_speed / 4;
+      if (x_speed <= 0) x_speed = _max_speed / 8;
       x_speed += _acceleration * dt;
     } else {
       if (x_speed < 0) x_speed += _deceleration * dt;

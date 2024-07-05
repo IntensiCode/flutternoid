@@ -1,0 +1,16 @@
+Main game graphics by @Davitmasia @Kronbits (itch.io)
+https://kronbits.itch.io/matriax-free-assets
+
+Wave shader by scarletshark
+https://www.shadertoy.com/user/scarletshark
+
+Explosion shader by Leukbaars
+https://www.shadertoy.com/user/Leukbaars
+
+Title them by suno.com
+https://suno.com/song/b716462a-987b-4de2-8ce5-314ebc7c0a4a
+
+Title screen background by Jones / Imagine / Taito
+
+Flame Game Engine
+https://flame-engine.org/

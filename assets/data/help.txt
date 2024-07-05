@@ -1,0 +1,9 @@
+Hold Space (or j) to force capture the energy ball even without the catcher power-up.
+
+But release it quickly before it becomes unstable and explodes!
+
+Eliminate all enemies to gain extra energy.
+
+Use the friction of VAUS to change the direction of the energy ball.
+
+Note that the catcher mode is powerful enough to pull the energy ball back from the void below!

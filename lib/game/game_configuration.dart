@@ -1,3 +1,5 @@
+final configuration = GameConfiguration();
+
 class GameConfiguration {
   bool pixelate = true;
 
@@ -8,7 +10,7 @@ class GameConfiguration {
 
   double force_hold_timeout = 1.0;
 
-  final max_ball_speed = 200.0;
-  final opt_ball_speed = 150.0;
+  final max_ball_speed = 150.0;
+  final opt_ball_speed = 100.0;
   final min_ball_speed = 25.0;
 }

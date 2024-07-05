@@ -3,11 +3,15 @@ import 'package:flame/game.dart';
 import 'common.dart';
 
 enum Screen {
+  audio_menu,
+  credits,
   enter_hiscore,
   game,
+  help,
   hiscore,
   loading,
   title,
+  video_menu,
 }
 
 class ShowScreen with Message {

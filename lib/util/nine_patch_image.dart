@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
 
@@ -22,11 +21,7 @@ class NinePatchComponent extends PositionComponent with HasPaint {
   }
 
   @override
-  void onLoad() {
-    ninePatchImage = NinePatchImage(image, cornerSize: cornerSize);
-    logInfo(width);
-    logInfo(height);
-  }
+  void onLoad() => ninePatchImage = NinePatchImage(image, cornerSize: cornerSize);
 
   late final NinePatchImage ninePatchImage;
 

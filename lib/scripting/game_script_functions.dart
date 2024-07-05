@@ -159,7 +159,13 @@ mixin GameScriptFunctions on Component, AutoDispose {
     return it;
   }
 
-  void backgroundMusic(String filename) async {
+  void fadeBackgroundMusic({double duration = 3}) {
+    dispose('afterTenSeconds');
+    dispose('backgroundMusic_fadeIn');
+    soundboard.bgm?.fadeOut(0.0, seconds: duration).onDone(() => dispose('backgroundMusic'));
+  }
+
+  void backgroundMusic(String filename, {bool keep_running = false}) async {
     filename = "music/$filename";
 
     dispose('afterTenSeconds');
@@ -167,12 +173,12 @@ mixin GameScriptFunctions on Component, AutoDispose {
     dispose('backgroundMusic_fadeIn');
 
     final AudioPlayer player = await soundboard.playBackgroundMusic(filename);
-    if (dev) {
-      // only in dev: stop music after 10 seconds, to avoid playing multiple times on hot restart.
-      final afterTenSeconds = player.onPositionChanged.where((it) => it.inSeconds >= 10).take(1);
-      autoDispose('afterTenSeconds', afterTenSeconds.listen((it) => player.stop()));
-    }
-    autoDispose('backgroundMusic', () => player.stop());
+    // if (dev) {
+    //   // only in dev: stop music after 10 seconds, to avoid playing multiple times on hot restart.
+    //   final afterTenSeconds = player.onPositionChanged.where((it) => it.inSeconds >= 10).take(1);
+    //   autoDispose('afterTenSeconds', afterTenSeconds.listen((it) => player.stop()));
+    // }
+    if (!keep_running) autoDispose('backgroundMusic', () => player.stop());
     autoDispose('backgroundMusic_fadeIn', player.fadeIn(musicVolume, seconds: 3));
   }
 
@@ -212,6 +218,13 @@ mixin GameScriptFunctions on Component, AutoDispose {
 }
 
 extension on AudioPlayer {
+  StreamSubscription fadeOut(double targetVolume, {double seconds = 3}) {
+    final steps = (seconds * 10).toInt();
+    return Stream.periodic(const Duration(milliseconds: 100), (it) => targetVolume * it / steps)
+        .take(steps)
+        .listen((it) => setVolume(it), onDone: () => setVolume(1 - targetVolume));
+  }
+
   StreamSubscription fadeIn(double targetVolume, {double seconds = 3}) {
     final steps = (seconds * 10).toInt();
     return Stream.periodic(const Duration(milliseconds: 100), (it) => targetVolume * it / steps)

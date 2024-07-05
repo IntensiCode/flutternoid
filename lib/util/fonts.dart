@@ -14,6 +14,7 @@ late BitmapFont menuFont;
 late BitmapFont miniFont;
 late BitmapFont smallFont;
 late BitmapFont textFont;
+late BitmapFont tinyFont;
 
 loadFonts(AssetsCache assets) async {
   fancyFont = await BitmapFont.loadDst(
@@ -48,6 +49,13 @@ loadFonts(AssetsCache assets) async {
     images,
     assets,
     'fonts/font_text.png',
+    columns: 16,
+    rows: 8,
+  );
+  tinyFont = await BitmapFont.loadDst(
+    images,
+    assets,
+    'fonts/font_tiny.png',
     columns: 16,
     rows: 8,
   );

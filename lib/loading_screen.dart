@@ -1,3 +1,4 @@
+import 'package:flame/components.dart';
 import 'package:flutternoid/core/functions.dart';
 
 import 'core/common.dart';
@@ -12,29 +13,25 @@ class LoadingScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
   void onLoad() async {
     at(0.0, () => fontSelect(menuFont, scale: 0.25));
 
-    at(0.0, () => fadeIn(textXY('An', xCenter, yCenter - lineHeight), duration: 3));
-    at(1.0, () => fadeIn(textXY('IntensiCode', xCenter, yCenter), duration: 3));
-    at(1.0, () => fadeIn(textXY('Presentation', xCenter, yCenter + lineHeight), duration: 3));
-    at(3.0, () => fadeOutAll(3.0));
-
-    at(2.0, () => fadeIn(textXY('Assets by', xCenter, yCenter - lineHeight), duration: 3));
-    at(1.0, () => fadeIn(textXY('www.kronbits.com', xCenter, yCenter), duration: 3));
-    at(1.0, () => fadeIn(textXY('(itch.io)', xCenter, yCenter + lineHeight), duration: 3));
-    at(3.0, () => fadeOutAll(3.0));
+    at(0.0, () => fadeIn(textXY('An', xCenter, yCenter - lineHeight), duration: 1));
+    at(1.0, () => fadeIn(textXY('IntensiCode', xCenter, yCenter), duration: 1));
+    at(1.0, () => fadeIn(textXY('Presentation', xCenter, yCenter + lineHeight), duration: 1));
+    at(2.0, () => fadeOutAll(1.0));
 
     final psychocell = await image('psychocell.png');
-    at(2.0, () => fontSelect(menuFont, scale: 0.5));
-    at(0.0, () => fadeIn(spriteIXY(psychocell, xCenter, yCenter), duration: 3));
-    at(1.0, () => fadeIn(textXY('A', xCenter, yCenter - lineHeight * 2), duration: 3));
-    at(1.0, () => fadeIn(textXY('Psychocell', xCenter, yCenter), duration: 3));
-    at(1.0, () => fadeIn(textXY('Game', xCenter, yCenter + lineHeight * 2), duration: 3));
-    at(4.0, () => fadeOutAll(3.0));
+    at(1.0, () => fontSelect(menuFont, scale: 0.5));
+    at(1.0, () => fadeIn(textXY('A', xCenter, yCenter - lineHeight * 2), duration: 1));
+    at(1.0, () => fadeIn(textXY('Psychocell', xCenter, yCenter), duration: 1));
+    at(0.0, () => playAudio('psychocell.ogg'));
+    at(0.0, () => fadeIn(spriteIXY(psychocell, xCenter, yCenter / 2), duration: 1));
+    at(1.0, () => fadeIn(textXY('Game', xCenter, yCenter + lineHeight * 2), duration: 1));
+    at(2.0, () => fadeOutAll(1.0));
 
     final intro = await image('intro.png');
-    at(3.0, () => fadeIn(spriteIXY(intro, xCenter, yCenter), duration: 3));
-    at(10.0, () => fadeOutAll(3.0));
+    at(1.0, () => fadeIn(spriteIXY(intro, xCenter, yCenter), duration: 1));
+    at(10.0, () => fadeOutAll(1.0));
 
-    at(3.0, () => _leave());
+    at(1.0, () => _leave());
 
     onKey('<Space>', () => _leave());
   }

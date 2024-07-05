@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -6,7 +7,6 @@ import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/cache.dart';
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
-import 'package:flame/sprite.dart';
 
 import '../core/common.dart';
 
@@ -64,7 +64,7 @@ abstract class BitmapFont {
       dst = await _loadDst(assets, filename);
     } catch (e, trace) {
       logError('Failed to load bitmap font dst: $e', trace);
-      dst = await _createDst(image, charWidth, charHeight, columns);
+      dst = await _createDst(image, charWidth, charHeight, columns, rows);
     }
     return DstBitmapFont(image, dst, charWidth, charHeight);
   }
@@ -77,17 +77,23 @@ abstract class BitmapFont {
     return Uint8List.fromList(widths.toList());
   }
 
-  static Future<Uint8List> _createDst(Image image, int charWidth, int charHeight, int columns) async {
-    final sheet = SpriteSheet(image: image, srcSize: Vector2(charWidth.toDouble(), charHeight.toDouble()));
-    final sprites = List.generate(sheet.columns * sheet.rows, (i) => sheet.getSpriteById(i));
-    final result = <int>[];
-    for (final it in sprites) {
-      final char = it.toImageSync();
-      final pixels = await char.pixelsInUint8();
-      final rows = pixels.slices((it.srcSize.x * 4).toInt());
-      final widths = rows.map((row) => row.lastIndexWhere((char_code) => char_code != 0) ~/ 4);
-      result.add(widths.max.toInt());
-    }
+  static Future<Uint8List> _createDst(Image image, int charWidth, int charHeight, int columns, int rows) async {
+    final pixels = await image.pixelsInUint8();
+    final result = List.generate(columns * rows, (i) {
+      if (i == 0) return charWidth ~/ 4;
+      final x_off = (i % columns) * charWidth * 4;
+      final y_off = (i ~/ columns) * charHeight * image.width * 4;
+      var width = 0;
+      for (int y = 0; y < charHeight; y++) {
+        for (int x = charWidth - 1; x >= 0; x--) {
+          final pixel = pixels[y_off + y * image.width * 4 + x_off + x * 4];
+          if (pixel == 0) continue;
+          width = max(width, x + 1);
+          break;
+        }
+      }
+      return width;
+    });
 
     final dump = result.slices(columns).map((row) => (row.map((it) => it.toRadixString(16).padLeft(2, '0')).join(' ')));
     logInfo('\n${dump.join('\n')}\n');

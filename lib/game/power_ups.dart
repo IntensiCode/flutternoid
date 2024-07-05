@@ -48,7 +48,7 @@ class PowerUps extends Component with AutoDispose {
   }
 
   void _spawn_power_up(Brick origin) {
-    logInfo('spawning power up from $origin');
+    logVerbose('spawning power up from $origin');
     final it = _pool.removeLastOrNull() ?? PowerUp(_recycle);
     final id = _pick_power_up(origin);
     if (id == null) return;
@@ -68,10 +68,8 @@ class PowerUps extends Component with AutoDispose {
       added_probability += it.probability;
       extras.add((it, added_probability));
     }
-    logInfo(extras);
 
     final all = extras.last.$2;
-    logInfo(all);
     final pick = rng.nextDoubleLimit(all);
     for (final it in extras) {
       if (pick < it.$2) return it.$1;
@@ -145,8 +143,6 @@ class PowerUp extends SpriteAnimationComponent {
       ExtraId.multi_ball => MultiBall(),
       ExtraId.slow_down => SlowDown(),
     };
-    logInfo(message);
-    logInfo(message.runtimeType);
     sendMessage(message);
 
     soundboard.play(switch (id) {

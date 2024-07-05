@@ -50,7 +50,7 @@ class Brick extends BodyComponent {
         _hits++;
       }
     }
-    logInfo('hit $id: hits: $hits strength: ${id.strength}');
+    logVerbose('hit $id: hits: $hits strength: ${id.strength}');
   }
 
   double hit_highlight = 0;

@@ -3,13 +3,43 @@ import 'dart:ui';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/extensions.dart';
-import 'package:flutter/services.dart';
+import 'package:flutternoid/input/shortcuts.dart';
+import 'package:flutternoid/util/auto_dispose.dart';
 
+import '../core/functions.dart';
 import 'bitmap_font.dart';
 import 'fonts.dart';
 import 'nine_patch_image.dart';
 
-class BitmapButton extends PositionComponent with HasPaint, TapCallbacks, KeyboardHandler {
+Future<BitmapButton> button({
+  Image? bgNinePatch,
+  required String text,
+  int cornerSize = 8,
+  Vector2? position,
+  Vector2? size,
+  BitmapFont? font,
+  Anchor? anchor,
+  List<String> shortcuts = const [],
+  double fontScale = 1,
+  Color? tint,
+  required Function(BitmapButton) onTap,
+}) async =>
+    BitmapButton(
+      bgNinePatch: bgNinePatch ?? await image('button_plain.png'),
+      text: text,
+      cornerSize: cornerSize,
+      position: position,
+      size: size,
+      font: font,
+      anchor: anchor,
+      shortcuts: shortcuts,
+      fontScale: fontScale,
+      tint: tint,
+      onTap: onTap,
+    );
+
+class BitmapButton extends PositionComponent
+    with AutoDispose, HasPaint, HasVisibility, TapCallbacks, HasAutoDisposeShortcuts {
   //
   final NinePatchImage? background;
   final String text;
@@ -31,12 +61,10 @@ class BitmapButton extends PositionComponent with HasPaint, TapCallbacks, Keyboa
     this.fontScale = 1,
     Color? tint,
     required this.onTap,
-  })  : font = font ?? fancyFont,
+  })  : font = font ?? tinyFont,
         background = bgNinePatch != null ? NinePatchImage(bgNinePatch, cornerSize: cornerSize) : null {
     if (position != null) this.position.setFrom(position);
-    if (tint != null) {
-      this.tint(tint);
-    }
+    if (tint != null) this.tint(tint);
     if (size == null) {
       this.font.scale = fontScale;
       this.size = this.font.textSize(text);
@@ -50,6 +78,12 @@ class BitmapButton extends PositionComponent with HasPaint, TapCallbacks, Keyboa
     final y = a.y * this.size.y;
     this.position.x -= x;
     this.position.y -= y;
+  }
+
+  @override
+  void onMount() {
+    super.onMount();
+    onKeys(shortcuts, () => onTap(this));
   }
 
   @override
@@ -71,17 +105,4 @@ class BitmapButton extends PositionComponent with HasPaint, TapCallbacks, Keyboa
 
   @override
   void onTapUp(TapUpEvent event) => onTap(this);
-
-  @override
-  bool onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
-    if (event is KeyRepeatEvent) return true;
-    if (event is! KeyDownEvent) return true;
-    if (event case KeyDownEvent it) {
-      if (shortcuts.contains(it.logicalKey.keyLabel)) {
-        onTap(this);
-        return true;
-      }
-    }
-    return false;
-  }
 }

@@ -60,7 +60,11 @@ mixin Shortcuts<T extends World> on HasKeyboardHandlerComponents<T> {
           handled = true;
         }
       }
-      if (handled) return KeyEventResult.skipRemainingHandlers;
+      if (handled) {
+        return KeyEventResult.skipRemainingHandlers;
+      } else {
+        logVerbose('not handled: $pattern');
+      }
     } else if (event is KeyDownEvent) {
       final pattern = _make_shortcut(event);
       snoop(pattern);
@@ -73,7 +77,11 @@ mixin Shortcuts<T extends World> on HasKeyboardHandlerComponents<T> {
           handled = true;
         }
       }
-      if (handled) return KeyEventResult.skipRemainingHandlers;
+      if (handled) {
+        return KeyEventResult.skipRemainingHandlers;
+      } else {
+        logVerbose('not handled: $pattern');
+      }
     }
     return super.onKeyEvent(event, keysPressed);
   }

@@ -21,7 +21,6 @@ import 'background_screen.dart';
 import 'ball.dart';
 import 'extra_id.dart';
 import 'flash_text.dart';
-import 'game_configuration.dart';
 import 'game_frame.dart';
 import 'game_object.dart';
 import 'level.dart';
@@ -31,7 +30,6 @@ import 'slow_down_area.dart';
 import 'visual_configuration.dart';
 
 class GameController extends PositionComponent with AutoDispose, GameScriptFunctions, HasAutoDisposeShortcuts {
-  final configuration = GameConfiguration();
   final visual = VisualConfiguration();
 
   final keys = Keys();

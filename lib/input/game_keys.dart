@@ -27,8 +27,8 @@ mixin HasGameKeys on KeyboardHandler {
   static final fireKeys2 = ['Enter', 'Shift', 'K'];
   static final inventoryKeys = ['Tab', 'I'];
   static final useOrExecuteKeys = ['U'];
-  static final softKeys1 = ['Control Left', 'F1'];
-  static final softKeys2 = ['Control Right', 'F2'];
+  static final softKeys1 = ['Backspace'];
+  static final softKeys2 = ['Delete'];
 
   static final mapping = {
     GameKey.left: leftKeys,

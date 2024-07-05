@@ -9,6 +9,7 @@ import 'package:flutternoid/util/on_message.dart';
 import '../core/common.dart';
 import 'ball.dart';
 import 'extra_id.dart';
+import 'game_configuration.dart';
 import 'game_object.dart';
 
 class SlowDownArea extends BodyComponent with AutoDispose, GameObject, ContactCallbacks {
@@ -137,15 +138,15 @@ class SlowDownArea extends BodyComponent with AutoDispose, GameObject, ContactCa
 
     if (configuration.pixelate) {
       final recorder = PictureRecorder();
-      Canvas(recorder).drawRect(Rect.fromLTWH(0, 0, visual.game_pixels.x, slow_down_range), shader_paint);
+      Canvas(recorder).drawRect(Rect.fromLTWH(0, 0, visual.game_pixels.x + 4, slow_down_range), shader_paint);
 
       final picture = recorder.endRecording();
-      final image = picture.toImageSync(visual.game_pixels.x.toInt(), slow_down_range.toInt());
-      canvas.drawImage(image, Offset.zero, paint);
+      final image = picture.toImageSync(visual.game_pixels.x.toInt() + 4, slow_down_range.toInt());
+      canvas.drawImage(image, const Offset(-2, 0), paint);
       image.dispose();
       picture.dispose();
     } else {
-      canvas.drawRect(Rect.fromLTWH(0, 0, visual.game_pixels.x, slow_down_range), shader_paint);
+      canvas.drawRect(Rect.fromLTWH(-2, 0, visual.game_pixels.x + 4, slow_down_range), shader_paint);
     }
   }
 

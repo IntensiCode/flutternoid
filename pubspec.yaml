@@ -43,6 +43,7 @@ flutter:
     - assets/audio/
     - assets/audio/music/
     - assets/audio/sound/
+    - assets/data/
     - assets/fonts/
     - assets/images/
     - assets/images/fonts/

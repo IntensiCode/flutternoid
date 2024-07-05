@@ -33,7 +33,7 @@ class Level extends PositionComponent with GameObject, HasPaint {
 
   final brick_rows = <Row>[];
 
-  int level_number_starting_at_1 = 1;
+  int level_number_starting_at_1 = 3;
 
   var state = LevelState.appearing;
   double state_progress = 0.0;

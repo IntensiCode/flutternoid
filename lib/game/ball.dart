@@ -16,6 +16,7 @@ import '../util/extensions.dart';
 import '../util/on_message.dart';
 import 'brick.dart';
 import 'extra_id.dart';
+import 'game_configuration.dart';
 import 'game_context.dart';
 import 'game_object.dart';
 import 'player.dart';
@@ -219,7 +220,7 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
   }
 
   void _on_active(double dt) {
-    if (state == BallState.pushed&& position.y < _player.position.y - _player.bat_height) {
+    if (state == BallState.pushed && position.y < _player.position.y - _player.bat_height) {
       state = BallState.active;
     }
     if (disruptor > 0) disruptor -= min(disruptor, dt);

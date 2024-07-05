@@ -22,7 +22,7 @@ Future<SpriteSheet> sheetIWH(
   var img = await image(filename);
   final columns = img.width ~/ frameWidth;
   final rows = img.height ~/ frameHeight;
-  logInfo('$filename: size ${img.size} $columns x $rows');
+  logVerbose('$filename: size ${img.size} $columns x $rows');
   return SpriteSheet.fromColumnsAndRows(image: img, columns: columns, rows: rows, spacing: spacing, margin: margin);
 }
 
