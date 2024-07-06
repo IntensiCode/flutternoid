@@ -4,6 +4,7 @@ import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 
 import '../core/common.dart';
+import '../core/soundboard.dart';
 import 'brick_id.dart';
 import 'extra_id.dart';
 
@@ -40,8 +41,10 @@ class Brick extends BodyComponent {
   bool spawned = false;
 
   void hit([bool full_force = false]) {
-    hit_highlight += 0.1;
+    soundboard.note_index = BrickId.values.length - id.index;
+
     if (indestructible) return;
+    hit_highlight += 0.1;
 
     if (_hits < id.strength) {
       if (full_force) {

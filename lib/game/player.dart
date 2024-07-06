@@ -135,7 +135,7 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
         if (!_is_catcher) {
           _force_hold[other] = configuration.force_hold_timeout;
         }
-        soundboard.play(Sound.ball_held);
+        soundboard.trigger(Sound.ball_held);
       } else {
         other.body.applyLinearImpulse(Vector2(player.x_speed, 0));
       }
@@ -244,7 +244,7 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
     expand_level++;
     expanded = configuration.expand_time;
     mode = PlayerMode.values[expand_level * 3 + (mode.index % 3)];
-    soundboard.play(Sound.bat_expand);
+    soundboard.trigger(Sound.bat_expand);
 
     _update_body_fixture();
   }
@@ -283,16 +283,16 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
 
       if (new_time <= 0) {
         ball.explode();
-        soundboard.play(Sound.explosion);
+        soundboard.trigger(Sound.explosion);
       } else {
         final timeout = configuration.force_hold_timeout;
         ball.jiggle((timeout - new_time) / timeout);
 
         if (new_time < 0.5 && time >= 0.5) {
-          soundboard.play(Sound.ball_held);
+          soundboard.trigger(Sound.ball_held);
         }
         if (new_time < 0.25 && time >= 0.25) {
-          soundboard.play(Sound.ball_held);
+          soundboard.trigger(Sound.ball_held);
         }
       }
     }
@@ -392,7 +392,7 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
       _laser_pos.x += bat_width / 4;
       laser.spawn(_laser_pos);
 
-      soundboard.play(Sound.laser_shot);
+      soundboard.trigger(Sound.laser_shot);
     }
 
     _was_holding_fire = false;
@@ -410,7 +410,7 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
       mode = PlayerMode.values[expand_level * 3 + (mode.index % 3)];
     }
     logInfo('expanded=$expanded, expand_level=$expand_level, bat_mode=$mode');
-    soundboard.play(Sound.bat_expand);
+    soundboard.trigger(Sound.bat_expand);
   }
 
   @override

@@ -145,7 +145,7 @@ class PowerUp extends SpriteAnimationComponent {
     };
     sendMessage(message);
 
-    soundboard.play(switch (id) {
+    soundboard.trigger(switch (id) {
       ExtraId.laser => Sound.laser,
       ExtraId.catcher => Sound.catcher,
       ExtraId.disruptor => Sound.disruptor,

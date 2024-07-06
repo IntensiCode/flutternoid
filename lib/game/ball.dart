@@ -148,7 +148,7 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
     if (other is Player && other.in_catcher_mode) {
       contact.isEnabled = false;
     } else {
-      soundboard.play(Sound.wall_hit);
+      soundboard.trigger(Sound.wall_hit);
     }
   }
 
@@ -282,7 +282,7 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
   void _check_ball_lost() {
     if (position.y > visual.game_pixels.y - 10 && !_lost) {
       _lost = true;
-      soundboard.play(Sound.ball_lost);
+      soundboard.trigger(Sound.ball_lost);
     }
     if (position.y > visual.game_pixels.y) removeFromParent();
   }

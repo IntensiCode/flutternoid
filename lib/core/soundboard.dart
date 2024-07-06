@@ -1,6 +1,12 @@
+import 'dart:async';
+import 'dart:math';
+import 'dart:typed_data';
+
 import 'package:dart_minilog/dart_minilog.dart';
-import 'package:flame/components.dart';
+import 'package:flame/components.dart' hide Timer;
 import 'package:flame_audio/flame_audio.dart';
+import 'package:flutter/foundation.dart';
+import 'package:mp_audio_stream/mp_audio_stream.dart';
 
 import 'common.dart';
 
@@ -31,7 +37,7 @@ final soundboard = Soundboard();
 double get musicVolume => soundboard.music * soundboard.master;
 
 class Soundboard extends Component {
-  double master = 0.5;
+  double master = 0.75;
   double _music = 0.5;
   double voice = 0.8;
   double sound = 0.6;
@@ -45,6 +51,26 @@ class Soundboard extends Component {
 
   bool muted = false;
 
+  // flag used during initialization
+  bool _blocked = false;
+
+  // used by [trigger] to play every sound only once per tick
+  final _triggered = <Sound>{};
+
+  // raw sample data for mixing
+  final _samples = <Sound, Float32List>{};
+
+  // some notes to play instead of wall hit
+  final _notes = <Float32List>[];
+
+  // constant audio stream for mixing sound effects
+  AudioStream? _stream;
+
+  // sample states for mixing into [_stream]
+  final _play_state = <(Float32List, int)>[];
+
+  int? note_index;
+
   toggleMute() {
     muted = !muted;
     if (muted) {
@@ -57,81 +83,69 @@ class Soundboard extends Component {
   clear(String filename) => FlameAudio.audioCache.clear(filename);
 
   preload() async {
-    for (final it in Sound.values) {
-      logVerbose('cache $it');
-      await FlameAudio.audioCache.load('sound/${it.name}$sound_extension');
+    logInfo('preload audio');
+
+    _blocked = true;
+
+    if (_samples.isEmpty) {
+      for (final it in Sound.values) {
+        logInfo('preload sample $it');
+        final bytes = await game.assets.readBinaryFile('audio/sound/${it.name}.raw');
+        final data = Float32List(bytes.length);
+        for (int i = 0; i < bytes.length; i++) {
+          data[i] = ((bytes[i] / 128) - 1) * 0.8;
+        }
+        _samples[it] = data;
+      }
     }
+
+    if (_stream == null) {
+      logInfo('start audio mixing stream');
+      _stream = getAudioStream();
+      final result = _stream!.init(
+        bufferMilliSec: 500,
+        waitingBufferMilliSec: 10,
+        channels: 1,
+        sampleRate: 11025,
+      );
+      logInfo('audio mixing stream started: $result');
+      _stream!.resume();
+      _mix_stream();
+    }
+
+    _blocked = false;
   }
-
-  int _activeSounds = 0;
-
-  final _triggered = <Sound>{};
 
   trigger(Sound sound) => _triggered.add(sound);
 
-  @override
-  update(double dt) {
-    super.update(dt);
-    if (_triggered.isNotEmpty) {
-      _triggered.forEach(play);
-      _triggered.clear();
-    }
-  }
+  int last = 0;
 
-  play(Sound sound, {double? volume}) {
+  play(Sound sound, {double? volume}) async {
     if (muted) return;
-
-    volume ??= soundboard.sound;
-
-    if (_activeSounds >= _maxActive) {
-      logVerbose('sound overload');
-      return;
-    }
-
-    _playPooled(sound, volume);
-  }
-
-  _playPooled(Sound sound, double volume) async {
-    final reuse = _pooledPlayers.indexWhere((it) {
-      if (it.$1 != sound) return false;
-      if (it.$2.state == PlayerState.playing) return false;
-      return true;
-    });
-
-    if (reuse == -1) {
-      while (_pooledPlayers.length >= _maxPooled) {
-        logVerbose('disposing pooled player');
-        final (_, player) = _pooledPlayers.removeAt(0);
-        player.dispose();
-      }
-
-      final it = await FlameAudio.play('sound/${sound.name}$sound_extension', volume: volume * master);
-      it.setPlayerMode(PlayerMode.lowLatency);
-      it.setReleaseMode(ReleaseMode.stop);
-      it.onPlayerStateChanged.listen((it) {
-        if (it == PlayerState.playing) {
-          _activeSounds++;
-        } else {
-          _activeSounds--;
+    if (_blocked) return;
+    if (_samples.isEmpty) {
+      preload();
+    } else if (sound == Sound.wall_hit) {
+      final index = note_index ?? 0;
+      if (_notes.length <= index) {
+        for (int i = _notes.length; i <= index; i++) {
+          final freq = 261.626 + i * (293.665 - 261.626);
+          final wave = _synth_sine_wave(freq, 11025, const Duration(milliseconds: 50));
+          _notes.add(wave);
         }
-      });
-
-      _activeSounds++;
-      _pooledPlayers.add((sound, it));
-      logVerbose('pooled: ${_pooledPlayers.length}');
+      }
+      _play_state.add((_notes[note_index ?? 0], 0));
     } else {
-      final it = _pooledPlayers.removeAt(reuse);
-      _pooledPlayers.add(it);
-      final player = it.$2;
-      player.setVolume(volume * master);
-      player.resume();
+      _play_state.add((_samples[sound]!, 0));
     }
   }
 
-  final _pooledPlayers = <(Sound, AudioPlayer)>[];
-
-  static const _maxActive = 10;
-  static const _maxPooled = 50;
+  Future<AudioPlayer> playAudio(String filename, {double? volume}) async {
+    volume ??= sound;
+    final player = await FlameAudio.play(filename, volume: volume * master);
+    if (muted) player.setVolume(0);
+    return player;
+  }
 
   AudioPlayer? bgm;
 
@@ -155,11 +169,80 @@ class Soundboard extends Component {
     return bgm!;
   }
 
-  Future<AudioPlayer> playAudio(String filename, {double? volume}) async {
-    volume ??= sound;
-    final player = await FlameAudio.play(filename, volume: volume * master);
-    if (muted) player.setVolume(0);
-    return player;
+  // Component
+
+  @override
+  update(double dt) {
+    super.update(dt);
+    if (_triggered.isEmpty) return;
+    _triggered.forEach(play);
+    _triggered.clear();
+  }
+
+  // Implementation
+
+  static Float32List _synth_sine_wave(double freq, int rate, Duration duration) {
+    final length = duration.inMilliseconds * rate ~/ 1000;
+
+    final fadeSamples = min(100, length ~/ 2);
+
+    final sineWave = List.generate(length, (i) {
+      final amp = sin(2 * pi * ((i * freq) % rate) / rate);
+
+      // apply fade in/out to avoid click noise
+      final volume = (i > length - fadeSamples)
+          ? (length - i - 1) / fadeSamples
+          : (i < fadeSamples)
+              ? i / fadeSamples
+              : 1.0;
+
+      return amp * volume * 0.8;
+    });
+
+    return Float32List.fromList(sineWave);
+  }
+
+  _mix_stream() async {
+    const hz = 10;
+    const rate = 11025;
+    const step = rate ~/ hz;
+    final mixed = Float32List(step);
+    logInfo('mixing at $hz hz - frame step $step - buffer bytes ${mixed.length}');
+
+    Timer.periodic(const Duration(milliseconds: 1000 ~/ hz), (t) {
+      mixed.fillRange(0, mixed.length, 0);
+      if (_play_state.isEmpty) {
+        _stream!.push(mixed);
+        return;
+      }
+
+      double? compress;
+      for (final (idx, it) in _play_state.indexed) {
+        final data = it.$1;
+        final start = it.$2;
+        final end = min(start + step, data.length);
+        for (int i = start; i < end; i++) {
+          final at = i - start;
+          mixed[at] += data[i];
+          if (mixed[at].abs() > 1) {
+            compress = max(compress ?? 0, mixed[at].abs());
+          }
+        }
+        if (end == data.length) {
+          _play_state[idx] = (it.$1, -1);
+        } else {
+          _play_state[idx] = (it.$1, it.$2 + step);
+        }
+      }
+      if (compress != null) {
+        logInfo('need compression: $compress');
+        for (int i = 0; i < mixed.length; i++) {
+          mixed[i] /= compress;
+        }
+      }
+      _stream!.push(mixed);
+      _play_state.removeWhere((e) => e.$2 == -1);
+    });
   }
 }
 

@@ -44,7 +44,6 @@ class LoadingScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
   @override
   void onMount() {
     super.onMount();
-    soundboard.master = 0.75;
     soundboard.music = 0.5;
     soundboard.muted = false;
     soundboard.sound = 0.75;
