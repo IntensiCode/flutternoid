@@ -20,6 +20,7 @@ import 'game_configuration.dart';
 import 'game_context.dart';
 import 'game_object.dart';
 import 'player.dart';
+import 'wall.dart';
 
 enum BallState {
   gone,
@@ -77,16 +78,12 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
 
     body.linearVelocity.setZero();
 
-    _push_delta.setValues(dx,dy);
+    _push_delta.setValues(dx, dy);
     _update_position.setFrom(position);
-
-    // body.linearVelocity.setValues(dx, dy);
-    // body.setTransform(_update_position, 0);
 
     if (_jiggle > 0) {
       final factor = max(0.0, _jiggle - 0.25);
       _push_delta.rotate(rng.nextDoublePM(factor));
-      // body.linearVelocity.rotate(rng.nextDoublePM(factor));
     }
   }
 
@@ -139,15 +136,13 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
     super.beginContact(other, contact);
     if (other is Ball && other.state != BallState.active || this.state != BallState.active) {
       contact.isEnabled = false;
-      return;
-    }
-    if (other is Brick) {
+    } else if (other is Brick) {
       other.hit(disruptor > 0);
       if (disruptor > 0 && other.destroyed) contact.isEnabled = false;
-    }
-    if (other is Player && other.in_catcher_mode) {
+      soundboard.trigger(Sound.wall_hit);
+    } else if (other is Player && other.in_catcher_mode) {
       contact.isEnabled = false;
-    } else {
+    } else if (other is Player || other is Wall) {
       soundboard.trigger(Sound.wall_hit);
     }
   }
