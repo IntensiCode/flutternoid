@@ -14,13 +14,13 @@ class Credits extends GameScriptComponent {
     add(await sprite_comp('background.png'));
 
     fontSelect(tinyFont, scale: 1);
-    textXY('Credits', xCenter, 10, scale: 2, anchor: Anchor.topCenter);
+    textXY('Credits', xCenter, 08, scale: 2, anchor: Anchor.topCenter);
 
     add(FlowText(
       text: await game.assets.readFile('data/credits.txt'),
       font: tinyFont,
-      position: Vector2(0, 32) ,
-      size: Vector2(320, 160 - 32),
+      position: Vector2(0, 24) ,
+      size: Vector2(320, 160 - 24),
     ));
 
     softkeys('Back', null, (_) => popScreen());
