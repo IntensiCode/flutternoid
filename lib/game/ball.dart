@@ -314,22 +314,28 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
   }
 
   void _render_exploding(Canvas canvas) {
-    shader.setFloat(0, 64);
-    shader.setFloat(1, 64);
+    const size = 64.0;
+    shader.setFloat(0, size);
+    shader.setFloat(1, size);
     shader.setFloat(2, state_progress);
 
     final shaded = pixelPaint();
     shaded.shader = shader;
 
-    final recorder = PictureRecorder();
-    Canvas(recorder).drawCircle(Offset.zero, 64, shaded);
+    if (configuration.pixelate) {
+      final recorder = PictureRecorder();
+      Canvas(recorder).drawCircle(Offset.zero, 64, shaded);
 
-    final picture = recorder.endRecording();
-    final image = picture.toImageSync(64, 64);
-    canvas.translate(-32, -32);
-    canvas.drawImage(image, Offset.zero, paint);
-    image.dispose();
-    picture.dispose();
+      final picture = recorder.endRecording();
+      final image = picture.toImageSync(size.toInt(), size.toInt());
+      canvas.translate(-size / 2, -size / 2);
+      canvas.drawImage(image, Offset.zero, paint);
+      image.dispose();
+      picture.dispose();
+    } else {
+      canvas.translate(-size / 2, -size / 2);
+      canvas.drawCircle(Offset.zero, size, shaded);
+    }
   }
 
   final _render_pos = Vector2.zero();
