@@ -39,7 +39,7 @@ class TriggerPlasmaBlast with Message {
 extension ComponentExtensions on Component {
   GameController get model => findParent<GameController>(includeSelf: true)!;
 
-  VisualConfiguration get visual => model.visual;
+  VisualConfiguration get visual => VisualConfiguration.instance;
 
   Keys get keys => model.keys;
 

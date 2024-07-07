@@ -140,7 +140,7 @@ class SlowDownArea extends BodyComponent with AutoDispose, GameObject, ContactCa
     final shader_paint = pixelPaint();
     shader_paint.shader = shader;
 
-    if (configuration.pixelate) {
+    if (visual.pixelate) {
       final recorder = PictureRecorder();
       Canvas(recorder).drawRect(Rect.fromLTWH(0, 0, visual.game_pixels.x + 4, slow_down_range), shader_paint);
 

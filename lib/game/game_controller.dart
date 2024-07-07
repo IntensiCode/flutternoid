@@ -21,6 +21,7 @@ import 'flash_text.dart';
 import 'game_context.dart';
 import 'game_frame.dart';
 import 'game_object.dart';
+import 'hiscore.dart';
 import 'laser_weapon.dart';
 import 'level.dart';
 import 'plasma_blast.dart';
@@ -31,8 +32,6 @@ import 'slow_down_area.dart';
 import 'visual_configuration.dart';
 
 class GameController extends PositionComponent with AutoDispose, GameScriptFunctions, HasAutoDisposeShortcuts {
-  final visual = VisualConfiguration();
-
   final keys = Keys();
   final level = Level();
   final flash_text = FlashText();
@@ -119,6 +118,8 @@ class GameController extends PositionComponent with AutoDispose, GameScriptFunct
   @override
   onLoad() async {
     position.setFrom(visual.game_position);
+    await add(visual);
+    await add(hiscore);
     await add(BackgroundScreen());
     await add(Shadows(() => children.whereType<Ball>()));
     await add(keys);

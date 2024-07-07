@@ -1,9 +1,6 @@
-import 'dart:convert';
-
-import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/storage.dart';
 import 'game_object.dart';
 
 final hiscore = Hiscore();
@@ -34,13 +31,13 @@ class Hiscore extends Component with HasGameData {
     }
     latestRank = rank;
 
-    try_store_state();
+    save('hiscore', this);
   }
 
   // Component
 
   @override
-  onLoad() async => await try_restore_state();
+  onLoad() async => await load('hiscore', this);
 
   // HasGameData
 
@@ -54,32 +51,6 @@ class Hiscore extends Component with HasGameData {
 
   @override
   GameData save_state(GameData data) => data..['entries'] = entries.map((it) => it.save_state({})).toList();
-
-  // Implementation
-
-  try_store_state() async {
-    try {
-      final preferences = await SharedPreferences.getInstance();
-      preferences.setString('hiscore', jsonEncode(save_state({})));
-    } catch (it, trace) {
-      logError('Failed to store hiscore: $it', trace);
-    }
-  }
-
-  Future try_restore_state() async {
-    try {
-      final preferences = await SharedPreferences.getInstance();
-      if (preferences.containsKey('hiscore')) {
-        final json = preferences.getString('hiscore');
-        if (json != null) {
-          logVerbose(json);
-          load_state(jsonDecode(json));
-        }
-      }
-    } catch (it, trace) {
-      logError('Failed to restore hiscore: $it', trace);
-    }
-  }
 }
 
 class HiscoreRank {

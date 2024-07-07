@@ -8,7 +8,7 @@ import 'components/soft_keys.dart';
 import 'core/common.dart';
 import 'core/functions.dart';
 import 'core/screens.dart';
-import 'game/game_configuration.dart';
+import 'game/visual_configuration.dart';
 import 'input/game_keys.dart';
 import 'input/shortcuts.dart';
 import 'scripting/game_script.dart';
@@ -25,7 +25,6 @@ class VideoMenu extends GameScriptComponent with HasAutoDisposeShortcuts, Keyboa
 
   @override
   onLoad() async {
-
     add(await sprite_comp('background.png'));
 
     fontSelect(tinyFont, scale: 1);
@@ -35,7 +34,7 @@ class VideoMenu extends GameScriptComponent with HasAutoDisposeShortcuts, Keyboa
     final menu = added(BasicMenu<OptionsMenuEntry>(buttonSheet, tinyFont, _selected));
     pixelate = menu.addEntry(OptionsMenuEntry.pixelate, 'Pixelate FX', anchor: Anchor.centerLeft);
 
-    pixelate.checked = configuration.pixelate;
+    pixelate.checked = visual.pixelate;
 
     menu.position.setValues(xCenter, yCenter);
     menu.anchor = Anchor.center;
@@ -52,8 +51,8 @@ class VideoMenu extends GameScriptComponent with HasAutoDisposeShortcuts, Keyboa
     logInfo('Selected: $it');
     switch (it) {
       case OptionsMenuEntry.pixelate:
-        configuration.pixelate = !configuration.pixelate;
+        visual.pixelate = !visual.pixelate;
     }
-    pixelate.checked = configuration.pixelate;
+    pixelate.checked = visual.pixelate;
   }
 }

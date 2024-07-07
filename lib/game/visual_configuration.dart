@@ -1,6 +1,23 @@
 import 'package:flame/components.dart';
+import 'package:flutternoid/core/storage.dart';
+import 'package:flutternoid/game/game_object.dart';
 
-class VisualConfiguration {
+final visual = VisualConfiguration.instance;
+
+class VisualConfiguration extends Component with HasGameData {
+  static final instance = VisualConfiguration._();
+
+  VisualConfiguration._();
+
+  bool _pixelate = true;
+
+  bool get pixelate => _pixelate;
+
+  set pixelate(bool value) {
+    _pixelate = value;
+    save('visual', this);
+  }
+
   final frame_shadow_size = 6.0;
   final shadow_offset = 4.0;
 
@@ -23,4 +40,17 @@ class VisualConfiguration {
   late final background_offset = Vector2.all(-border_size - brick_inset);
 
   final plasma_size = Vector2(64, 64);
+
+  // Component
+
+  @override
+  onLoad() async => await load('visual', this);
+
+  // HasGameData
+
+  @override
+  void load_state(Map<String, dynamic> data) => _pixelate = data['pixelate'] ?? _pixelate;
+
+  @override
+  GameData save_state(Map<String, dynamic> data) => data..['pixelate'] = _pixelate;
 }

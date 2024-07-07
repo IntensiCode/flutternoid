@@ -322,7 +322,7 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
     final shaded = pixelPaint();
     shaded.shader = shader;
 
-    if (configuration.pixelate) {
+    if (visual.pixelate) {
       final recorder = PictureRecorder();
       Canvas(recorder).drawCircle(Offset.zero, 64, shaded);
 
