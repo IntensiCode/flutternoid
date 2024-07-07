@@ -5,7 +5,6 @@ import 'package:flame/components.dart';
 import 'package:supercharged/supercharged.dart';
 
 import '../core/common.dart';
-import '../core/game.dart';
 import '../core/messaging.dart';
 import '../core/random.dart';
 import '../core/soundboard.dart';
@@ -19,10 +18,12 @@ import 'background_screen.dart';
 import 'ball.dart';
 import 'extra_id.dart';
 import 'flash_text.dart';
+import 'game_context.dart';
 import 'game_frame.dart';
 import 'game_object.dart';
 import 'laser_weapon.dart';
 import 'level.dart';
+import 'plasma_blast.dart';
 import 'player.dart';
 import 'power_ups.dart';
 import 'shadows.dart';
@@ -38,7 +39,9 @@ class GameController extends PositionComponent with AutoDispose, GameScriptFunct
   final power_ups = PowerUps();
   final laser = LaserWeapon();
   final slow_down_area = SlowDownArea();
-  late final player = Player(laser);
+  final plasma_blasts = PlasmaBlasts();
+
+  late final player = Player(laser, () => children.whereType<Ball>());
 
   GamePhase _phase = GamePhase.start_game;
 
@@ -117,7 +120,7 @@ class GameController extends PositionComponent with AutoDispose, GameScriptFunct
   onLoad() async {
     position.setFrom(visual.game_position);
     await add(BackgroundScreen());
-    await add(Shadows());
+    await add(Shadows(() => children.whereType<Ball>()));
     await add(keys);
     await add(level);
     await add(flash_text);
@@ -126,6 +129,7 @@ class GameController extends PositionComponent with AutoDispose, GameScriptFunct
     await add(player);
     await add(GameFrame());
     await add(slow_down_area);
+    await add(plasma_blasts);
   }
 
   @override

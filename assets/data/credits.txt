@@ -1,19 +1,15 @@
-Main game graphics by @Davitmasia @Kronbits (itch.io)
-https://kronbits.itch.io/matriax-free-assets
-
-Wave shader by scarletshark
-https://www.shadertoy.com/user/scarletshark
-
-Explosion shader by Leukbaars
-https://www.shadertoy.com/user/Leukbaars
-
-Star nest shader by Pablo Roman Andrioli
-https://www.shadertoy.com/view/XlfGRj
-
-Title them by suno.com
-https://suno.com/song/b716462a-987b-4de2-8ce5-314ebc7c0a4a
-
+Graphics:
+Game graphics by @Davitmasia: kronbits.itch.io/matriax-free-assets
 Title screen background by Jones / Imagine / Taito
 
-Flame Game Engine
-https://flame-engine.org/
+Shaders:
+Wave by scarletshark: shadertoy.com/view/ltXczj
+Pixel explosion by Leukbaars: shadertoy.com/view/lldGzr
+Star nest by Pablo Roman Andrioli: shadertoy.com/view/XlfGRj
+Plasma globe by nimitz: shadertoy.com/view/XsjXRm
+
+Title theme by suno.com: suno.com/song/b716462a-987b-4de2-8ce5-314ebc7c0a4a
+
+Flame Game Engine: flame-engine.org
+
+Code by The.French.DJ / IntensiCode: github.com/IntensiCode

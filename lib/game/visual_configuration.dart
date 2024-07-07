@@ -21,4 +21,6 @@ class VisualConfiguration {
   );
 
   late final background_offset = Vector2.all(-border_size - brick_inset);
+
+  final plasma_size = Vector2(64, 64);
 }

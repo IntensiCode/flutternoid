@@ -20,8 +20,8 @@ import 'game_configuration.dart';
 import 'game_context.dart';
 import 'game_object.dart';
 import 'laser_weapon.dart';
-import 'wall.dart';
 import 'slow_down_area.dart';
+import 'wall.dart';
 
 class PlayerReady with Message {}
 
@@ -50,6 +50,9 @@ enum PlayerMode {
 
 class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObject {
   final LaserWeapon laser;
+  final Iterable<Ball> Function() balls;
+
+  Player(this.laser, this.balls);
 
   late final Keys _keys;
   late final SpriteSheet sprites;
@@ -76,14 +79,13 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
   double mode_time = 0;
   double _mode_change = 0;
   late PlayerMode _mode_origin;
+  double _plasma_cool_down = 0.0;
 
   var _thrust_left = 0.0;
   var _thrust_right = 0.0;
   bool _was_holding_fire = false;
 
   double x_speed = 0.0;
-
-  Player(this.laser);
 
   bool get in_normal_mode => mode.index % 3 == 0;
 
@@ -269,6 +271,19 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
         _on_mode_change(dt);
         _on_thrusters(dt);
         _on_force_hold(dt);
+        _on_plasma_blast(dt);
+    }
+  }
+
+  void _on_plasma_blast(double dt) {
+    final got_balls = balls().where((it) => it.state == BallState.active);
+    if (got_balls.isEmpty) return;
+
+    if (_plasma_cool_down > 0) _plasma_cool_down -= min(_plasma_cool_down, dt);
+    if (keys.check_and_consume(GameKey.fire2) && _plasma_cool_down <= 0) {
+      _plasma_cool_down = configuration.plasma_cool_down;
+      soundboard.trigger(Sound.plasma);
+      sendMessage(TriggerPlasmaBlasts());
     }
   }
 
@@ -367,7 +382,7 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
     if (body.transform.p.y != visual.game_pixels.y * 0.9) {
       _update_pos.y = visual.game_pixels.y * 0.9;
     }
-    _update_pos.x = _update_pos.x.clamp(bat_width / 2 + 0.5, visual.game_pixels.x - bat_width / 2 - 0.5);
+    _update_pos.x = _update_pos.x.clamp(bat_width / 2 - 0.5, visual.game_pixels.x - bat_width / 2 + 0.5);
     body.setTransform(_update_pos, 0);
   }
 
@@ -376,7 +391,7 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
 
     if (!_was_holding_fire || _keys.fire1) return;
 
-    final caught = balls.where((it) => it.state == BallState.caught).firstOrNull;
+    final caught = balls().where((it) => it.state == BallState.caught).firstOrNull;
     if (caught != null) {
       _was_holding_fire = false;
       caught.push(x_speed * 0.5, -configuration.opt_ball_speed * 0.5);

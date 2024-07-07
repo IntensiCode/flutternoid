@@ -6,6 +6,7 @@ import 'package:flame/components.dart' hide World;
 import 'package:flame/sprite.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutternoid/core/messaging.dart';
 
 import '../core/common.dart';
 import '../core/functions.dart';
@@ -21,6 +22,8 @@ import 'game_context.dart';
 import 'game_object.dart';
 import 'player.dart';
 import 'wall.dart';
+
+class TriggerPlasmaBlasts with Message {}
 
 enum BallState {
   gone,
@@ -185,6 +188,16 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
   void onMount() {
     super.onMount();
     onMessage<Disruptor>((it) => disruptor = configuration.disruptor_time);
+    onMessage<TriggerPlasmaBlasts>((_) => _on_trigger_plasma_blast());
+  }
+
+  void _on_trigger_plasma_blast() {
+    if (state != BallState.active) return;
+    sendMessage(TriggerPlasmaBlast(position));
+    body.linearVelocity.x = rng.nextDoublePM(1);
+    body.linearVelocity.y = -1;
+    body.linearVelocity.scale(configuration.opt_ball_speed);
+    disruptor += configuration.plasma_disruptor;
   }
 
   @override

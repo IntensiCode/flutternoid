@@ -9,6 +9,8 @@ class GameConfiguration {
   double disruptor_time = 10;
 
   double force_hold_timeout = 1.0;
+  double plasma_cool_down = 3.0;
+  double plasma_disruptor = 1.0;
 
   final max_ball_speed = 150.0;
   final opt_ball_speed = 100.0;

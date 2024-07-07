@@ -50,5 +50,6 @@ flutter:
     - assets/tiles/
   shaders:
     - assets/shaders/explosion.frag
+    - assets/shaders/plasma.frag
     - assets/shaders/stars.frag
     - assets/shaders/wave.frag

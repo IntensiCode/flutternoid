@@ -59,14 +59,19 @@ class Flutternoid extends Forge2DGame<MainController>
     add(soundboard);
 
     if (dev) {
-      onKey('<C-d>', () => _toggleDebug());
-      onKey('<C-m>', () => soundboard.toggleMute());
-      onKey('<C-l>', () => showScreen(Screen.loading));
-      onKey('<C-t>', () => showScreen(Screen.title));
-      onKey('<C-g>', () => showScreen(Screen.game));
       onKey('<C-->', () => _slowDown());
       onKey('<C-=>', () => _speedUp());
       onKey('<C-S-+>', () => _speedUp());
+      onKey('<C-a>', () => showScreen(Screen.audio_menu));
+      onKey('<C-c>', () => showScreen(Screen.credits));
+      onKey('<C-d>', () => _toggleDebug());
+      onKey('<C-g>', () => showScreen(Screen.game));
+      onKey('<C-h>', () => showScreen(Screen.hiscore));
+      onKey('<C-l>', () => showScreen(Screen.loading));
+      onKey('<C-m>', () => soundboard.toggleMute());
+      onKey('<C-p>', () => showScreen(Screen.help));
+      onKey('<C-t>', () => showScreen(Screen.title));
+      onKey('<C-v>', () => showScreen(Screen.video_menu));
     }
   }
 

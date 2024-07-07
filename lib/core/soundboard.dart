@@ -26,11 +26,10 @@ enum Sound {
   laser_shot,
   level_complete,
   multi_ball,
+  plasma,
   slow_down,
   wall_hit,
 }
-
-String sound_extension = '.ogg';
 
 final soundboard = Soundboard();
 

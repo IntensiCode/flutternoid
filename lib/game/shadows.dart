@@ -1,9 +1,15 @@
 import 'dart:ui';
 
 import 'package:flame/components.dart';
-import 'package:flutternoid/game/game_context.dart';
+
+import 'ball.dart';
+import 'game_context.dart';
 
 class Shadows extends Component {
+  final Iterable<Ball> Function() balls;
+
+  Shadows(this.balls);
+
   late final double _shadow_offset;
 
   final _render_pos = Vector2.zero();
@@ -15,7 +21,6 @@ class Shadows extends Component {
   void render(Canvas canvas) {
     super.render(canvas);
 
-    final bricks = level.sprites;
     for (final row in level.brick_rows) {
       for (final brick in row) {
         if (brick == null) continue;
@@ -30,7 +35,7 @@ class Shadows extends Component {
       }
     }
 
-    for (final ball in balls) {
+    for (final ball in balls()) {
       _render_pos.setFrom(ball.position);
       _render_pos.x += _shadow_offset;
       _render_pos.y += _shadow_offset;
