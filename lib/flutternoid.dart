@@ -10,6 +10,7 @@ import 'core/common.dart';
 import 'core/messaging.dart';
 import 'core/screens.dart';
 import 'core/soundboard.dart';
+import 'game/visual_configuration.dart';
 import 'input/shortcuts.dart';
 import 'main_controller.dart';
 import 'util/fonts.dart';
@@ -76,7 +77,7 @@ class Flutternoid extends Forge2DGame<MainController>
   }
 
   _toggleDebug() {
-    debug = !debug;
+    visual.debug = !visual.debug;
     return KeyEventResult.handled;
   }
 

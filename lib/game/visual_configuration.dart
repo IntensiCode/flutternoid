@@ -1,4 +1,5 @@
 import 'package:flame/components.dart';
+import 'package:flutternoid/core/common.dart' as common;
 import 'package:flutternoid/core/storage.dart';
 import 'package:flutternoid/game/game_object.dart';
 
@@ -15,6 +16,13 @@ class VisualConfiguration extends Component with HasGameData {
 
   set pixelate(bool value) {
     _pixelate = value;
+    save('visual', this);
+  }
+
+  bool get debug => common.debug;
+
+  set debug(bool value) {
+    common.debug = value;
     save('visual', this);
   }
 
@@ -49,8 +57,13 @@ class VisualConfiguration extends Component with HasGameData {
   // HasGameData
 
   @override
-  void load_state(Map<String, dynamic> data) => _pixelate = data['pixelate'] ?? _pixelate;
+  void load_state(Map<String, dynamic> data) {
+    _pixelate = data['pixelate'] ?? _pixelate;
+    debug = data['debug'] ?? debug;
+  }
 
   @override
-  GameData save_state(Map<String, dynamic> data) => data..['pixelate'] = _pixelate;
+  GameData save_state(Map<String, dynamic> data) => data
+    ..['pixelate'] = _pixelate
+    ..['debug'] = debug;
 }
