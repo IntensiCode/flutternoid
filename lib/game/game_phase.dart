@@ -1,5 +1,6 @@
 enum GamePhase {
-  doh_intro,
+  round_intro,
+  next_round,
   game_on,
   game_paused,
   game_over,

@@ -21,6 +21,7 @@ import 'flash_text.dart';
 import 'game_frame.dart';
 import 'game_messages.dart';
 import 'game_phase.dart';
+import 'game_state.dart';
 import 'hiscore.dart';
 import 'laser_weapon.dart';
 import 'level.dart';
@@ -37,6 +38,7 @@ class GameScreen extends PositionComponent
 
   final Keys keys;
 
+  final state = GameState();
   final level = Level();
   final flash_text = FlashText();
   final power_ups = PowerUps();
@@ -46,7 +48,7 @@ class GameScreen extends PositionComponent
 
   late final player = Player(laser, () => children.whereType<Ball>());
 
-  GamePhase _phase = GamePhase.doh_intro;
+  GamePhase _phase = GamePhase.game_over;
 
   GamePhase get phase => _phase;
 
@@ -71,6 +73,7 @@ class GameScreen extends PositionComponent
   @override
   onLoad() async {
     position.setFrom(visual.game_position);
+    await add(state);
     await add(visual);
     await add(hiscore);
     await add(BackgroundScreen());
@@ -84,11 +87,7 @@ class GameScreen extends PositionComponent
     await add(GameFrame());
     await add(slow_down_area);
     await add(plasma_blasts);
-  }
 
-  @override
-  void onMount() {
-    super.onMount();
     onMessage<PlayerReady>((it) => add(Ball()));
     onMessage<MultiBall>((_) => _split_ball());
 
@@ -101,6 +100,7 @@ class GameScreen extends PositionComponent
       onKey('6', () => sendMessage(SpawnExtra(ExtraId.multi_ball)));
       onKey('7', () => sendMessage(SpawnExtra(ExtraId.extra_life)));
       onKey('b', () => add(Ball()));
+      onKey('c', () => sendMessage(LevelComplete()));
       onKey('r', () {
         removeAll(children.whereType<Ball>());
         add(Ball());
@@ -111,7 +111,7 @@ class GameScreen extends PositionComponent
 
   @override
   void updateTree(double dt) {
-    if (phase != GamePhase.game_on || !isVisible) return;
+    if (!isVisible) return;
     super.updateTree(dt);
   }
 

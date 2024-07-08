@@ -41,7 +41,7 @@ mixin Messaging on Component {
     if (listener == null || listener.isEmpty) {
       logWarn('no listener for ${message.runtimeType} in $listeners');
     } else {
-      logVerbose('sending ${message.runtimeType} to ${listener.length} listeners');
+      logInfo('sending ${message.runtimeType} to ${listener.length} listeners');
       listener.forEach((it) => it(message));
     }
   }

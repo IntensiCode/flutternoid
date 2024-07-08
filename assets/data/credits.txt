@@ -1,6 +1,7 @@
 Graphics:
 Game graphics by @Davitmasia: kronbits.itch.io/matriax-free-assets
-Title screen background by Jones / Imagine / Taito
+Title screen background by Jones [Imagine / Taito]
+Scoreboard logo by Mark Jones [Imagine / Taito]
 
 Shaders:
 Wave by scarletshark: shadertoy.com/view/ltXczj

@@ -7,10 +7,14 @@ import 'package:flame_forge2d/flame_forge2d.dart';
 
 import '../core/common.dart';
 import '../core/functions.dart';
-import 'soundboard.dart';
+import '../util/auto_dispose.dart';
+import '../util/on_message.dart';
 import 'ball.dart';
 import 'game_context.dart';
+import 'game_messages.dart';
+import 'game_phase.dart';
 import 'player.dart';
+import 'soundboard.dart';
 
 enum EnemyState {
   spawned,
@@ -18,7 +22,7 @@ enum EnemyState {
   exploding,
 }
 
-abstract class Enemy extends BodyComponent with ContactCallbacks {
+abstract class Enemy extends BodyComponent with AutoDispose, ContactCallbacks {
   Enemy({required this.radius, this.hit_points = 5}) {
     priority = 5;
   }
@@ -105,11 +109,13 @@ abstract class Enemy extends BodyComponent with ContactCallbacks {
   onLoad() async {
     super.onLoad();
     explosion = await sheetIWH('game_explosion.png', 32, 32);
+    onMessage<LevelComplete>((_) => removeFromParent());
   }
 
   @override
   void update(double dt) {
     if (renderBody != debug) renderBody = debug;
+    if (phase != GamePhase.game_on) return;
     super.update(dt);
     switch (state) {
       case EnemyState.spawned:

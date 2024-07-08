@@ -79,12 +79,12 @@ class SlowDownArea extends BodyComponent with AutoDispose, GameObject, ContactCa
   onLoad() async {
     super.onLoad();
     shader = (await FragmentProgram.fromAsset('assets/shaders/wave.frag')).fragmentShader();
-  }
-
-  @override
-  void onMount() {
-    super.onMount();
     onMessage<SlowDown>((_) => _slow_down_time = configuration.slow_down_time);
+    onMessage<LevelComplete>((_) {
+      _slow_down_time = 0.0;
+      _shade_fade = 0;
+      _shade_anim = 0;
+    });
   }
 
   @override

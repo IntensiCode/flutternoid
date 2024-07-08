@@ -11,6 +11,10 @@ class Expander with Message {}
 
 class Disruptor with Message {}
 
+class GameComplete with Message {}
+
+class GameOver with Message {}
+
 class SlowDown with Message {}
 
 class MultiBall with Message {}
@@ -18,6 +22,10 @@ class MultiBall with Message {}
 class ExtraLife with Message {}
 
 class LevelComplete with Message {}
+
+class LevelReady with Message {}
+
+class LoadLevel with Message {}
 
 class GamePhaseUpdate with Message {
   final GamePhase phase;

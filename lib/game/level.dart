@@ -1,9 +1,11 @@
 import 'dart:math';
 
 import 'package:collection/collection.dart';
+import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
 import 'package:flame/sprite.dart';
+import 'package:flame/src/game/flame_game.dart';
 import 'package:flame_tiled/flame_tiled.dart';
 import 'package:kart/kart.dart';
 
@@ -11,11 +13,15 @@ import '../core/common.dart';
 import '../core/functions.dart';
 import '../core/messaging.dart';
 import '../core/random.dart';
+import '../util/auto_dispose.dart';
+import '../util/delayed.dart';
 import '../util/extensions.dart';
+import '../util/on_message.dart';
 import '../util/tiled_extensions.dart';
 import 'brick.dart';
 import 'extra_id.dart';
 import 'game_context.dart';
+import 'game_messages.dart';
 import 'game_object.dart';
 import 'wall.dart';
 
@@ -28,16 +34,16 @@ enum LevelState {
   defeated,
 }
 
-class Level extends PositionComponent with GameObject, HasPaint {
+class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
   late final SpriteSheet sprites;
 
   final brick_rows = <Row>[];
   final enemies = ['globolus', 'crystal', 'globolus', 'crystal'];
   final max_concurrent_enemies = 2;
 
-  int level_number_starting_at_1 = 1;
+  int get level_number_starting_at_1 => this.game.state.level_number_starting_at_1;
 
-  var state = LevelState.appearing;
+  var state = LevelState.waiting;
   double state_progress = 0.0;
 
   Iterable<Brick> get bricks sync* {
@@ -62,18 +68,47 @@ class Level extends PositionComponent with GameObject, HasPaint {
 
   @override
   onLoad() async {
+    super.onLoad();
+
     priority = 2;
 
     paint = pixelPaint();
 
     sprites = await sheetIWH('game_blocks.png', visual.brick_width, visual.brick_height, spacing: 1);
 
+    onMessage<LevelComplete>((_) => _on_level_complete());
+    onMessage<LoadLevel>((_) => _load_level());
+  }
+
+  void _on_level_complete() {
+    state_progress = 0;
+    state = LevelState.waiting;
+    opacity = 0.0;
+  }
+
+  void _load_level() async {
+    logInfo('load level $level_number_starting_at_1');
+
+    state_progress = 0;
+    state = LevelState.waiting;
+    opacity = 0.0;
+
+    removeAll(children);
+
     final which = level_number_starting_at_1.toString().padLeft(2, '0');
-    final level_data = await TiledComponent.load(
-      'level$which.tmx',
-      Vector2(12.0, 6.0),
-      layerPaintFactory: (it) => pixelPaint(),
-    );
+    final TiledComponent<FlameGame<World>> level_data;
+
+    try {
+      level_data = await TiledComponent.load(
+        'level$which.tmx',
+        Vector2(12.0, 6.0),
+        layerPaintFactory: (it) => pixelPaint(),
+      );
+    } catch (e) {
+      logError('failed to load level $which: $e');
+      sendMessage(GameComplete());
+      return;
+    }
 
     brick_rows.clear();
 
@@ -93,7 +128,7 @@ class Level extends PositionComponent with GameObject, HasPaint {
         bricks.add(brick);
 
         if (brick == null) continue;
-        add(brick);
+        await add(brick);
 
         final extra = extra_rows?.getOrNull(y)?.getOrNull(x);
         if (extra == null) continue;
@@ -106,9 +141,14 @@ class Level extends PositionComponent with GameObject, HasPaint {
 
     const outset = 2.0;
     final size = visual.game_pixels;
-    add(Wall(start: Vector2(-outset, -outset), end: Vector2(size.x + outset, -outset)));
-    add(Wall(start: Vector2(-outset, -outset), end: Vector2(-outset, size.y * 2)));
-    add(Wall(start: Vector2(size.x + outset, -outset), end: Vector2(size.x + outset, size.y * 2)));
+    await add(Wall(start: Vector2(-outset, -outset), end: Vector2(size.x + outset, -outset)));
+    await add(Wall(start: Vector2(-outset, -outset), end: Vector2(-outset, size.y * 2)));
+    await add(Wall(start: Vector2(size.x + outset, -outset), end: Vector2(size.x + outset, size.y * 2)));
+
+    add(Delayed(1.0, () {
+      state = LevelState.appearing;
+      state_progress = 0;
+    }));
   }
 
   @override
@@ -131,6 +171,7 @@ class Level extends PositionComponent with GameObject, HasPaint {
     if (state_progress >= 1.0) {
       state_progress = 1.0;
       state = LevelState.active;
+      sendMessage(LevelReady());
     }
   }
 
@@ -152,12 +193,15 @@ class Level extends PositionComponent with GameObject, HasPaint {
         if (brick.gone) row[x] = null;
       }
     }
+    if (brick_rows.every((it) => it.every((it) => it == null || it.indestructible))) {
+      logInfo('LEVEL COMPLETE???');
+      sendMessage(LevelComplete());
+    }
   }
 
   @override
   void render(Canvas canvas) {
     super.render(canvas);
-
     switch (state) {
       case LevelState.waiting:
         break;

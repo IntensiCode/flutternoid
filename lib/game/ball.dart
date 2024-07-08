@@ -180,13 +180,10 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
       body.linearVelocity.setFrom(_spawn_velocity!);
       state = origin.state;
     }
-  }
 
-  @override
-  void onMount() {
-    super.onMount();
     onMessage<Disruptor>((it) => disruptor = configuration.disruptor_time);
     onMessage<TriggerPlasmaBlasts>((_) => _on_trigger_plasma_blast());
+    onMessage<LevelComplete>((_) => removeFromParent());
   }
 
   void _on_trigger_plasma_blast() {

@@ -77,7 +77,9 @@ class MainController extends Forge2DWorld implements ScreenNavigation {
       });
     } else {
       final it = added(_makeScreen(screen));
-      if (!skip_fade_in) it.mounted.then((_) => it.fadeInDeep());
+      if (screen != Screen.game && !skip_fade_in) {
+        it.mounted.then((_) => it.fadeInDeep());
+      }
     }
   }
 

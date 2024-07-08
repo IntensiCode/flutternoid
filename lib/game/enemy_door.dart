@@ -1,11 +1,14 @@
-import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
 import 'package:flame/sprite.dart';
+import 'package:flutternoid/game/game_phase.dart';
 
 import '../core/functions.dart';
+import '../util/auto_dispose.dart';
+import '../util/on_message.dart';
 import 'enemy.dart';
 import 'game_context.dart';
+import 'game_messages.dart';
 
 enum DoorState {
   idle,
@@ -14,7 +17,7 @@ enum DoorState {
   closing,
 }
 
-class EnemyDoor extends PositionComponent with HasPaint {
+class EnemyDoor extends PositionComponent with AutoDispose, HasPaint {
   late final SpriteSheet door;
 
   DoorState state = DoorState.idle;
@@ -33,10 +36,16 @@ class EnemyDoor extends PositionComponent with HasPaint {
   // Component
 
   @override
-  onLoad() async => door = await sheetIWH('game_door.png', 27, 8);
+  onLoad() async {
+    door = await sheetIWH('game_door.png', 27, 8);
+    onMessage<LevelComplete>((_) {
+      if (state != DoorState.idle) state = DoorState.closing;
+    });
+  }
 
   @override
   void update(double dt) {
+    if (phase != GamePhase.game_on) return;
     super.update(dt);
     switch (state) {
       case DoorState.idle:

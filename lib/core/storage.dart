@@ -6,6 +6,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 final _prefs = SharedPreferences.getInstance();
 
+Future clear(String name) async {
+  final preferences = await _prefs;
+  preferences.remove(name);
+  logVerbose('cleared $name data');
+}
+
 Future save(String name, HasGameData it) async => save_data(name, it.save_state({}));
 
 Future load(String name, HasGameData it) async {

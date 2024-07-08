@@ -98,8 +98,11 @@ mixin GameScriptFunctions on Component, AutoDispose {
     return added(SubtitlesComponent(text, autoClearSeconds, image));
   }
 
-  SpriteComponent spriteSXY(Sprite sprite, double x, double y, [Anchor anchor = Anchor.center]) =>
-      added(SpriteComponent(sprite: sprite, position: Vector2(x, y), anchor: anchor));
+  Future<SpriteComponent> spriteSXY(Sprite sprite, double x, double y, [Anchor anchor = Anchor.center]) async {
+    final it = SpriteComponent(sprite: sprite, position: Vector2(x, y), anchor: anchor);
+    await add(it);
+    return it;
+  }
 
   SpriteComponent spriteIXY(Image image, double x, double y, [Anchor anchor = Anchor.center]) =>
       added(SpriteComponent(sprite: Sprite(image), position: Vector2(x, y), anchor: anchor));

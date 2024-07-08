@@ -1,4 +1,3 @@
-import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
 
@@ -12,6 +11,7 @@ import 'enemy_door.dart';
 import 'enemy_globolus.dart';
 import 'game_context.dart';
 import 'game_messages.dart';
+import 'game_phase.dart';
 
 class EnemySpawner extends PositionComponent with AutoDispose, HasPaint {
   late final EnemyDoor left_door;
@@ -31,16 +31,13 @@ class EnemySpawner extends PositionComponent with AutoDispose, HasPaint {
     position.setFrom(visual.background_offset);
     await add(left_door = EnemyDoor()..position.setValues(22, 0));
     await add(right_door = EnemyDoor()..position.setValues(151, 0));
-  }
-
-  @override
-  void onMount() {
-    super.onMount();
     onMessage<PlayerReady>((_) => pending_enemies.addAll(level.enemies));
+    onMessage<LevelComplete>((_) => pending_enemies.clear());
   }
 
   @override
   void update(double dt) {
+    if (phase != GamePhase.game_on) return;
     super.update(dt);
     if (pending_enemies.isEmpty) return;
     if (active_enemies.length >= level.max_concurrent_enemies) return;

@@ -9,19 +9,19 @@ import 'package:flame_forge2d/flame_forge2d.dart';
 import '../core/common.dart';
 import '../core/functions.dart';
 import '../core/messaging.dart';
-import 'soundboard.dart';
 import '../input/keys.dart';
 import '../util/auto_dispose.dart';
 import '../util/extensions.dart';
 import '../util/on_message.dart';
 import 'ball.dart';
-import 'extra_id.dart';
 import 'game_configuration.dart';
 import 'game_context.dart';
 import 'game_messages.dart';
 import 'game_object.dart';
+import 'game_phase.dart';
 import 'laser_weapon.dart';
 import 'slow_down_area.dart';
+import 'soundboard.dart';
 import 'wall.dart';
 
 enum PlayerState {
@@ -68,10 +68,11 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
   final _deceleration = 700.0;
   final _max_speed = 210.0;
 
-  var state = PlayerState.entering;
+  final double bat_height = 6;
+
+  var state = PlayerState.gone;
   var state_progress = 0.0;
   var mode = PlayerMode.normal1;
-  double bat_height = 6;
 
   double expanded = 0;
   int expand_level = 0;
@@ -85,6 +86,31 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
   bool _was_holding_fire = false;
 
   double x_speed = 0.0;
+
+  void _reset(PlayerState state) {
+    this.state = state;
+    state_progress = 0.0;
+    expanded = 0;
+    expand_level = 0;
+
+    mode = PlayerMode.normal1;
+    mode_time = 0.0;
+    _mode_change = 0.0;
+    _mode_origin = mode;
+
+    _update_pos.setZero();
+    _laser_pos.setZero();
+    _force_hold.clear();
+    _plasma_cool_down = 0.0;
+    _thrust_left = 0.0;
+    _thrust_right = 0.0;
+    _was_holding_fire = false;
+
+    body.linearVelocity.setZero();
+    body.setTransform(Vector2(visual.game_pixels.x / 2, visual.game_pixels.y * 0.9), 0);
+
+    _update_body_fixture();
+  }
 
   bool get in_normal_mode => mode.index % 3 == 0;
 
@@ -159,6 +185,7 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
     _keys = keys;
     sprites = await sheetIWH('game_bat.png', 36, 8);
     explosion = await sheetIWH('game_explosion.png', 32, 32);
+
     final thrust = await sheetIWH('game_thrust.png', 7, 6);
     add(left_thruster = SpriteAnimationComponent(
       animation: thrust.createAnimation(row: 0, stepTime: 0.05),
@@ -169,12 +196,19 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
       animation: thrust.createAnimation(row: 1, stepTime: 0.05),
       position: Vector2(bat_width / 2, -bat_height / 2 - 1),
     ));
-    left_thruster.opacity = _thrust_left > 0 ? 1.0 : 0.0;
-    right_thruster.opacity = _thrust_right > 0 ? 1.0 : 0.0;
+
+    left_thruster.opacity = 0;
+    right_thruster.opacity = 0;
 
     body.setTransform(Vector2(visual.game_pixels.x / 2, visual.game_pixels.y * 0.9), 0);
     _update_body_fixture();
     renderBody = debug;
+
+    onMessage<Catcher>((_) => _on_catcher());
+    onMessage<Expander>((_) => _on_expander());
+    onMessage<Laser>((_) => _on_laser());
+    onMessage<LevelComplete>((_) => state = PlayerState.leaving);
+    onMessage<LevelReady>((_) => _reset(PlayerState.entering));
   }
 
   _update_body_fixture() {
@@ -199,14 +233,6 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
         Vector2(-bat_width / 2 + bat_edge - 3, bat_height / 2),
         Vector2(-bat_width / 2 - 1, -1),
       ];
-
-  @override
-  void onMount() {
-    super.onMount();
-    onMessage<Catcher>((_) => _on_catcher());
-    onMessage<Expander>((_) => _on_expander());
-    onMessage<Laser>((_) => _on_laser());
-  }
 
   void _on_catcher() {
     mode_time = configuration.mode_time;
@@ -250,8 +276,14 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
     _update_body_fixture();
   }
 
+  PlayerState? seen;
+
   @override
   void update(double dt) {
+    if (seen != state) {
+      logInfo('player state: $seen => $state');
+      seen = state;
+    }
     if (debug != renderBody) renderBody = debug;
     super.update(dt);
     switch (state) {
@@ -336,6 +368,7 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
     if (state_progress > 1.0) {
       paint.color = white;
       state_progress = 1.0;
+      if (phase != GamePhase.game_on) return;
       state = PlayerState.playing;
       sendMessage(PlayerReady());
     }

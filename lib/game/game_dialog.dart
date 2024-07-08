@@ -21,7 +21,7 @@ class GameDialog extends PositionComponent with AutoDispose, GameScriptFunctions
   onLoad() async {
     super.onLoad();
 
-    position.setValues(80, 68);
+    position.setValues(16 + 20, 68);
     size.setValues(160, 64);
 
     final bg = await image('button_plain.png');
