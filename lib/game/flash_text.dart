@@ -1,19 +1,19 @@
 import 'dart:ui';
 
-import 'package:flutternoid/game/game_context.dart';
-import 'package:flutternoid/util/bitmap_font.dart';
-import 'package:flutternoid/util/extensions.dart';
 import 'package:kart/kart.dart';
 
 import '../core/common.dart';
+import '../util/bitmap_font.dart';
+import '../util/extensions.dart';
 import '../util/fonts.dart';
+import 'game_context.dart';
 import 'game_object.dart';
 import 'game_particles.dart';
 
 class FlashText extends GameParticles<_FlashLetter> {
   FlashText() : super(_FlashLetter.new);
 
-  static const _font_scale = 0.25;
+  static const _font_scale = 0.5;
 
   late final BitmapFont _font;
 
@@ -23,7 +23,7 @@ class FlashText extends GameParticles<_FlashLetter> {
   void spawn(String text, [double? x, double? y]) {
     x ??= player.position.x;
     y ??= player.position.y;
-    if (_queue.isEmpty) _trigger(text, x, y);
+    if (_queue.isEmpty) _trigger(text, x, y + player.bat_height);
     _queue.add((text, x, y));
     _dequeue = 0.25;
   }
@@ -50,7 +50,7 @@ class FlashText extends GameParticles<_FlashLetter> {
   onLoad() {
     priority = 5;
 
-    _font = smallFont;
+    _font = tinyFont;
   }
 
   @override
