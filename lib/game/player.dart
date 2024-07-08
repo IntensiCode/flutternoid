@@ -9,7 +9,7 @@ import 'package:flame_forge2d/flame_forge2d.dart';
 import '../core/common.dart';
 import '../core/functions.dart';
 import '../core/messaging.dart';
-import '../core/soundboard.dart';
+import 'soundboard.dart';
 import '../input/keys.dart';
 import '../util/auto_dispose.dart';
 import '../util/extensions.dart';

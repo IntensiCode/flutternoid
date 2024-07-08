@@ -10,7 +10,7 @@ import 'package:signals_core/signals_core.dart';
 
 import '../core/common.dart';
 import '../core/functions.dart';
-import '../core/soundboard.dart';
+import '../game/soundboard.dart';
 import '../util/auto_dispose.dart';
 import '../util/bitmap_button.dart';
 import '../util/bitmap_font.dart';

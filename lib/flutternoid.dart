@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart' hide Image, Shortcuts;
 import 'core/common.dart';
 import 'core/messaging.dart';
 import 'core/screens.dart';
-import 'core/soundboard.dart';
+import 'game/soundboard.dart';
 import 'game/visual_configuration.dart';
 import 'input/shortcuts.dart';
 import 'main_controller.dart';

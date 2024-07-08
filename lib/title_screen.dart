@@ -1,5 +1,5 @@
 import 'package:flame/components.dart';
-import 'package:flutternoid/core/soundboard.dart';
+import 'package:flutternoid/game/soundboard.dart';
 
 import 'core/common.dart';
 import 'core/screens.dart';
@@ -17,8 +17,6 @@ class TitleScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
 
   @override
   onLoad() async {
-    soundboard.preload();
-
     await spriteXY('title.png', xCenter, yCenter);
 
     final delta = seen ? 0.0 : 0.2;

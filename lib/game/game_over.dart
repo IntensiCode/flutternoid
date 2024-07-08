@@ -1,5 +1,5 @@
 import 'package:flame/components.dart';
-import 'package:flutternoid/core/soundboard.dart';
+import 'package:flutternoid/game/soundboard.dart';
 
 import '../components/soft_keys.dart';
 import '../core/common.dart';

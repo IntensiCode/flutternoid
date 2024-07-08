@@ -4,7 +4,7 @@ import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 
 import '../core/common.dart';
-import '../core/soundboard.dart';
+import 'soundboard.dart';
 import 'brick_id.dart';
 import 'extra_id.dart';
 

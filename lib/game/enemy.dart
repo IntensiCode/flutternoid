@@ -7,7 +7,7 @@ import 'package:flame_forge2d/flame_forge2d.dart';
 
 import '../core/common.dart';
 import '../core/functions.dart';
-import '../core/soundboard.dart';
+import 'soundboard.dart';
 import 'ball.dart';
 import 'game_context.dart';
 import 'player.dart';

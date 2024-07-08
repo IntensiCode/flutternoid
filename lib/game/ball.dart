@@ -11,7 +11,7 @@ import '../core/common.dart';
 import '../core/functions.dart';
 import '../core/messaging.dart';
 import '../core/random.dart';
-import '../core/soundboard.dart';
+import 'soundboard.dart';
 import '../util/auto_dispose.dart';
 import '../util/extensions.dart';
 import '../util/on_message.dart';

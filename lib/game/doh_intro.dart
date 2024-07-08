@@ -2,7 +2,7 @@ import 'package:flame/components.dart';
 
 import '../core/common.dart';
 import '../core/functions.dart';
-import '../core/soundboard.dart';
+import 'soundboard.dart';
 import '../scripting/game_script.dart';
 import '../util/fade_parent.dart';
 

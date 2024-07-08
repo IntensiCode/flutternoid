@@ -17,6 +17,7 @@ Future save_data(String name, GameData data) async {
   try {
     final preferences = await _prefs;
     preferences.setString(name, jsonEncode(data));
+    logInfo('saved $name data');
   } catch (it, trace) {
     logError('Failed to store $name: $it', trace);
   }

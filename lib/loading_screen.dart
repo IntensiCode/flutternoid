@@ -1,7 +1,7 @@
 import 'core/common.dart';
 import 'core/functions.dart';
 import 'core/screens.dart';
-import 'core/soundboard.dart';
+import 'game/soundboard.dart';
 import 'input/shortcuts.dart';
 import 'scripting/game_script.dart';
 import 'util/fonts.dart';
@@ -37,15 +37,6 @@ class LoadingScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
   void _leave() {
     showScreen(Screen.title, skip_fade_out: true);
     removeFromParent();
-  }
-
-  @override
-  void onMount() {
-    super.onMount();
-    soundboard.music = 0.5;
-    soundboard.muted = false;
-    soundboard.sound = 0.75;
-    soundboard.voice = 0.75;
   }
 
   @override
