@@ -34,7 +34,7 @@ class TitleScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
   void onMount() {
     super.onMount();
     if (!seen) soundboard.play_one_shot_sample('arkanoid.ogg');
-    if (!seen) backgroundMusic('theme.mp3', keep_running: true);
+    if (!seen) soundboard.play_music('music/theme.mp3');
     onKey('<Space>', () => _showScreen(Screen.game));
     seen = true;
   }
@@ -42,7 +42,7 @@ class TitleScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
   // Implementation
 
   void _showScreen(Screen it) {
-    if (it == Screen.game) fadeBackgroundMusic(duration: 0.2);
+    // TODO if (it == Screen.game) fade to in-game music
     showScreen(it);
   }
 

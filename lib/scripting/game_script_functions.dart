@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:ui';
 
-import 'package:audioplayers/audioplayers.dart';
 import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
@@ -76,7 +75,7 @@ mixin GameScriptFunctions on Component, AutoDispose {
       added(await sprite_comp(filename, position: position, anchor: anchor));
 
   SubtitlesComponent subtitles(String text, double? autoClearSeconds, {String? image, String? audio}) {
-    if (audio != null) soundboard.playAudio(audio);
+    if (audio != null) soundboard.play_one_shot_sample(audio);
     return added(SubtitlesComponent(text, autoClearSeconds, image));
   }
 
@@ -159,34 +158,6 @@ mixin GameScriptFunctions on Component, AutoDispose {
     return it;
   }
 
-  void fadeBackgroundMusic({double duration = 3}) {
-    dispose('afterTenSeconds');
-    dispose('backgroundMusic_fadeIn');
-    soundboard.bgm?.fadeOut(0.0, seconds: duration).onDone(() => dispose('backgroundMusic'));
-  }
-
-  void backgroundMusic(String filename, {bool keep_running = false}) async {
-    filename = "music/$filename";
-
-    dispose('afterTenSeconds');
-    dispose('backgroundMusic');
-    dispose('backgroundMusic_fadeIn');
-
-    final AudioPlayer player = await soundboard.playBackgroundMusic(filename);
-    // if (dev) {
-    //   // only in dev: stop music after 10 seconds, to avoid playing multiple times on hot restart.
-    //   final afterTenSeconds = player.onPositionChanged.where((it) => it.inSeconds >= 10).take(1);
-    //   autoDispose('afterTenSeconds', afterTenSeconds.listen((it) => player.stop()));
-    // }
-    if (!keep_running) autoDispose('backgroundMusic', () => player.stop());
-    autoDispose('backgroundMusic_fadeIn', player.fadeIn(musicVolume, seconds: 3));
-  }
-
-  Future playAudio(String filename) async {
-    final player = await soundboard.playAudio(filename);
-    autoDispose('playAudio', () => player.stop());
-  }
-
   void scaleTo(Component it, double scale, double duration, Curve? curve) {
     it.add(
       ScaleEffect.to(
@@ -214,21 +185,5 @@ mixin GameScriptFunctions on Component, AutoDispose {
     );
     add(it);
     return it;
-  }
-}
-
-extension on AudioPlayer {
-  StreamSubscription fadeOut(double targetVolume, {double seconds = 3}) {
-    final steps = (seconds * 10).toInt();
-    return Stream.periodic(const Duration(milliseconds: 100), (it) => targetVolume * it / steps)
-        .take(steps)
-        .listen((it) => setVolume(it), onDone: () => setVolume(1 - targetVolume));
-  }
-
-  StreamSubscription fadeIn(double targetVolume, {double seconds = 3}) {
-    final steps = (seconds * 10).toInt();
-    return Stream.periodic(const Duration(milliseconds: 100), (it) => targetVolume * it / steps)
-        .take(steps)
-        .listen((it) => setVolume(it), onDone: () => setVolume(targetVolume));
   }
 }

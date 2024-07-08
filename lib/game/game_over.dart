@@ -1,4 +1,5 @@
 import 'package:flame/components.dart';
+import 'package:flutternoid/core/soundboard.dart';
 
 import '../components/soft_keys.dart';
 import '../core/common.dart';
@@ -18,7 +19,7 @@ class GameOver extends GameScriptComponent {
     fontSelect(tinyFont, scale: 2);
     add(RectangleComponent(size: gameSize, paint: pixelPaint()..color = shadow));
     at(0.0, () => textXY('Game Over', xCenter, yCenter, anchor: Anchor.center)..priority = 10);
-    at(0.0, () => playAudio('sound/doh_laugh.ogg'));
+    at(0.0, () => soundboard.play_one_shot_sample('doh_laugh.ogg'));
     softkeys('Exit', null, _handle, shortcuts: false);
   }
 

@@ -11,5 +11,6 @@ Plasma globe by nimitz: shadertoy.com/view/XsjXRm
 Title theme by suno.com: suno.com/song/b716462a-987b-4de2-8ce5-314ebc7c0a4a
 
 Flame Game Engine: flame-engine.org
+Audio Streaming Engine: github.com/reki2000/mp-audio-stream
 
 Code by The.French.DJ / IntensiCode: github.com/IntensiCode

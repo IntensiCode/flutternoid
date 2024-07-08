@@ -105,7 +105,7 @@ class AudioMenu extends GameScriptComponent {
   void _make_sound() {
     logInfo('make sound');
     final which = Sound.values.random().name;
-    soundboard.playAudio('sound/$which.ogg', volume: soundboard.sound);
+    soundboard.play_one_shot_sample('sound/$which');
   }
 
   void _stop_music() async {

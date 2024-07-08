@@ -35,6 +35,18 @@ final soundboard = Soundboard();
 
 double get musicVolume => soundboard.music * soundboard.master;
 
+class PlayState {
+  PlayState(this.sample, {this.loop = false, this.paused = false, required this.volume});
+
+  final Float32List sample;
+  int sample_pos = 0;
+
+  bool loop = false;
+  bool paused = false;
+
+  double volume;
+}
+
 class Soundboard extends Component {
   double master = 0.75;
   double _music = 0.5;
@@ -45,7 +57,8 @@ class Soundboard extends Component {
 
   set music(double value) {
     _music = value;
-    bgm?.setVolume(_music * master);
+    active_music?.volume = value;
+    active_music?.paused = value == 0;
   }
 
   bool muted = false;
@@ -66,18 +79,11 @@ class Soundboard extends Component {
   AudioStream? _stream;
 
   // sample states for mixing into [_stream]
-  final _play_state = <(Float32List, int)>[];
+  final _play_state = <PlayState>[];
 
   int? note_index;
 
-  toggleMute() {
-    muted = !muted;
-    if (muted) {
-      if (bgm?.state == PlayerState.playing) bgm?.pause();
-    } else {
-      if (bgm?.state == PlayerState.paused) bgm?.resume();
-    }
-  }
+  toggleMute() => muted = !muted;
 
   clear(String filename) => FlameAudio.audioCache.clear(filename);
 
@@ -87,12 +93,7 @@ class Soundboard extends Component {
     if (_samples.isEmpty) {
       for (final it in Sound.values) {
         logInfo('preload sample $it');
-        final bytes = await game.assets.readBinaryFile('audio/sound/${it.name}.raw');
-        final data = Float32List(bytes.length);
-        for (int i = 0; i < bytes.length; i++) {
-          data[i] = ((bytes[i] / 128) - 1) * 0.8;
-        }
-        _samples[it] = data;
+        _samples[it] = await _make_sample('audio/sound/${it.name}.raw');
       }
     }
 
@@ -113,6 +114,15 @@ class Soundboard extends Component {
     _blocked = false;
   }
 
+  Future<Float32List> _make_sample(String fileName) async {
+    final bytes = await game.assets.readBinaryFile(fileName);
+    final data = Float32List(bytes.length);
+    for (int i = 0; i < bytes.length; i++) {
+      data[i] = ((bytes[i] / 128) - 1);
+    }
+    return data;
+  }
+
   trigger(Sound sound) => _triggered.add(sound);
 
   int last = 0;
@@ -121,7 +131,7 @@ class Soundboard extends Component {
     if (muted) return;
     if (_blocked) return;
 
-    if (dev) preload();
+    if (dev) await preload();
 
     if (sound == Sound.wall_hit) {
       final index = note_index ?? 0;
@@ -132,52 +142,35 @@ class Soundboard extends Component {
           _notes.add(wave);
         }
       }
-      _play_state.add((_notes[note_index ?? 0], 0));
+      _play_state.add(PlayState(_notes[index], volume: volume ?? this.sound));
     } else {
-      _play_state.add((_samples[sound]!, 0));
+      _play_state.add(PlayState(_samples[sound]!, volume: volume ?? this.sound));
     }
   }
 
   play_one_shot_sample(String filename, {double? volume}) async {
-
-    if (dev) preload();
+    if (dev) await preload();
 
     if (filename.endsWith('.ogg')) filename = filename.replaceFirst('.ogg', '');
-    final bytes = await game.assets.readBinaryFile('audio/$filename.raw');
-    final data = Float32List(bytes.length);
-    for (int i = 0; i < bytes.length; i++) {
-      data[i] = ((bytes[i] / 128) - 1) * 0.8;
-    }
-    _play_state.add((data, 0));
+
+    logInfo('play sample $filename');
+    final data = await _make_sample('audio/$filename.raw');
+    _play_state.add(PlayState(data, volume: volume ?? this.voice));
   }
 
-  Future<AudioPlayer> playAudio(String filename, {double? volume}) async {
-    volume ??= sound;
-    final player = await FlameAudio.play(filename, volume: volume * master);
-    if (muted) player.setVolume(0);
-    return player;
-  }
+  PlayState? active_music;
 
-  AudioPlayer? bgm;
+  play_music(String filename, {double? volume}) async {
+    _play_state.remove(active_music);
+    active_music = null;
 
-  Future<AudioPlayer> playBackgroundMusic(String filename) async {
-    bgm?.stop();
+    if (dev) await preload();
 
-    final volume = music * master;
-    if (dev) {
-      bgm = await FlameAudio.playLongAudio(filename, volume: volume);
+    filename = filename.replaceFirst('.ogg', '').replaceFirst('.mp3', '');
 
-      // only in dev: stop music after 10 seconds, to avoid playing multiple times on hot restart.
-      // final afterTenSeconds = player.onPositionChanged.where((it) => it.inSeconds >= 10).take(1);
-      // autoDispose('afterTenSeconds', afterTenSeconds.listen((it) => player.stop()));
-    } else {
-      await FlameAudio.bgm.play(filename, volume: volume);
-      bgm = FlameAudio.bgm.audioPlayer;
-    }
-
-    if (muted) bgm!.pause();
-
-    return bgm!;
+    logInfo('loop sample $filename');
+    final data = await _make_sample('audio/$filename.raw');
+    _play_state.add(active_music = PlayState(data, loop: true, volume: volume ?? this.music));
   }
 
   // Component
@@ -207,7 +200,7 @@ class Soundboard extends Component {
               ? i / fadeSamples
               : 1.0;
 
-      return amp * volume * 0.8;
+      return amp * volume;
     });
 
     return Float32List.fromList(sineWave);
@@ -222,39 +215,47 @@ class Soundboard extends Component {
 
     Timer.periodic(const Duration(milliseconds: 1000 ~/ hz), (t) {
       mixed.fillRange(0, mixed.length, 0);
-      if (_play_state.isEmpty) {
+      if (_play_state.isEmpty || muted) {
         _stream!.push(mixed);
         return;
       }
 
-      double? compress;
-      for (final (idx, it) in _play_state.indexed) {
-        final data = it.$1;
-        final start = it.$2;
+      for (final it in _play_state) {
+        if (it.paused) continue;
+
+        final data = it.sample;
+        final start = it.sample_pos;
         final end = min(start + step, data.length);
         for (int i = start; i < end; i++) {
           final at = i - start;
-          mixed[at] += data[i];
-          if (mixed[at].abs() > 1) {
-            compress = max(compress ?? 0, mixed[at].abs());
-          }
+          mixed[at] += data[i] * it.volume;
         }
         if (end == data.length) {
-          _play_state[idx] = (it.$1, -1);
+          it.sample_pos = it.loop ? 0 : -1;
         } else {
-          _play_state[idx] = (it.$1, it.$2 + step);
+          it.sample_pos = end;
         }
       }
+
+      double? compress;
+      for (int i = 0; i < mixed.length; i++) {
+        final v = mixed[i];
+        // limit before compression
+        if (v.abs() > 1) compress = max(compress ?? 0, v.abs());
+        // apply master for absolute limit
+        mixed[i] = v * master;
+      }
+
       if (compress != null) {
         logInfo('need compression: $compress');
         for (int i = 0; i < mixed.length; i++) {
           mixed[i] /= compress;
         }
       }
+
       _stream!.push(mixed);
-      _play_state.removeWhere((e) => e.$2 == -1);
+
+      _play_state.removeWhere((e) => e.sample_pos == -1);
     });
   }
 }
-
-// TODO Replace AudioPlayer result type with AudioHandle to change stop into fade out etc
