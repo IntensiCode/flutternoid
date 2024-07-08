@@ -1,51 +1,29 @@
 import 'package:flame/components.dart';
 
-import '../core/common.dart';
 import '../input/keys.dart';
 import 'flash_text.dart';
-import 'game_controller.dart';
+import 'game_configuration.dart';
+import 'game_screen.dart';
 import 'level.dart';
 import 'player.dart';
 import 'visual_configuration.dart';
 
-// just to make jumping here easier
-class GameContext {}
-
-enum GamePhase {
-  start_game,
-  playing_level,
-  game_paused,
-  game_over,
-  confirm_exit,
-  ;
-
-  static GamePhase from(final String name) => GamePhase.values.firstWhere((e) => e.name == name);
-}
-
-class LevelComplete with Message {}
-
-class GamePhaseUpdate with Message {
-  final GamePhase phase;
-
-  GamePhaseUpdate(this.phase);
-}
-
-class TriggerPlasmaBlast with Message {
-  final Vector2 center;
-
-  TriggerPlasmaBlast(this.center);
-}
-
 extension ComponentExtensions on Component {
-  GameController get model => findParent<GameController>(includeSelf: true)!;
+  GameScreen get game => findParent<GameScreen>(includeSelf: true)!;
+
+  GameConfiguration get configuration => GameConfiguration.instance;
 
   VisualConfiguration get visual => VisualConfiguration.instance;
 
-  Keys get keys => model.keys;
+  Keys get keys => game.keys;
 
-  Level get level => model.level;
+  Level get level => game.level;
 
-  FlashText get flash_text => model.flash_text;
+  FlashText get flash_text => game.flash_text;
 
-  Player get player => model.player;
+  Player get player => game.player;
+
+  Iterable<T> top_level_children<T extends Component>() => game.children.whereType<T>();
+
+  spawn_top_level<T extends Component>(T component) => game.add(component);
 }

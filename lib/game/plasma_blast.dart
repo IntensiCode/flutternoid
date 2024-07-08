@@ -1,13 +1,14 @@
 import 'dart:ui';
 
 import 'package:flame/components.dart';
-import 'package:flutternoid/util/auto_dispose.dart';
-import 'package:flutternoid/util/on_message.dart';
 
 import '../core/common.dart';
 import '../core/random.dart';
+import '../util/auto_dispose.dart';
 import '../util/extensions.dart';
+import '../util/on_message.dart';
 import 'game_context.dart';
+import 'game_messages.dart';
 
 class PlasmaBlasts extends Component with AutoDispose, HasPaint {
   late final FragmentShader _shader;

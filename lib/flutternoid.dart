@@ -23,6 +23,7 @@ class Flutternoid extends Forge2DGame<MainController>
 
   Flutternoid() : super(world: MainController()) {
     game = this;
+    world = this.world;
     images = this.images;
     if (kIsWeb) logAnsi = false;
   }

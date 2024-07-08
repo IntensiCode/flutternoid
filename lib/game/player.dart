@@ -18,12 +18,11 @@ import 'ball.dart';
 import 'extra_id.dart';
 import 'game_configuration.dart';
 import 'game_context.dart';
+import 'game_messages.dart';
 import 'game_object.dart';
 import 'laser_weapon.dart';
 import 'slow_down_area.dart';
 import 'wall.dart';
-
-class PlayerReady with Message {}
 
 enum PlayerState {
   gone,

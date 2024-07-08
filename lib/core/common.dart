@@ -2,6 +2,7 @@ import 'package:flame/cache.dart';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flame/particles.dart';
+import 'package:flame_forge2d/flame_forge2d.dart' hide Particle;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -21,6 +22,7 @@ const lineHeight = 24 * fontScale;
 const debugHeight = 12 * fontScale;
 
 late Game game;
+late Forge2DWorld world;
 late Images images;
 
 // to avoid importing materials elsewhere (which causes clashes sometimes), some color values right here:

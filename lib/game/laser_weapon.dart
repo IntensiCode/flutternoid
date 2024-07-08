@@ -5,6 +5,7 @@ import '../core/common.dart';
 import '../core/functions.dart';
 import '../util/auto_dispose.dart';
 import '../util/extensions.dart';
+import 'enemy.dart';
 import 'game_context.dart';
 
 class LaserWeapon extends Component with AutoDispose {
@@ -76,11 +77,29 @@ class LaserShot extends SpriteAnimationComponent {
       position.y -= 500 * dt;
       if (position.y < -height) {
         _recycle(this);
-      } else {
-        final brick = level.find_lowest_brick(position, height);
-        brick?.hit();
-        expire_at = brick?.topLeft.y;
-        if (brick != null) animationTicker!.paused = true;
+      } else if (expire_at == null) {
+        _find_target();
+      }
+    }
+  }
+
+  void _find_target() {
+    final brick = level.find_lowest_brick(position, height);
+    if (brick != null) {
+      brick.hit();
+      expire_at = brick.topLeft.y;
+      animationTicker!.paused = true;
+      return;
+    }
+
+    final enemies = top_level_children<Enemy>();
+    for (final it in enemies.where((it) => it.state != EnemyState.exploding)) {
+      if (position.distanceTo(it.position) < 8) {
+        it.hit();
+        expire_at = position.y;
+        animationTicker!.paused = true;
+        it.body.applyLinearImpulse(Vector2(0, -2500));
+        return;
       }
     }
   }

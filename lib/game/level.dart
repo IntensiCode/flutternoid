@@ -32,6 +32,8 @@ class Level extends PositionComponent with GameObject, HasPaint {
   late final SpriteSheet sprites;
 
   final brick_rows = <Row>[];
+  final enemies = ['globolus', 'crystal', 'globolus', 'crystal'];
+  final max_concurrent_enemies = 2;
 
   int level_number_starting_at_1 = 1;
 

@@ -6,24 +6,22 @@ import 'package:flame/components.dart' hide World;
 import 'package:flame/sprite.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutternoid/core/messaging.dart';
 
 import '../core/common.dart';
 import '../core/functions.dart';
+import '../core/messaging.dart';
 import '../core/random.dart';
 import '../core/soundboard.dart';
 import '../util/auto_dispose.dart';
 import '../util/extensions.dart';
 import '../util/on_message.dart';
 import 'brick.dart';
-import 'extra_id.dart';
 import 'game_configuration.dart';
 import 'game_context.dart';
+import 'game_messages.dart';
 import 'game_object.dart';
 import 'player.dart';
 import 'wall.dart';
-
-class TriggerPlasmaBlasts with Message {}
 
 enum BallState {
   gone,

@@ -10,6 +10,7 @@ import 'extra_id.dart';
 
 export 'brick_id.dart';
 
+// not in game_messages.dart because it references Brick
 class SpawnExtraFromBrick with Message {
   final Brick brick;
 

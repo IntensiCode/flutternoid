@@ -12,7 +12,7 @@ class BackgroundScreen extends PositionComponent with AutoDispose, GameScriptFun
   onLoad() async {
     position.setFrom(visual.background_offset);
 
-    final level = model.level.level_number_starting_at_1;
+    final level = game.level.level_number_starting_at_1;
     const number_of_backgrounds = 8;
     final background_index = (level - 1) % number_of_backgrounds;
 

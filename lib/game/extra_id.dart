@@ -1,13 +1,3 @@
-import '../core/common.dart';
-
-class Laser with Message {}
-class Catcher with Message {}
-class Expander with Message {}
-class Disruptor with Message {}
-class SlowDown with Message {}
-class MultiBall with Message {}
-class ExtraLife with Message {}
-
 // order matches row in sprite sheet
 enum ExtraId {
   laser(0.05),

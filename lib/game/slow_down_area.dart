@@ -2,14 +2,14 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flame_forge2d/flame_forge2d.dart';
-import 'package:flutternoid/game/game_context.dart';
-import 'package:flutternoid/util/auto_dispose.dart';
-import 'package:flutternoid/util/on_message.dart';
 
 import '../core/common.dart';
+import '../util/auto_dispose.dart';
+import '../util/on_message.dart';
 import 'ball.dart';
-import 'extra_id.dart';
 import 'game_configuration.dart';
+import 'game_context.dart';
+import 'game_messages.dart';
 import 'game_object.dart';
 
 class SlowDownArea extends BodyComponent with AutoDispose, GameObject, ContactCallbacks {

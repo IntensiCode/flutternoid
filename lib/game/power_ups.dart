@@ -13,6 +13,7 @@ import '../util/on_message.dart';
 import 'brick.dart';
 import 'extra_id.dart';
 import 'game_context.dart';
+import 'game_messages.dart';
 import 'player.dart';
 
 class SpawnExtra with Message {

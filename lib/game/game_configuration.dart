@@ -1,6 +1,10 @@
-final configuration = GameConfiguration();
+final configuration = GameConfiguration.instance;
 
 class GameConfiguration {
+  static final instance = GameConfiguration._();
+
+  GameConfiguration._();
+
   double mode_time = 30;
   double expand_time = 60;
   double slow_down_time = 60;
