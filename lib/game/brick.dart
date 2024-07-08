@@ -33,6 +33,14 @@ class Brick extends BodyComponent {
     paint.style = PaintingStyle.stroke;
   }
 
+  double sweep_delay = 0.0;
+  double sweep_progress = 0.0;
+
+  void sweep(double delay) {
+    sweep_delay = delay;
+    sweep_progress = 0.0;
+  }
+
   int _hits = 0;
 
   int get hits => _hits;
@@ -46,6 +54,9 @@ class Brick extends BodyComponent {
 
     if (indestructible) return;
     hit_highlight += 0.1;
+
+    sweep_progress = 0.0;
+    sweep_delay = 0.0;
 
     if (_hits < id.strength) {
       if (full_force) {

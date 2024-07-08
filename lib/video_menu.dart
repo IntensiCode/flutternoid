@@ -27,11 +27,11 @@ class VideoMenu extends GameScriptComponent with HasAutoDisposeShortcuts, Keyboa
   onLoad() async {
     add(await sprite_comp('background.png'));
 
-    fontSelect(tinyFont, scale: 1);
+    fontSelect(tiny_font, scale: 1);
     textXY('Video Mode', xCenter, 16, scale: 2);
 
     final buttonSheet = await sheetI('button_option.png', 1, 2);
-    final menu = added(BasicMenu<OptionsMenuEntry>(buttonSheet, tinyFont, _selected));
+    final menu = added(BasicMenu<OptionsMenuEntry>(buttonSheet, tiny_font, _selected));
     pixelate = menu.addEntry(OptionsMenuEntry.pixelate, 'Pixelate FX', anchor: Anchor.centerLeft);
 
     pixelate.checked = visual.pixelate;

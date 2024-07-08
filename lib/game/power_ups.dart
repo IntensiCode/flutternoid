@@ -39,6 +39,7 @@ class PowerUps extends Component with AutoDispose {
     onMessage<SpawnExtra>((it) => _spawn(it.id));
     onMessage<SpawnExtraFromBrick>((it) => _spawn_power_up(it.brick));
     onMessage<LevelComplete>((_) => removeAll(children));
+    onMessage<RoundIntro>((_) => removeAll(children));
   }
 
   // Implementation

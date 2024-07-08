@@ -170,7 +170,7 @@ mixin GameScriptFunctions on Component, AutoDispose {
     final it = BitmapButton(
       bgNinePatch: button,
       text: text,
-      font: menuFont,
+      font: menu_font,
       fontScale: 0.25,
       position: pos,
       anchor: anchor,

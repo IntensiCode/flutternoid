@@ -13,12 +13,12 @@ class Credits extends GameScriptComponent {
   void onLoad() async {
     add(await sprite_comp('background.png'));
 
-    fontSelect(tinyFont, scale: 1);
+    fontSelect(tiny_font, scale: 1);
     textXY('Credits', xCenter, 08, scale: 2, anchor: Anchor.topCenter);
 
     add(FlowText(
       text: await game.assets.readFile('data/credits.txt'),
-      font: tinyFont,
+      font: tiny_font,
       position: Vector2(0, 24) ,
       size: Vector2(320, 160 - 24),
     ));

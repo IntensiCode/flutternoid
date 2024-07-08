@@ -27,6 +27,9 @@ class LevelReady with Message {}
 
 class LoadLevel with Message {}
 
+// alias for GamePhaseUpdate(round_intro)
+class RoundIntro with Message {}
+
 class GamePhaseUpdate with Message {
   final GamePhase phase;
 

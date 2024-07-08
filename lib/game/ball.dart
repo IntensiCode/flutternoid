@@ -184,6 +184,7 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
     onMessage<Disruptor>((it) => disruptor = configuration.disruptor_time);
     onMessage<TriggerPlasmaBlasts>((_) => _on_trigger_plasma_blast());
     onMessage<LevelComplete>((_) => removeFromParent());
+    onMessage<RoundIntro>((_) => removeFromParent());
   }
 
   void _on_trigger_plasma_blast() {

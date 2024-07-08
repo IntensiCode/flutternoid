@@ -19,7 +19,7 @@ class SlowDownArea extends BodyComponent with AutoDispose, GameObject, ContactCa
   late double slow_down_top;
   late double slow_down_bottom;
 
-  double _slow_down_time = 0.0;
+  double slow_down_time = 0.0;
   double _shade_anim = 0.0;
   double _shade_fade = 0.0;
 
@@ -61,7 +61,7 @@ class SlowDownArea extends BodyComponent with AutoDispose, GameObject, ContactCa
   void beginContact(Object other, Contact contact) {
     super.beginContact(other, contact);
     if (other is Ball) {
-      _speeds[other] = _slow_down_time;
+      _speeds[other] = slow_down_time;
     } else {
       contact.isEnabled = false;
     }
@@ -79,12 +79,15 @@ class SlowDownArea extends BodyComponent with AutoDispose, GameObject, ContactCa
   onLoad() async {
     super.onLoad();
     shader = (await FragmentProgram.fromAsset('assets/shaders/wave.frag')).fragmentShader();
-    onMessage<SlowDown>((_) => _slow_down_time = configuration.slow_down_time);
-    onMessage<LevelComplete>((_) {
-      _slow_down_time = 0.0;
-      _shade_fade = 0;
-      _shade_anim = 0;
-    });
+    onMessage<SlowDown>((_) => slow_down_time = configuration.slow_down_time);
+    onMessage<LevelComplete>((_) => _reset());
+    onMessage<RoundIntro>((_) => _reset());
+  }
+
+  void _reset() {
+    slow_down_time = 0.0;
+    _shade_fade = 0;
+    _shade_anim = 0;
   }
 
   @override
@@ -92,14 +95,14 @@ class SlowDownArea extends BodyComponent with AutoDispose, GameObject, ContactCa
     if (debug != renderBody) renderBody = debug;
     super.update(dt);
 
-    if (_slow_down_time > 0.0) {
-      _slow_down_time -= min(dt, _slow_down_time);
+    if (slow_down_time > 0.0) {
+      slow_down_time -= min(dt, slow_down_time);
       _shade_anim += dt;
     }
 
     for (final ball in _speeds.keys) {
       final target_speed = _target_speed(ball);
-      if (_slow_down_time > 0.0) {
+      if (slow_down_time > 0.0) {
         if (ball.vy > 0 && ball.speed > target_speed) {
           ball.velocity.normalize();
           ball.velocity.scale(target_speed);
@@ -114,7 +117,7 @@ class SlowDownArea extends BodyComponent with AutoDispose, GameObject, ContactCa
       }
     }
 
-    if (_slow_down_time > 0.0) {
+    if (slow_down_time > 0.0) {
       if (_shade_fade < 1.0) {
         _shade_fade += dt;
         _shade_fade = min(_shade_fade, 1.0);

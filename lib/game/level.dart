@@ -1,13 +1,13 @@
 import 'dart:math';
 
-import 'package:collection/collection.dart';
+import 'package:collection/collection.dart' hide IterableExtension;
 import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
 import 'package:flame/sprite.dart';
-import 'package:flame/src/game/flame_game.dart';
 import 'package:flame_tiled/flame_tiled.dart';
 import 'package:kart/kart.dart';
+import 'package:supercharged/supercharged.dart';
 
 import '../core/common.dart';
 import '../core/functions.dart';
@@ -34,6 +34,12 @@ enum LevelState {
   defeated,
 }
 
+enum SpawnMode {
+  none,
+  once_per_color,
+  random,
+}
+
 class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
   late final SpriteSheet sprites;
 
@@ -41,10 +47,14 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
   final enemies = ['globolus', 'crystal', 'globolus', 'crystal'];
   final max_concurrent_enemies = 2;
 
-  int get level_number_starting_at_1 => this.game.state.level_number_starting_at_1;
+  int get level_number_starting_at_1 => this.model.state.level_number_starting_at_1;
 
   var state = LevelState.waiting;
   double state_progress = 0.0;
+
+  SpawnMode spawn_mode = SpawnMode.none;
+
+  late int level_time;
 
   Iterable<Brick> get bricks sync* {
     for (final row in brick_rows) {
@@ -76,8 +86,26 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
 
     sprites = await sheetIWH('game_blocks.png', visual.brick_width, visual.brick_height, spacing: 1);
 
+    onMessage<RoundIntro>((_) => _on_level_complete());
     onMessage<LevelComplete>((_) => _on_level_complete());
     onMessage<LoadLevel>((_) => _load_level());
+    onMessage<PlayerReady>((_) => _sweep_level());
+  }
+
+  void _sweep_level({bool extras_only = false}) {
+    double sweep_delay = 0;
+    for (final (idx, row) in brick_rows.indexed) {
+      sweep_delay = idx * 0.04;
+      for (final brick in row) {
+        if (brick == null || brick.indestructible) continue;
+        if (brick.extra_id?.isNotEmpty == true) {
+          brick.sweep(sweep_delay + 0.5);
+        } else if (!extras_only) {
+          brick.sweep(sweep_delay);
+        }
+        sweep_delay += 0.01;
+      }
+    }
   }
 
   void _on_level_complete() {
@@ -96,7 +124,7 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
     removeAll(children);
 
     final which = level_number_starting_at_1.toString().padLeft(2, '0');
-    final TiledComponent<FlameGame<World>> level_data;
+    final TiledComponent level_data;
 
     try {
       level_data = await TiledComponent.load(
@@ -110,6 +138,8 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
       return;
     }
 
+    level_time = level_data.intOptProp('level_time_seconds') ?? 30;
+
     brick_rows.clear();
 
     final width = visual.brick_width.toDouble();
@@ -118,6 +148,8 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
     final block_rows = (level_data.getLayer('blocks') as TileLayer).data!.slices(15);
     final extra_rows = (level_data.getLayer('extras') as TileLayer?)?.data?.slices(15);
     final map = level_data.tileMap.map;
+
+    spawn_mode = level_data.spawn_mode;
 
     for (var (y, row) in block_rows.indexed) {
       final bricks = <Brick?>[];
@@ -134,9 +166,35 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
         if (extra == null) continue;
 
         final id = map.tileByGid(extra)!.localId;
+        if (id == -1) continue;
         brick.extra_id = {ExtraId.values[id ~/ 9]};
+
+        logInfo('brick $brick has extra id $id ($extra)');
       }
       brick_rows.add(bricks);
+    }
+
+    logInfo('spawn mode: $spawn_mode');
+
+    final Map<BrickId, List<Brick>> by_color = bricks.groupBy((it) => it.id);
+    if (spawn_mode == SpawnMode.once_per_color) {
+      logInfo('once per color extra');
+      for (final it in by_color.entries) {
+        final which = it.value.whereNot((it) => it.extra_id != null).toList().random(rng);
+        which.extra_id = it.key.extras;
+        logInfo('brick $which has extra id ${it.key.extras}');
+      }
+    }
+    if (spawn_mode == SpawnMode.random) {
+      logInfo('random extras');
+      final percentage = level_data.intOptProp('percentage') ?? 10;
+      for (final it in by_color.entries) {
+        final selection = [...it.value];
+        selection.shuffle(rng);
+        final count = selection.length * percentage ~/ 100;
+        selection.take(count).forEach((it) => it.extra_id = it.id.extras);
+        logInfo('bricks $selection have extra id ${it.key.extras}');
+      }
     }
 
     const outset = 2.0;
@@ -145,7 +203,7 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
     await add(Wall(start: Vector2(-outset, -outset), end: Vector2(-outset, size.y * 2)));
     await add(Wall(start: Vector2(size.x + outset, -outset), end: Vector2(size.x + outset, size.y * 2)));
 
-    add(Delayed(1.0, () {
+    add(Delayed(0.5, () {
       state = LevelState.appearing;
       state_progress = 0;
     }));
@@ -167,7 +225,7 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
   }
 
   void _on_appearing(double dt) {
-    state_progress += dt;
+    state_progress += dt * 2;
     if (state_progress >= 1.0) {
       state_progress = 1.0;
       state = LevelState.active;
@@ -175,20 +233,34 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
     }
   }
 
+  double _re_sweep = 5.0;
+
   void _on_active(double dt) {
+    _re_sweep -= min(_re_sweep, dt);
+    if (_re_sweep <= 0) {
+      _re_sweep = 5.0;
+      _sweep_level(extras_only: true);
+    }
     for (var row in brick_rows) {
       for (var x = 0; x < row.length; x++) {
         final brick = row[x];
         if (brick == null) continue;
+        if (brick.sweep_delay > 0) {
+          brick.sweep_delay -= min(brick.sweep_delay, dt);
+          if (brick.sweep_delay <= 0) brick.sweep_progress = 1.0;
+        }
+        if (brick.sweep_progress > 0) {
+          brick.sweep_progress -= min(brick.sweep_progress, dt * 4);
+        }
         if (brick.hit_highlight > 0) brick.hit_highlight -= min(brick.hit_highlight, dt);
         if (brick.destroyed && brick.destroy_progress < 1.0) brick.destroy_progress += dt * 4;
         if (brick.destroyed && !brick.spawned) {
-          final probability = 0.05 + (brick.id.index ~/ 5) * 0.1;
-          if (brick.extra_id != null || rng.nextDouble() < probability) {
+          if (brick.extra_id != null) {
+            logInfo('brick destroyed - extra id: ${brick.extra_id}');
             sendMessage(SpawnExtraFromBrick(brick));
           }
           brick.spawned = true;
-          brick.removeFromParent();
+          brick.removeFromParent(); // this is the body only - we still render the destroy animation below
         }
         if (brick.gone) row[x] = null;
       }
@@ -233,7 +305,7 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
       for (var brick in row) {
         if (brick == null) continue;
 
-        final Sprite sprite;
+        Sprite sprite;
         if (brick.destroyed) {
           final progress = brick.destroy_progress.clamp(0.0, 1.0);
           final frame = (sprites.columns - 1) * progress;
@@ -244,6 +316,13 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
           sprite = sprites.getSpriteById(brick.id.index);
         }
         sprite.render(canvas, position: brick.topLeft, overridePaint: paint);
+
+        if (brick.sweep_progress > 0) {
+          final progress = 1 - brick.sweep_progress.clamp(0.0, 1.0);
+          final frame = (sprites.columns - 1) * progress;
+          sprite = sprites.getSpriteById(25 + frame.round().clamp(0, sprites.columns));
+          sprite.render(canvas, position: brick.topLeft, overridePaint: paint);
+        }
       }
     }
   }
@@ -255,4 +334,13 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
 
   @override
   GameData save_state(GameData data) => data;
+}
+
+extension on TiledComponent {
+  SpawnMode get spawn_mode {
+    var spawn_mode = stringOptProp('spawn_mode');
+    final extra_rows = getLayer('extras') as TileLayer?;
+    spawn_mode ??= extra_rows != null ? 'none' : 'once_per_color';
+    return SpawnMode.values.firstWhere((it) => it.name == spawn_mode);
+  }
 }

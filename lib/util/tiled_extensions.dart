@@ -34,6 +34,8 @@ extension RenderableTiledMapExtensions on RenderableTiledMap {
 
   int intProperty(String name) => map.intProperty(name);
 
+  String? stringOptProp(String name) => map.stringOptProp(name);
+
   String stringProperty(String name) => map.stringProperty(name);
 }
 
@@ -48,6 +50,8 @@ extension TiledComponentExtensions on TiledComponent {
   int? intOptProp(String name) => tileMap.intOptProp(name);
 
   int intProperty(String name) => tileMap.intProperty(name);
+
+  String? stringOptProp(String name) => tileMap.stringOptProp(name);
 
   String stringProperty(String name) => tileMap.stringProperty(name);
 
@@ -73,6 +77,8 @@ extension TiledMapExtensions on TiledMap {
   }
 
   int intProperty(String name) => properties.firstWhere((it) => it.name == name).value as int;
+
+  String? stringOptProp(String name) => properties.firstWhereOrNull((it) => it.name == name)?.value.toString();
 
   String stringProperty(String name) => properties.firstWhere((it) => it.name == name).value.toString();
 }

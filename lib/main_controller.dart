@@ -52,14 +52,17 @@ class MainController extends Forge2DWorld implements ScreenNavigation {
   }
 
   Screen? _triggered;
+  StackTrace? _previous;
 
   @override
   void showScreen(Screen screen, {bool skip_fade_out = false, bool skip_fade_in = false}) {
     if (_triggered == screen) {
       logError('duplicate trigger ignored: $screen', StackTrace.current);
+      logError('previous trigger', _previous);
       return;
     }
     _triggered = screen;
+    _previous = StackTrace.current;
 
     logInfo('show $screen');
     logVerbose('screen stack: $_stack');

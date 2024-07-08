@@ -9,7 +9,7 @@ import 'util/fonts.dart';
 class LoadingScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
   @override
   void onLoad() async {
-    at(0.0, () => fontSelect(menuFont, scale: 0.25));
+    at(0.0, () => fontSelect(menu_font, scale: 0.25));
 
     at(0.0, () => fadeIn(textXY('An', xCenter, yCenter - lineHeight), duration: 1));
     at(1.0, () => fadeIn(textXY('IntensiCode', xCenter, yCenter), duration: 1));
@@ -17,7 +17,7 @@ class LoadingScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
     at(2.0, () => fadeOutAll(1.0));
 
     final psychocell = await image('psychocell.png');
-    at(1.0, () => fontSelect(menuFont, scale: 0.5));
+    at(1.0, () => fontSelect(menu_font, scale: 0.5));
     at(1.0, () => fadeIn(textXY('A', xCenter, yCenter - lineHeight * 2), duration: 1));
     at(1.0, () => fadeIn(textXY('Psychocell', xCenter, yCenter), duration: 1));
     at(0.0, () => soundboard.play_one_shot_sample('psychocell.ogg'));

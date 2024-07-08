@@ -2,22 +2,22 @@ import 'package:flutternoid/game/extra_id.dart';
 
 enum BrickId {
   // top
-  blue1('B1', strength: 1, score_per_hit: 1, extras: basic),
-  green1('G1', strength: 1, score_per_hit: 1, extras: basic),
-  orange1('O1', strength: 1, score_per_hit: 1, extras: basic),
-  gray1('G1', strength: 1, score_per_hit: 1, extras: basic),
-  red1('R1', strength: 1, score_per_hit: 1, extras: basic),
+  blue1('B1', strength: 1, score_per_hit: 1, extras: {ExtraId.disruptor}),
+  green1('G1', strength: 1, score_per_hit: 1, extras: {ExtraId.catcher}),
+  orange1('O1', strength: 1, score_per_hit: 1, extras: {ExtraId.slow_down}),
+  gray1('G1', strength: 1, score_per_hit: 1, extras: {}),
+  red1('R1', strength: 1, score_per_hit: 1, extras: {ExtraId.multi_ball}),
   // middle
-  blue2('B2', strength: 1, score_per_hit: 2, extras: most),
-  green2('G2', strength: 1, score_per_hit: 2, extras: most),
-  orange2('O2', strength: 1, score_per_hit: 2, extras: most),
-  gray2('G2', strength: 1, score_per_hit: 2, extras: most),
-  red2('R2', strength: 1, score_per_hit: 2, extras: most),
+  blue2('B2', strength: 1, score_per_hit: 2, extras: {ExtraId.expander}),
+  green2('G2', strength: 1, score_per_hit: 2, extras: {ExtraId.catcher}),
+  orange2('O2', strength: 1, score_per_hit: 2, extras: {ExtraId.slow_down}),
+  gray2('G2', strength: 1, score_per_hit: 2, extras: {}),
+  red2('R2', strength: 1, score_per_hit: 2, extras: {ExtraId.laser}),
   // bottom
-  double('DD', strength: 6, score_per_hit: 6, extras: all),
-  green3('G3', strength: 3, score_per_hit: 3, extras: all),
-  orange3('O3', strength: 3, score_per_hit: 3, extras: all),
-  gray3('G3', strength: 3, score_per_hit: 3, extras: all),
+  double('DD', strength: 6, score_per_hit: 6, extras: {ExtraId.extra_life}),
+  green3('G3', strength: 3, score_per_hit: 3, extras: {ExtraId.catcher}),
+  orange3('O3', strength: 3, score_per_hit: 3, extras: {ExtraId.slow_down}),
+  gray3('G3', strength: 3, score_per_hit: 3, extras: {}),
   massive('MM', strength: 0, score_per_hit: 0, extras: {}),
   ;
 
@@ -25,30 +25,6 @@ enum BrickId {
   final int strength;
   final int score_per_hit;
   final Set<ExtraId> extras;
-
-  static const basic = {
-    ExtraId.catcher,
-    ExtraId.expander,
-    ExtraId.slow_down,
-  };
-
-  static const most = {
-    ExtraId.laser,
-    ExtraId.catcher,
-    ExtraId.expander,
-    ExtraId.slow_down,
-    ExtraId.multi_ball,
-  };
-
-  static const all = {
-    ExtraId.laser,
-    ExtraId.catcher,
-    ExtraId.expander,
-    ExtraId.disruptor,
-    ExtraId.slow_down,
-    ExtraId.multi_ball,
-    ExtraId.extra_life,
-  };
 
   const BrickId(this.id, {required this.strength, required this.score_per_hit, required this.extras});
 

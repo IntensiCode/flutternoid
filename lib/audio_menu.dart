@@ -31,7 +31,7 @@ class AudioMenu extends GameScriptComponent {
   onLoad() async {
     add(await sprite_comp('background.png'));
 
-    fontSelect(tinyFont, scale: 2);
+    fontSelect(tiny_font, scale: 2);
     textXY('Audio Mode', xCenter, 20, scale: 2, anchor: Anchor.topCenter);
 
     final preselected = switch (soundboard.audio_mode) {
@@ -42,7 +42,7 @@ class AudioMenu extends GameScriptComponent {
     };
 
     final buttonSheet = await sheetI('button_menu.png', 1, 2);
-    menu = added(BasicMenu<AudioMenuEntry>(buttonSheet, tinyFont, _selected, spacing: 2)
+    menu = added(BasicMenu<AudioMenuEntry>(buttonSheet, tiny_font, _selected, spacing: 2)
       ..addEntry(AudioMenuEntry.music_and_sound, 'Music & Sound')
       ..addEntry(AudioMenuEntry.music_only, 'Music Only')
       ..addEntry(AudioMenuEntry.sound_only, 'Sound Only')

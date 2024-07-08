@@ -83,8 +83,8 @@ class GameScreen extends PositionComponent
     await add(flash_text);
     await add(power_ups);
     await add(laser);
-    await add(player);
     await add(GameFrame());
+    await add(player);
     await add(slow_down_area);
     await add(plasma_blasts);
 
@@ -101,6 +101,11 @@ class GameScreen extends PositionComponent
       onKey('7', () => sendMessage(SpawnExtra(ExtraId.extra_life)));
       onKey('b', () => add(Ball()));
       onKey('c', () => sendMessage(LevelComplete()));
+      onKey('n', () => sendMessage(LevelComplete()));
+      onKey('p', () {
+        state.level_number_starting_at_1--;
+        phase = GamePhase.enter_round;
+      });
       onKey('r', () {
         removeAll(children.whereType<Ball>());
         add(Ball());

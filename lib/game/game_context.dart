@@ -1,10 +1,10 @@
 import 'package:flame/components.dart';
-import 'package:flutternoid/game/game_controller.dart';
-import 'package:flutternoid/game/game_phase.dart';
 
 import '../input/keys.dart';
 import 'flash_text.dart';
 import 'game_configuration.dart';
+import 'game_controller.dart';
+import 'game_phase.dart';
 import 'game_screen.dart';
 import 'game_state.dart';
 import 'level.dart';
@@ -12,8 +12,8 @@ import 'player.dart';
 import 'visual_configuration.dart';
 
 extension ComponentExtensions on Component {
-  GameScreen get game {
-    final it = findParent<GameScreen>(includeSelf: true) ?? findParent<GameController>(includeSelf: true)?.game;
+  GameScreen get model {
+    final it = findParent<GameScreen>(includeSelf: true) ?? findParent<GameController>(includeSelf: true)?.model;
     if (it != null) return it;
     throw 'no game found in $this';
   }
@@ -22,19 +22,19 @@ extension ComponentExtensions on Component {
 
   VisualConfiguration get visual => VisualConfiguration.instance;
 
-  GamePhase get phase => game.phase;
+  GamePhase get phase => model.phase;
 
-  Keys get keys => game.keys;
+  Keys get keys => model.keys;
 
-  GameState get state => game.state;
+  GameState get state => model.state;
 
-  Level get level => game.level;
+  Level get level => model.level;
 
-  FlashText get flash_text => game.flash_text;
+  FlashText get flash_text => model.flash_text;
 
-  Player get player => game.player;
+  Player get player => model.player;
 
-  Iterable<T> top_level_children<T extends Component>() => game.children.whereType<T>();
+  Iterable<T> top_level_children<T extends Component>() => model.children.whereType<T>();
 
-  spawn_top_level<T extends Component>(T component) => game.add(component);
+  spawn_top_level<T extends Component>(T component) => model.add(component);
 }

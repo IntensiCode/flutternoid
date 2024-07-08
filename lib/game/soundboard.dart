@@ -97,7 +97,7 @@ class Soundboard extends Component with HasGameData {
     active_music?.paused = _music == 0;
   }
 
-  final double _master = 0.75;
+  final double _master = 0.5;
 
   double _music = 0.4;
   double _sound = 0.6;

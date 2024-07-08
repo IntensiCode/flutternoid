@@ -61,7 +61,7 @@ class BitmapButton extends PositionComponent
     this.fontScale = 1,
     Color? tint,
     required this.onTap,
-  })  : font = font ?? tinyFont,
+  })  : font = font ?? tiny_font,
         background = bgNinePatch != null ? NinePatchImage(bgNinePatch, cornerSize: cornerSize) : null {
     if (position != null) this.position.setFrom(position);
     if (tint != null) this.tint(tint);

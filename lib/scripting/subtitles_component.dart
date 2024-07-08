@@ -35,12 +35,12 @@ class SubtitlesComponent extends PositionComponent with HasPaint, AutoDispose, G
     position.y = gameHeight - 8;
     anchor = Anchor.bottomLeft;
 
-    final lineHeight = textFont.lineHeight(_fontScale) * 4 / 3;
-    final lines = textFont.reflow(_text, 176, scale: _fontScale);
-    final w = lines.map((it) => textFont.lineWidth(it)).max();
+    final lineHeight = tiny_font.lineHeight(_fontScale) * 4 / 3;
+    final lines = tiny_font.reflow(_text, 176, scale: _fontScale);
+    final w = lines.map((it) => tiny_font.lineWidth(it)).max();
     final h = lines.length * lineHeight;
     size.x = gameWidth;
-    size.y = h + 16 - (lineHeight - textFont.lineHeight(_fontScale) + 1);
+    size.y = h + 16 - (lineHeight - tiny_font.lineHeight(_fontScale) + 1);
 
     if (portrait != null) {
       _portrait = await sprite_comp(portrait!);
@@ -52,12 +52,12 @@ class SubtitlesComponent extends PositionComponent with HasPaint, AutoDispose, G
 
     final pos = Vector2.zero();
     for (final line in lines) {
-      pos.x = (size.x - textFont.lineWidth(line)) / 2;
+      pos.x = (size.x - tiny_font.lineWidth(line)) / 2;
       pos.y += lineHeight;
       final text = BitmapText(
         text: line,
         position: pos,
-        font: textFont,
+        font: tiny_font,
         scale: _fontScale,
       );
       text.fadeInDeep();

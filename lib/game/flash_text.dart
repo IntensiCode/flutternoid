@@ -50,7 +50,7 @@ class FlashText extends GameParticles<_FlashLetter> {
   onLoad() {
     priority = 5;
 
-    _font = tinyFont;
+    _font = tiny_font;
   }
 
   @override

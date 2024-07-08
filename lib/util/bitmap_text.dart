@@ -18,7 +18,7 @@ class BitmapText extends PositionComponent with HasPaint, HasVisibility {
     double scale = 1,
     Color? tint,
     Anchor anchor = Anchor.topLeft,
-  })  : font = font ?? fancyFont,
+  })  : font = font ?? mini_font,
         fontScale = scale {
     if (tint != null) this.tint(tint);
     this.position.setFrom(position);

@@ -22,7 +22,7 @@ class HiscoreScreen extends GameScriptComponent with HasAutoDisposeShortcuts, Ke
   onLoad() async {
     add(await sprite_comp('background.png'));
 
-    fontSelect(tinyFont, scale: 1);
+    fontSelect(tiny_font, scale: 1);
     textXY('Hiscore', xCenter, 16, scale: 2);
 
     _add('Score', 'Round', 'Name');
@@ -41,7 +41,7 @@ class HiscoreScreen extends GameScriptComponent with HasAutoDisposeShortcuts, Ke
       score,
       level,
       name,
-      tinyFont,
+      tiny_font,
       size: _entry_size,
       position: _position,
     ));

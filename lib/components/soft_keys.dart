@@ -64,7 +64,7 @@ class SoftKeys extends PositionComponent with AutoDispose, KeyboardHandler, HasG
   }) async =>
       SoftKeys(
         image: await images.load('button_plain.png'),
-        font: tinyFont,
+        font: tiny_font,
         left: left,
         right: right,
         on_tap: onTap,
@@ -83,7 +83,7 @@ class SoftKeys extends PositionComponent with AutoDispose, KeyboardHandler, HasG
   }) async =>
       SoftKeys(
         image: await images.load('button_soft.png'),
-        font: font ?? tinyFont,
+        font: font ?? tiny_font,
         font_scale: font_scale,
         left: left,
         right: right,

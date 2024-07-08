@@ -157,7 +157,6 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
         contact.isEnabled = false;
       } else if (in_catcher_mode) {
         contact.isEnabled = false;
-        logInfo('ball caught');
         other.caught();
         if (!_is_catcher) {
           _force_hold[other] = configuration.force_hold_timeout;
@@ -207,8 +206,15 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
     onMessage<Catcher>((_) => _on_catcher());
     onMessage<Expander>((_) => _on_expander());
     onMessage<Laser>((_) => _on_laser());
-    onMessage<LevelComplete>((_) => state = PlayerState.leaving);
+    onMessage<RoundIntro>((_) => _reset(PlayerState.gone));
+    onMessage<LevelComplete>((_) => _on_level_complete());
     onMessage<LevelReady>((_) => _reset(PlayerState.entering));
+  }
+
+  _on_level_complete() {
+    left_thruster.opacity = 0;
+    right_thruster.opacity = 0;
+    state = PlayerState.leaving;
   }
 
   _update_body_fixture() {
@@ -296,6 +302,7 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
       case PlayerState.exploding:
         _on_exploding(dt);
       case PlayerState.playing:
+        if (phase != GamePhase.game_on) return;
         _on_playing_move(dt);
         _on_playing_fire(dt);
         _on_expansion(dt);
@@ -364,11 +371,11 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
   }
 
   void _on_entering(double dt) {
-    state_progress += dt;
+    state_progress += dt * 3;
     if (state_progress > 1.0) {
       paint.color = white;
       state_progress = 1.0;
-      if (phase != GamePhase.game_on) return;
+      // if (phase != GamePhase.game_on) return;
       state = PlayerState.playing;
       sendMessage(PlayerReady());
     }
@@ -379,7 +386,7 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
     if (state_progress < 0.0) {
       paint.color = transparent;
       state_progress = 0.0;
-      state = PlayerState.gone;
+      _reset(PlayerState.gone);
     }
   }
 

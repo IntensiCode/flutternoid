@@ -18,7 +18,7 @@ class WebPlayScreen extends AutoDisposeComponent with HasAutoDisposeShortcuts {
     add(BitmapButton(
       bgNinePatch: button,
       text: 'Start',
-      font: menuFont,
+      font: menu_font,
       fontScale: scale,
       position: Vector2(gameWidth / 2, gameHeight / 2),
       anchor: Anchor.center,
