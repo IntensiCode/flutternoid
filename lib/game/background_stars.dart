@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flame/components.dart';
+import 'package:flutter/foundation.dart';
 
 import '../core/common.dart';
 
@@ -40,7 +41,14 @@ class BackgroundStars extends PositionComponent with HasPaint {
     final shader_paint = pixelPaint();
     shader_paint.shader = shader;
 
-    if (split_mode) {
+    if (!kIsWeb) {
+      if (_snapshot != null) {
+        canvas.drawImage(_snapshot!, Offset.zero, paint);
+      } else {
+        _render(canvas, 0, 319, shader_paint, snapshot: true);
+      }
+      return;
+    } else if (split_mode) {
       _render(canvas, 0, 15, shader_paint);
       _render(canvas, 216, 103, shader_paint);
     } else {
@@ -48,7 +56,9 @@ class BackgroundStars extends PositionComponent with HasPaint {
     }
   }
 
-  void _render(Canvas canvas, double from, double w, Paint shader_paint) {
+  Image? _snapshot;
+
+  void _render(Canvas canvas, double from, double w, Paint shader_paint, {bool snapshot = false}) {
     const h = gameHeight - 1;
 
     final recorder = PictureRecorder();
@@ -57,7 +67,12 @@ class BackgroundStars extends PositionComponent with HasPaint {
     final picture = recorder.endRecording();
     final image = picture.toImageSync(w ~/ 1, h ~/ 1);
     canvas.drawImage(image, Offset(from, 0), paint);
-    image.dispose();
+    if (snapshot) {
+      _snapshot?.dispose();
+      _snapshot = image;
+    } else {
+      image.dispose();
+    }
     picture.dispose();
   }
 }
