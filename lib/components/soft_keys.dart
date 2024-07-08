@@ -20,7 +20,7 @@ extension GameScriptFunctionsExtension on GameScriptFunctions {
     BitmapFont? font,
     double font_scale = 2,
     bool at_top = false,
-    bool insets = true,
+    bool insets = false,
     bool shortcuts = true,
   }) async =>
       added(await SoftKeys.soft(
@@ -32,6 +32,22 @@ extension GameScriptFunctionsExtension on GameScriptFunctions {
         at_top: at_top,
         insets: insets,
         shortcuts: shortcuts,
+      ));
+
+  Future<SoftKeys> softkeys_plain(
+    String? left,
+    String? right,
+    Function(SoftKey) onTap, {
+    BitmapFont? font,
+    double font_scale = 2,
+    bool at_top = false,
+    bool insets = false,
+    bool shortcuts = true,
+  }) async =>
+      added(await SoftKeys.plain(
+        left: left,
+        right: right,
+        onTap: onTap,
       ));
 }
 
@@ -93,7 +109,7 @@ class SoftKeys extends PositionComponent with AutoDispose, KeyboardHandler, HasG
     bool at_top = false,
     bool shortcuts = true,
   }) {
-    insets ??= Vector2(16, 10);
+    insets ??= Vector2(4, 3);
     padding ??= Vector2(8, 6);
 
     final y = at_top ? 0.0 : gameHeight - insets.y;
@@ -145,6 +161,10 @@ class SoftKeyButton extends PositionComponent with TapCallbacks {
 
     final size = use_image_size ? null : _font.textSize(text);
     size?.add(_padding);
+
+    // for nine patch, assume corner size 8 for now:
+    size?.x = (size.x + 7) ~/ 8 * 8;
+    size?.y = (size.y + 6) ~/ 8 * 8;
 
     final bg = _background(_image, size);
     bg.add(BitmapText(

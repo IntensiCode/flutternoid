@@ -18,6 +18,13 @@ class NinePatchComponent extends PositionComponent with HasPaint {
   }) {
     if (position != null) this.position = position;
     this.size = size;
+
+    if (width ~/ cornerSize * cornerSize != width) {
+      throw ArgumentError('must be multiple of $cornerSize: $width');
+    }
+    if (height ~/ cornerSize * cornerSize != height) {
+      throw ArgumentError('must be multiple of $cornerSize: $height');
+    }
   }
 
   @override
