@@ -1,12 +1,16 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flame/components.dart';
 
 import '../core/common.dart';
+import '../core/functions.dart';
 import '../core/screens.dart';
 import '../input/keys.dart';
 import '../input/shortcuts.dart';
 import '../scripting/game_script.dart';
+import '../util/bitmap_button.dart';
+import '../util/fonts.dart';
 import '../util/on_message.dart';
 import 'background_stars.dart';
 import 'confirm_exit.dart';
@@ -22,6 +26,7 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
   final _keys = Keys();
   final _stars = BackgroundStars();
 
+  late final Image _button;
   late final _game = GameScreen(keys: _keys);
 
   Component? _overlay;
@@ -29,6 +34,9 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
   @override
   onLoad() async {
     super.onLoad();
+
+    _button = await image('button_plain.png');
+
     await add(_stars);
     await add(_keys);
     await add(_game);
@@ -54,6 +62,25 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
     _overlay?.removeFromParent();
     _overlay = null;
     _game.phase = GamePhase.game_on;
+    _overlay = Component(children: [
+      BitmapButton(
+        bgNinePatch: _button,
+        text: 'Exit',
+        position: Vector2(0, 32),
+        anchor: Anchor.topLeft,
+        font: tinyFont,
+        onTap: (_) => _on_confirm_exit(),
+      )..angle = -pi / 2,
+      BitmapButton(
+        bgNinePatch: _button,
+        text: 'Pause',
+        position: Vector2(0, gameHeight + 16),
+        anchor: Anchor.bottomLeft,
+        font: tinyFont,
+        onTap: (_) => _on_game_paused(),
+      )..angle = -pi / 2,
+    ]);
+    add(_overlay!);
   }
 
   _on_game_paused() {
