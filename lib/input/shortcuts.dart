@@ -7,8 +7,15 @@ import 'package:flutter/widgets.dart';
 import '../util/auto_dispose.dart';
 
 mixin HasAutoDisposeShortcuts on Component, AutoDispose {
-  void onKey(String pattern, void Function() callback) =>
-      autoDispose('key-$pattern', shortcuts.onKey(pattern, callback));
+  bool get is_active => true;
+
+  void onKey(String pattern, void Function() callback) {
+    autoDispose(
+      'key-$pattern',
+      shortcuts.onKey(pattern, () {
+        if (is_active) callback();
+      }));
+  }
 
   void onKeys(List<String> patterns, void Function() callback) {
     patterns.forEach((it) => onKey(it, callback));
@@ -53,7 +60,7 @@ mixin Shortcuts<T extends World> on HasKeyboardHandlerComponents<T> {
       snoop(pattern);
 
       bool handled = false;
-      final cloned = [...handlers];
+      final cloned = [...handlers]; // clone to avoid concurrent modification from add/remove handlers
       for (final it in cloned) {
         if (it.$1 == pattern) {
           it.$2();
@@ -70,7 +77,7 @@ mixin Shortcuts<T extends World> on HasKeyboardHandlerComponents<T> {
       snoop(pattern);
 
       bool handled = false;
-      final cloned = [...handlers];
+      final cloned = [...handlers]; // clone to avoid concurrent modification from add/remove handlers
       for (final it in cloned) {
         if (it.$1 == pattern) {
           it.$2();
