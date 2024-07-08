@@ -1,5 +1,8 @@
+import 'dart:ui';
+
 import 'package:flame/components.dart';
 
+import '../core/common.dart';
 import '../core/screens.dart';
 import '../input/keys.dart';
 import '../input/shortcuts.dart';
@@ -8,6 +11,7 @@ import '../util/on_message.dart';
 import 'background_stars.dart';
 import 'confirm_exit.dart';
 import 'doh_intro.dart';
+import 'game_context.dart';
 import 'game_messages.dart';
 import 'game_over.dart';
 import 'game_paused.dart';
@@ -107,6 +111,21 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
     final mapping = _on_key[_game.phase];
     for (final key in mapping!.keys) {
       if (_keys.check_and_consume(key)) mapping[key]!();
+    }
+  }
+
+  @override
+  void renderTree(Canvas canvas) {
+    if (visual.pixelate && false) {
+      final recorder = PictureRecorder();
+      super.renderTree(Canvas(recorder));
+      final picture = recorder.endRecording();
+      final image = picture.toImageSync(gameWidth ~/ 1, gameHeight ~/ 1);
+      canvas.drawImage(image, Offset.zero, pixelPaint());
+      image.dispose();
+      picture.dispose();
+    } else {
+      super.renderTree(canvas);
     }
   }
 }
