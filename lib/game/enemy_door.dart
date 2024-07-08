@@ -25,7 +25,6 @@ class EnemyDoor extends PositionComponent with HasPaint {
   double open_progress = 0.0;
 
   release(Enemy enemy) {
-    logInfo('releasing $enemy');
     if (is_blocked) throw 'no no';
     spawn_target = enemy;
     state = DoorState.opening;

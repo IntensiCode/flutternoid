@@ -49,7 +49,7 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
   BallState get state => _state;
 
   set state(BallState value) {
-    logInfo('new ball state: $value');
+    logVerbose('new ball state: $value');
     _state = value;
   }
 

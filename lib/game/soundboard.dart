@@ -66,7 +66,7 @@ class Soundboard extends Component with HasGameData {
     if (_audio_mode == mode) return;
     _audio_mode = mode;
 
-    logInfo('change audio mode: $mode');
+    logVerbose('change audio mode: $mode');
 
     save('soundboard', this);
 
@@ -134,13 +134,13 @@ class Soundboard extends Component with HasGameData {
 
     if (_samples.isEmpty) {
       for (final it in Sound.values) {
-        logInfo('preload sample $it');
+        logVerbose('preload sample $it');
         _samples[it] = await _make_sample('audio/sound/${it.name}.raw');
       }
     }
 
     if (_stream == null) {
-      logInfo('start audio mixing stream');
+      logVerbose('start audio mixing stream');
       _stream = getAudioStream();
       final result = _stream!.init(
         bufferMilliSec: 500,
@@ -148,7 +148,7 @@ class Soundboard extends Component with HasGameData {
         channels: 1,
         sampleRate: 11025,
       );
-      logInfo('audio mixing stream started: $result');
+      logVerbose('audio mixing stream started: $result');
       _stream!.resume();
       _mix_stream();
     }
@@ -191,7 +191,7 @@ class Soundboard extends Component with HasGameData {
   play_one_shot_sample(String filename, {double? volume}) async {
     if (filename.endsWith('.ogg')) filename = filename.replaceFirst('.ogg', '');
 
-    logInfo('play sample $filename');
+    logVerbose('play sample $filename');
     final data = await _make_sample('audio/$filename.raw');
     _play_state.add(PlayState(data, volume: volume ?? _voice));
   }
@@ -204,7 +204,7 @@ class Soundboard extends Component with HasGameData {
 
     filename = filename.replaceFirst('.ogg', '').replaceFirst('.mp3', '');
 
-    logInfo('loop sample $filename');
+    logVerbose('loop sample $filename');
     final data = await _make_sample('audio/$filename.raw');
     _play_state.add(active_music = PlayState(data, loop: true, volume: volume ?? _music));
   }
@@ -230,7 +230,6 @@ class Soundboard extends Component with HasGameData {
 
   @override
   void load_state(Map<String, dynamic> data) {
-    logInfo('load soundboard state $data');
     audio_mode = AudioMode.from_name(data['audio_mode'] ?? audio_mode.name);
   }
 

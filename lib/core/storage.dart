@@ -17,7 +17,7 @@ Future save_data(String name, GameData data) async {
   try {
     final preferences = await _prefs;
     preferences.setString(name, jsonEncode(data));
-    logInfo('saved $name data');
+    logVerbose('saved $name data');
   } catch (it, trace) {
     logError('Failed to store $name: $it', trace);
   }
@@ -27,7 +27,7 @@ Future<GameData?> load_data(String name) async {
   try {
     final preferences = await _prefs;
     if (!preferences.containsKey(name)) {
-      logInfo('no data for $name');
+      logVerbose('no data for $name');
       return null;
     }
 

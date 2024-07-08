@@ -36,10 +36,7 @@ class EnemySpawner extends PositionComponent with AutoDispose, HasPaint {
   @override
   void onMount() {
     super.onMount();
-    onMessage<PlayerReady>((_) {
-      logInfo('player ready - spawning enemies');
-      pending_enemies.addAll(level.enemies);
-    });
+    onMessage<PlayerReady>((_) => pending_enemies.addAll(level.enemies));
   }
 
   @override

@@ -62,8 +62,8 @@ class MainController extends Forge2DWorld implements ScreenNavigation {
     _triggered = screen;
 
     logInfo('show $screen');
-    logInfo('screen stack: $_stack');
-    logInfo('children: ${children.map((it) => it.runtimeType)}');
+    logVerbose('screen stack: $_stack');
+    logVerbose('children: ${children.map((it) => it.runtimeType)}');
 
     if (!skip_fade_out && children.isNotEmpty) {
       children.last.fadeOutDeep(and_remove: true);
