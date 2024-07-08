@@ -13,12 +13,11 @@ import '../util/bitmap_button.dart';
 import '../util/fonts.dart';
 import '../util/on_message.dart';
 import 'background_stars.dart';
-import 'confirm_exit.dart';
 import 'doh_intro.dart';
 import 'game_context.dart';
+import 'game_dialog.dart';
 import 'game_messages.dart';
 import 'game_over.dart';
-import 'game_paused.dart';
 import 'game_phase.dart';
 import 'game_screen.dart';
 
@@ -87,7 +86,7 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
     _overlay?.removeFromParent();
     _overlay = null;
     _game.phase = GamePhase.game_paused;
-    _overlay = GamePaused(_on_key[GamePhase.game_paused]!);
+    _overlay = GameDialog(_on_key[GamePhase.game_paused]!, 'Game paused', 'Exit', 'Resume');
     add(_overlay!);
   }
 
@@ -95,7 +94,7 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
     _overlay?.removeFromParent();
     _overlay = null;
     _game.phase = GamePhase.confirm_exit;
-    _overlay = ConfirmExit(_on_key[GamePhase.confirm_exit]!);
+    _overlay = GameDialog(_on_key[GamePhase.confirm_exit]!, 'Back to title?', 'Yes', 'No');
     add(_overlay!);
   }
 

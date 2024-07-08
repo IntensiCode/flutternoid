@@ -39,6 +39,25 @@ mixin GameScriptFunctions on Component, AutoDispose {
     _autoDisposeCount++;
   }
 
+  Future<BitmapButton> add_button(
+    Image bg,
+    String text,
+    double x,
+    double y,
+    Anchor anchor,
+    Function() onTap,
+  ) async {
+    final it = BitmapButton(
+      bgNinePatch: bg,
+      text: text,
+      position: Vector2(x, y),
+      anchor: anchor,
+      onTap: (_) => onTap(),
+    );
+    await add(it);
+    return it;
+  }
+
   void clearByType(List types) {
     final what = types.isEmpty ? children : children.where((it) => types.contains(it.runtimeType));
     removeAll(what);
