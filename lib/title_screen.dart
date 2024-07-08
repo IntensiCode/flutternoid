@@ -17,6 +17,8 @@ class TitleScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
 
   @override
   onLoad() async {
+    soundboard.preload();
+
     await spriteXY('title.png', xCenter, yCenter);
 
     final delta = seen ? 0.0 : 0.2;
@@ -26,14 +28,12 @@ class TitleScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
     at(delta, () async => await add(fadeIn(await _video())));
     at(delta, () async => await add(fadeIn(await _credits())));
     at(delta, () async => await added(await _insert_coin()).add(BlinkEffect()));
-
-    soundboard.preload();
   }
 
   @override
   void onMount() {
     super.onMount();
-    if (!seen) playAudio('arkanoid.ogg');
+    if (!seen) soundboard.play_one_shot_sample('arkanoid.ogg');
     if (!seen) backgroundMusic('theme.mp3', keep_running: true);
     onKey('<Space>', () => _showScreen(Screen.game));
     seen = true;

@@ -82,8 +82,6 @@ class Soundboard extends Component {
   clear(String filename) => FlameAudio.audioCache.clear(filename);
 
   preload() async {
-    logInfo('preload audio');
-
     _blocked = true;
 
     if (_samples.isEmpty) {
@@ -122,9 +120,10 @@ class Soundboard extends Component {
   play(Sound sound, {double? volume}) async {
     if (muted) return;
     if (_blocked) return;
-    if (_samples.isEmpty) {
-      preload();
-    } else if (sound == Sound.wall_hit) {
+
+    if (dev) preload();
+
+    if (sound == Sound.wall_hit) {
       final index = note_index ?? 0;
       if (_notes.length <= index) {
         for (int i = _notes.length; i <= index; i++) {
@@ -137,6 +136,19 @@ class Soundboard extends Component {
     } else {
       _play_state.add((_samples[sound]!, 0));
     }
+  }
+
+  play_one_shot_sample(String filename, {double? volume}) async {
+
+    if (dev) preload();
+
+    if (filename.endsWith('.ogg')) filename = filename.replaceFirst('.ogg', '');
+    final bytes = await game.assets.readBinaryFile('audio/$filename.raw');
+    final data = Float32List(bytes.length);
+    for (int i = 0; i < bytes.length; i++) {
+      data[i] = ((bytes[i] / 128) - 1) * 0.8;
+    }
+    _play_state.add((data, 0));
   }
 
   Future<AudioPlayer> playAudio(String filename, {double? volume}) async {

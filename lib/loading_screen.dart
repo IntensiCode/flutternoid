@@ -1,7 +1,5 @@
-import 'package:flame/components.dart';
-import 'package:flutternoid/core/functions.dart';
-
 import 'core/common.dart';
+import 'core/functions.dart';
 import 'core/screens.dart';
 import 'core/soundboard.dart';
 import 'input/shortcuts.dart';
@@ -22,7 +20,7 @@ class LoadingScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
     at(1.0, () => fontSelect(menuFont, scale: 0.5));
     at(1.0, () => fadeIn(textXY('A', xCenter, yCenter - lineHeight * 2), duration: 1));
     at(1.0, () => fadeIn(textXY('Psychocell', xCenter, yCenter), duration: 1));
-    at(0.0, () => playAudio('psychocell.ogg'));
+    at(0.0, () => soundboard.play_one_shot_sample('psychocell.ogg'));
     at(0.0, () => fadeIn(spriteIXY(psychocell, xCenter, yCenter / 2), duration: 1));
     at(1.0, () => fadeIn(textXY('Game', xCenter, yCenter + lineHeight * 2), duration: 1));
     at(2.0, () => fadeOutAll(1.0));
