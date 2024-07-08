@@ -31,7 +31,8 @@ import 'shadows.dart';
 import 'slow_down_area.dart';
 import 'visual_configuration.dart';
 
-class GameScreen extends PositionComponent with AutoDispose, GameScriptFunctions, HasAutoDisposeShortcuts {
+class GameScreen extends PositionComponent
+    with AutoDispose, GameScriptFunctions, HasAutoDisposeShortcuts, HasVisibility {
   GameScreen({required this.keys});
 
   final Keys keys;
@@ -110,7 +111,7 @@ class GameScreen extends PositionComponent with AutoDispose, GameScriptFunctions
 
   @override
   void updateTree(double dt) {
-    if (phase != GamePhase.game_on) return;
+    if (phase != GamePhase.game_on || !isVisible) return;
     super.updateTree(dt);
   }
 

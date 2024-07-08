@@ -41,6 +41,7 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
     await add(_game);
 
     if (_game.phase == GamePhase.doh_intro) {
+      _game.isVisible = false;
       _stars.split_mode = false;
       await add(_overlay = DohIntro(_on_game_on));
     } else {
@@ -60,6 +61,7 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
     _stars.split_mode = true;
     _overlay?.removeFromParent();
     _overlay = null;
+    _game.isVisible = true;
     _game.phase = GamePhase.game_on;
     _overlay = Component(children: [
       BitmapButton(
