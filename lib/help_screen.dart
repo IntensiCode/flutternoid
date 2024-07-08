@@ -19,15 +19,15 @@ class HelpScreen extends GameScriptComponent {
     add(FlowText(
       text: await game.assets.readFile('data/controls.txt'),
       font: tinyFont,
-      position: Vector2(0, 32) ,
-      size: Vector2(160, 160 - 32),
+      position: Vector2(0, 25) ,
+      size: Vector2(160, 160 - 16),
     ));
 
     add(FlowText(
       text: await game.assets.readFile('data/help.txt'),
       font: tinyFont,
-      position: Vector2(xCenter, 32) ,
-      size: Vector2(160, 160 - 32),
+      position: Vector2(xCenter, 25) ,
+      size: Vector2(160, 176),
     ));
 
     softkeys('Back', null, (_) => popScreen());

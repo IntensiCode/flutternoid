@@ -20,7 +20,7 @@ extension GameScriptFunctionsExtension on GameScriptFunctions {
     BitmapFont? font,
     double font_scale = 2,
     bool at_top = false,
-    bool insets = false,
+    bool insets = true,
     bool shortcuts = true,
   }) async =>
       added(await SoftKeys.soft(
@@ -109,8 +109,8 @@ class SoftKeys extends PositionComponent with AutoDispose, KeyboardHandler, HasG
     bool at_top = false,
     bool shortcuts = true,
   }) {
-    insets ??= Vector2(4, 3);
-    padding ??= Vector2(8, 6);
+    insets ??= Vector2(2, 1);
+    padding ??= Vector2(2, 1);
 
     final y = at_top ? 0.0 : gameHeight - insets.y;
 
