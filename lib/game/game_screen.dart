@@ -2,8 +2,6 @@ import 'dart:math';
 
 import 'package:flame/components.dart';
 import 'package:flame_forge2d/body_component.dart';
-import 'package:flutternoid/game/enemy_spawner.dart';
-import 'package:flutternoid/game/game_phase.dart';
 import 'package:supercharged/supercharged.dart';
 
 import '../core/common.dart';
@@ -17,10 +15,12 @@ import '../util/extensions.dart';
 import '../util/on_message.dart';
 import 'background_screen.dart';
 import 'ball.dart';
+import 'enemy_spawner.dart';
 import 'extra_id.dart';
 import 'flash_text.dart';
 import 'game_frame.dart';
 import 'game_messages.dart';
+import 'game_phase.dart';
 import 'hiscore.dart';
 import 'laser_weapon.dart';
 import 'level.dart';

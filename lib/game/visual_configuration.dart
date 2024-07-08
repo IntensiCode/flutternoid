@@ -1,7 +1,8 @@
 import 'package:flame/components.dart';
-import 'package:flutternoid/core/common.dart' as common;
-import 'package:flutternoid/core/storage.dart';
-import 'package:flutternoid/game/game_object.dart';
+
+import '../core/common.dart' as common;
+import '../core/storage.dart';
+import 'game_object.dart';
 
 final visual = VisualConfiguration.instance;
 
