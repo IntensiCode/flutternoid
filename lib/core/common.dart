@@ -25,6 +25,7 @@ late Images images;
 
 // to avoid importing materials elsewhere (which causes clashes sometimes), some color values right here:
 const transparent = Colors.transparent;
+const shadow = Color(0x80000000);
 const black = Colors.black;
 const white = Colors.white;
 const red = Colors.red;
