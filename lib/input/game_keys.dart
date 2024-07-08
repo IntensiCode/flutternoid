@@ -24,11 +24,11 @@ mixin HasGameKeys on KeyboardHandler {
   static final downKeys = ['Arrow Down', 'S'];
   static final upKeys = ['Arrow Up', 'W'];
   static final fireKeys1 = ['Space', 'J'];
-  static final fireKeys2 = ['Enter', 'Shift', 'K'];
+  static final fireKeys2 = ['Shift', 'K'];
   static final inventoryKeys = ['Tab', 'I'];
   static final useOrExecuteKeys = ['U'];
-  static final softKeys1 = ['Backspace'];
-  static final softKeys2 = ['Delete'];
+  static final softKeys1 = ['Backspace', 'Escape'];
+  static final softKeys2 = ['Delete', 'Enter'];
 
   static final mapping = {
     GameKey.left: leftKeys,

@@ -1,18 +1,18 @@
-Space (or "j"):
+Space or "j":
 * Capture or release energy ball
 * Fire laser if active
 
-Enter (or "k"):
+Shift or "k":
 * Generate random energy push
 
-Left (or "a"):
+Left or "a":
 * Accelerate VAUS left
 
-Right (or "d"):
+Right or "d":
 * Accelerate VAUS right
 
-Backspace
+Escape or Backspace:
 * Left "Soft-Key" Button
 
-Delete
+Enter or Delete:
 * Right "Soft-Key" Button
