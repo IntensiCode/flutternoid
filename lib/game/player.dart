@@ -5,6 +5,7 @@ import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 import 'package:flame/sprite.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
+import 'package:flutternoid/game/enemy.dart';
 
 import '../core/common.dart';
 import '../core/functions.dart';
@@ -19,7 +20,6 @@ import 'game_context.dart';
 import 'game_messages.dart';
 import 'game_object.dart';
 import 'game_phase.dart';
-import 'laser_weapon.dart';
 import 'slow_down_area.dart';
 import 'soundboard.dart';
 import 'wall.dart';
@@ -48,11 +48,6 @@ enum PlayerMode {
 }
 
 class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObject {
-  final LaserWeapon laser;
-  final Iterable<Ball> Function() balls;
-
-  Player(this.laser, this.balls);
-
   late final Keys _keys;
   late final SpriteSheet sprites;
   late final SpriteSheet explosion;
@@ -86,12 +81,15 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
   bool _was_holding_fire = false;
 
   double x_speed = 0.0;
+  bool _seen_ball = false;
 
-  void _reset(PlayerState state) {
+  void reset(PlayerState state) {
     this.state = state;
+    _seen_ball = false;
     state_progress = 0.0;
     expanded = 0;
     expand_level = 0;
+    x_speed = 0;
 
     mode = PlayerMode.normal1;
     mode_time = 0.0;
@@ -116,7 +114,7 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
 
   bool get in_catcher_mode => mode.index % 3 == 1 || _was_holding_fire;
 
-  bool get _is_catcher => mode.index % 3 == 1;
+  bool get is_actual_catcher => mode.index % 3 == 1;
 
   bool get in_laser_mode => mode.index % 3 == 2;
 
@@ -131,6 +129,14 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
     out_closest.x = it.x.clamp(position.x - bat_width / 2, position.x + bat_width / 2);
     out_closest.y = it.y.clamp(position.y - bat_height / 2, position.y + bat_height / 2);
     return it.distanceTo(out_closest);
+  }
+
+  void explode() {
+    left_thruster.opacity = 0;
+    right_thruster.opacity = 0;
+    state = PlayerState.exploding;
+    state_progress = 0;
+    soundboard.play(Sound.explosion);
   }
 
   // BodyComponent
@@ -158,12 +164,18 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
       } else if (in_catcher_mode) {
         contact.isEnabled = false;
         other.caught();
-        if (!_is_catcher) {
+        if (!is_actual_catcher) {
           _force_hold[other] = configuration.force_hold_timeout;
         }
         soundboard.trigger(Sound.ball_held);
       } else {
         other.body.applyLinearImpulse(Vector2(player.x_speed, 0));
+      }
+    } else if (other is Enemy) {
+      explode();
+      other.explode();
+      for (final it in balls) {
+        it.explode();
       }
     } else {
       logInfo('unknown contact: $other');
@@ -206,9 +218,9 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
     onMessage<Catcher>((_) => _on_catcher());
     onMessage<Expander>((_) => _on_expander());
     onMessage<Laser>((_) => _on_laser());
-    onMessage<RoundIntro>((_) => _reset(PlayerState.gone));
+    onMessage<EnterRound>((_) => reset(PlayerState.gone));
     onMessage<LevelComplete>((_) => _on_level_complete());
-    onMessage<LevelReady>((_) => _reset(PlayerState.entering));
+    onMessage<LevelReady>((_) => reset(PlayerState.entering));
   }
 
   _on_level_complete() {
@@ -242,7 +254,7 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
 
   void _on_catcher() {
     mode_time = configuration.mode_time;
-    if (_is_catcher) return;
+    if (is_actual_catcher) return;
 
     _mode_origin = mode;
     _mode_change = 1.0;
@@ -277,7 +289,7 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
     expand_level++;
     expanded = configuration.expand_time;
     mode = PlayerMode.values[expand_level * 3 + (mode.index % 3)];
-    soundboard.trigger(Sound.bat_expand);
+    soundboard.trigger(Sound.bat_expand_arcade);
 
     _update_body_fixture();
   }
@@ -310,18 +322,31 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
         _on_thrusters(dt);
         _on_force_hold(dt);
         _on_plasma_blast(dt);
+        _on_got_no_balls(dt);
     }
   }
 
+  void _on_got_no_balls(double dt) {
+    if (balls.isEmpty && _seen_ball) {
+      explode();
+    } else if (balls.isNotEmpty) {
+      _seen_ball = true;
+    }
+  }
+
+  Iterable<Ball> get balls => top_level_children<Ball>();
+
   void _on_plasma_blast(double dt) {
-    final got_balls = balls().where((it) => it.state == BallState.active);
+    final got_balls = balls.where((it) => it.state == BallState.active);
     if (got_balls.isEmpty) return;
+    if (model.state.blasts <= 0) return;
 
     if (_plasma_cool_down > 0) _plasma_cool_down -= min(_plasma_cool_down, dt);
     if (keys.check_and_consume(GameKey.fire2) && _plasma_cool_down <= 0) {
       _plasma_cool_down = configuration.plasma_cool_down;
       soundboard.trigger(Sound.plasma);
       sendMessage(TriggerPlasmaBlasts());
+      model.state.blasts--;
     }
   }
 
@@ -386,7 +411,7 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
     if (state_progress < 0.0) {
       paint.color = transparent;
       state_progress = 0.0;
-      _reset(PlayerState.gone);
+      reset(PlayerState.gone);
     }
   }
 
@@ -395,6 +420,7 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
     if (state_progress > 1.0) {
       state_progress = 0.0;
       state = PlayerState.gone;
+      sendMessage(VausLost());
     }
   }
 
@@ -430,7 +456,7 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
 
     if (!_was_holding_fire || _keys.fire1) return;
 
-    final caught = balls().where((it) => it.state == BallState.caught).firstOrNull;
+    final caught = balls.where((it) => it.state == BallState.caught).firstOrNull;
     if (caught != null) {
       _was_holding_fire = false;
       caught.push(x_speed * 0.5, -configuration.opt_ball_speed * 0.5);
@@ -440,13 +466,16 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
 
       _laser_pos.setFrom(position);
       _laser_pos.x -= bat_width / 4;
-      laser.spawn(_laser_pos);
+      model.laser.spawn(_laser_pos);
 
       _laser_pos.setFrom(position);
       _laser_pos.x += bat_width / 4;
-      laser.spawn(_laser_pos);
+      model.laser.spawn(_laser_pos);
 
       soundboard.trigger(Sound.laser_shot);
+
+      mode_time -= min(mode_time, 1);
+      if (mode_time <= 0) _on_mode_reset();
     }
 
     _was_holding_fire = false;
@@ -464,7 +493,7 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
       mode = PlayerMode.values[expand_level * 3 + (mode.index % 3)];
     }
     logInfo('expanded=$expanded, expand_level=$expand_level, bat_mode=$mode');
-    soundboard.trigger(Sound.bat_expand);
+    soundboard.trigger(Sound.bat_expand_arcade);
   }
 
   @override
@@ -486,7 +515,7 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
 
         final frame = (state_progress * (explosion.columns - 1)).round();
         if (frame < 5) _render_bat(canvas);
-        explosion.getSpriteById(frame).render(canvas, position: position, overridePaint: paint, anchor: Anchor.center);
+        explosion.getSpriteById(frame).render(canvas, overridePaint: paint, anchor: Anchor.center);
         break;
       case PlayerState.playing:
         _render_bat(canvas);

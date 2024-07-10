@@ -1,5 +1,7 @@
 This plays very different to the original:
 
+Enemies will attack and destroy VAUS!
+
 Hold Space (or j) to force capture the energy ball even without the catcher power-up.
 
 But release it quickly before it becomes unstable and explodes!

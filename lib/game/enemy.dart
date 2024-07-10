@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
 import 'package:flame/sprite.dart';
@@ -57,14 +58,19 @@ abstract class Enemy extends BodyComponent with AutoDispose, ContactCallbacks {
   }
 
   explode() {
-    if (state == EnemyState.exploding) throw 'no no';
+    if (state == EnemyState.exploding) {
+      logError('already exploding', StackTrace.current);
+      return;
+    }
+
+    model.state.score += configuration.enemy_score;
 
     _forced_position.setFrom(position);
     body.linearVelocity.setZero();
 
     state = EnemyState.exploding;
     _explode_time = 0.0;
-    soundboard.play(Sound.explosion);
+    soundboard.play(Sound.enemy_destroyed);
   }
 
   // BodyComponent
@@ -98,7 +104,7 @@ abstract class Enemy extends BodyComponent with AutoDispose, ContactCallbacks {
       contact.isEnabled = false;
     } else if (other is Ball) {
       hit();
-    } else if (other is Player) {
+    } else if (other is Player && other.state == PlayerState.playing) {
       explode();
     }
   }
@@ -108,8 +114,10 @@ abstract class Enemy extends BodyComponent with AutoDispose, ContactCallbacks {
   @override
   onLoad() async {
     super.onLoad();
-    explosion = await sheetIWH('game_explosion.png', 32, 32);
-    onMessage<LevelComplete>((_) => removeFromParent());
+    explosion = await sheetIWH('enemy_explosion.png', 16, 16);
+    onMessage<EnterRound>((_) => removeFromParent());
+    // handled by EnemySpawner instead to have teleports
+    // onMessage<LevelComplete>((_) => removeFromParent());
   }
 
   @override
@@ -139,7 +147,7 @@ abstract class Enemy extends BodyComponent with AutoDispose, ContactCallbacks {
 
       case EnemyState.exploding:
         body.setTransform(_forced_position, 0);
-        _explode_time += dt;
+        _explode_time += dt * 3;
         if (_explode_time > 1.0) removeFromParent();
     }
   }

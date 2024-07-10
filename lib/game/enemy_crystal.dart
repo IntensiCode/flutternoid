@@ -33,7 +33,8 @@ class EnemyCrystal extends Enemy {
     super.update(dt);
 
     if (state != EnemyState.active) return;
-    if (position.y <= visual.game_pixels.y * 0.7) return;
+    if (position.y <= visual.game_pixels.y * 0.6) return;
+    if (position.y >= visual.game_pixels.y * 0.8) return;
 
     final target = Vector2.copy(player.position);
     target.sub(position);

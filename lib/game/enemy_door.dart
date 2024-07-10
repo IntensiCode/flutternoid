@@ -38,6 +38,11 @@ class EnemyDoor extends PositionComponent with AutoDispose, HasPaint {
   @override
   onLoad() async {
     door = await sheetIWH('game_door.png', 27, 8);
+    onMessage<EnterRound>((_) {
+      state = DoorState.idle;
+      open_progress = 0;
+      spawn_target = null;
+    });
     onMessage<LevelComplete>((_) {
       if (state != DoorState.idle) state = DoorState.closing;
     });

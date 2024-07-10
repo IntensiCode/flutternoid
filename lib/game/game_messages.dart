@@ -19,6 +19,9 @@ class SlowDown with Message {}
 
 class MultiBall with Message {}
 
+// alias for GamePhaseUpdate(enter_round)
+class EnterRound with Message {}
+
 class ExtraLife with Message {}
 
 class LevelComplete with Message {}
@@ -27,8 +30,11 @@ class LevelReady with Message {}
 
 class LoadLevel with Message {}
 
-// alias for GamePhaseUpdate(round_intro)
-class RoundIntro with Message {}
+class PlayerReady with Message {}
+
+class TriggerPlasmaBlasts with Message {}
+
+class VausLost with Message {}
 
 class GamePhaseUpdate with Message {
   final GamePhase phase;
@@ -36,12 +42,14 @@ class GamePhaseUpdate with Message {
   GamePhaseUpdate(this.phase);
 }
 
-class PlayerReady with Message {}
+class SpawnTeleport with Message {
+  final Vector2 position;
+
+  SpawnTeleport(this.position);
+}
 
 class TriggerPlasmaBlast with Message {
   final Vector2 center;
 
   TriggerPlasmaBlast(this.center);
 }
-
-class TriggerPlasmaBlasts with Message {}

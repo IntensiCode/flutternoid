@@ -27,11 +27,6 @@ class PlasmaBlasts extends Component with AutoDispose, HasPaint {
   onLoad() async {
     super.onLoad();
     _shader = (await FragmentProgram.fromAsset('assets/shaders/plasma.frag')).fragmentShader();
-  }
-
-  @override
-  void onMount() {
-    super.onMount();
     onMessage<TriggerPlasmaBlast>((it) => _active.add(_Blast(it.center)));
   }
 
@@ -72,14 +67,19 @@ class PlasmaBlasts extends Component with AutoDispose, HasPaint {
     shader_paint.shader = _shader;
     shader_paint.opacity = blast.opacity;
 
-    final recorder = PictureRecorder();
-    Canvas(recorder).drawRect(Rect.fromLTWH(0, 0, w, h), shader_paint);
+    if (visual.pixelate) {
+      final recorder = PictureRecorder();
+      Canvas(recorder).drawRect(Rect.fromLTWH(0, 0, w, h), shader_paint);
 
-    final picture = recorder.endRecording();
-    final image = picture.toImageSync(w.toInt(), h.toInt());
-    canvas.drawImage(image, Offset(x, y), paint);
-    image.dispose();
-    picture.dispose();
+      final picture = recorder.endRecording();
+      final image = picture.toImageSync(w.toInt(), h.toInt());
+      canvas.drawImage(image, Offset(x, y), paint);
+      image.dispose();
+      picture.dispose();
+    } else {
+      canvas.translate(x, y);
+      canvas.drawRect(Rect.fromLTWH(0, 0, w, h), shader_paint);
+    }
   }
 }
 

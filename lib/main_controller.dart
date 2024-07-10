@@ -3,20 +3,20 @@ import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutternoid/audio_menu.dart';
-import 'package:flutternoid/help_screen.dart';
-import 'package:flutternoid/video_menu.dart';
 
+import 'audio_menu.dart';
 import 'core/common.dart';
 import 'core/messaging.dart';
 import 'core/screens.dart';
 import 'credits.dart';
 import 'enter_hiscore_screen.dart';
 import 'game/game_controller.dart';
+import 'help_screen.dart';
 import 'hiscore_screen.dart';
 import 'loading_screen.dart';
 import 'title_screen.dart';
 import 'util/extensions.dart';
+import 'video_menu.dart';
 import 'web_play_screen.dart';
 
 class MainController extends Forge2DWorld implements ScreenNavigation {

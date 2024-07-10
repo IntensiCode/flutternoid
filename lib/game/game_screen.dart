@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flame/components.dart';
 import 'package:flame_forge2d/body_component.dart';
+import 'package:flutternoid/game/teleports.dart';
 import 'package:supercharged/supercharged.dart';
 
 import '../core/common.dart';
@@ -43,10 +44,9 @@ class GameScreen extends PositionComponent
   final flash_text = FlashText();
   final power_ups = PowerUps();
   final laser = LaserWeapon();
+  final player = Player();
   final slow_down_area = SlowDownArea();
   final plasma_blasts = PlasmaBlasts();
-
-  late final player = Player(laser, () => children.whereType<Ball>());
 
   GamePhase _phase = GamePhase.game_over;
 
@@ -87,6 +87,7 @@ class GameScreen extends PositionComponent
     await add(player);
     await add(slow_down_area);
     await add(plasma_blasts);
+    await add(Teleports());
 
     onMessage<PlayerReady>((it) => add(Ball()));
     onMessage<MultiBall>((_) => _split_ball());
@@ -117,6 +118,7 @@ class GameScreen extends PositionComponent
   @override
   void updateTree(double dt) {
     if (!isVisible) return;
+    if (phase == GamePhase.game_paused) return;
     super.updateTree(dt);
   }
 

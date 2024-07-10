@@ -15,12 +15,13 @@ import 'game_object.dart';
 enum Sound {
   ball_held,
   ball_lost,
-  bat_expand,
+  bat_expand_arcade,
   catcher,
   disruptor,
+  enemy_destroyed,
   expander,
   explosion,
-  extra_life,
+  extra_life_jingle,
   game_over,
   get_ready,
   hiscore,
@@ -30,6 +31,8 @@ enum Sound {
   multi_ball,
   plasma,
   slow_down,
+  teleport,
+  vaus_lost,
   wall_hit,
 }
 

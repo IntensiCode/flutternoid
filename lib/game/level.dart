@@ -23,6 +23,8 @@ import 'extra_id.dart';
 import 'game_context.dart';
 import 'game_messages.dart';
 import 'game_object.dart';
+import 'game_phase.dart';
+import 'player.dart';
 import 'wall.dart';
 
 typedef Row = List<Brick?>;
@@ -54,7 +56,9 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
 
   SpawnMode spawn_mode = SpawnMode.none;
 
-  late int level_time;
+  late double level_time = configuration.level_time;
+
+  double _re_sweep = 10.0;
 
   Iterable<Brick> get bricks sync* {
     for (final row in brick_rows) {
@@ -74,6 +78,19 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
     return matches.reduce((a, b) => a.topLeft.y < b.topLeft.y ? a : b);
   }
 
+  void _reset() {
+    removeAll(children); // TODO?
+    brick_rows.clear(); // TODO?
+
+    state_progress = 0;
+    state = LevelState.waiting;
+    opacity = 0.0;
+
+    spawn_mode = SpawnMode.none;
+    level_time = configuration.level_time;
+    _re_sweep = 10.0;
+  }
+
   // Component
 
   @override
@@ -86,8 +103,8 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
 
     sprites = await sheetIWH('game_blocks.png', visual.brick_width, visual.brick_height, spacing: 1);
 
-    onMessage<RoundIntro>((_) => _on_level_complete());
-    onMessage<LevelComplete>((_) => _on_level_complete());
+    onMessage<EnterRound>((_) => _reset());
+    onMessage<LevelComplete>((_) => _reset());
     onMessage<LoadLevel>((_) => _load_level());
     onMessage<PlayerReady>((_) => _sweep_level());
   }
@@ -108,10 +125,24 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
     }
   }
 
-  void _on_level_complete() {
-    state_progress = 0;
-    state = LevelState.waiting;
-    opacity = 0.0;
+  (int, TiledComponent)? _preloaded;
+
+  Future<bool> preload_level() async {
+    final which = level_number_starting_at_1.toString().padLeft(2, '0');
+
+    try {
+      final TiledComponent level_data = await TiledComponent.load(
+        'level$which.tmx',
+        Vector2(12.0, 6.0),
+        layerPaintFactory: (it) => pixelPaint(),
+      );
+      _preloaded = (level_number_starting_at_1, level_data);
+      return true;
+    } catch (e) {
+      logError('failed to load level $which: $e');
+      sendMessage(GameOver());
+      return false;
+    }
   }
 
   void _load_level() async {
@@ -123,22 +154,24 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
 
     removeAll(children);
 
-    final which = level_number_starting_at_1.toString().padLeft(2, '0');
-    final TiledComponent level_data;
-
-    try {
-      level_data = await TiledComponent.load(
-        'level$which.tmx',
-        Vector2(12.0, 6.0),
-        layerPaintFactory: (it) => pixelPaint(),
-      );
-    } catch (e) {
-      logError('failed to load level $which: $e');
-      sendMessage(GameComplete());
-      return;
+    if (_preloaded == null || _preloaded?.$1 != level_number_starting_at_1) {
+      final which = level_number_starting_at_1.toString().padLeft(2, '0');
+      try {
+        final TiledComponent level_data = await TiledComponent.load(
+          'level$which.tmx',
+          Vector2(12.0, 6.0),
+          layerPaintFactory: (it) => pixelPaint(),
+        );
+        _preloaded = (level_number_starting_at_1, level_data);
+      } catch (e) {
+        logError('failed to load level $which: $e');
+        sendMessage(GameOver());
+        return;
+      }
     }
 
-    level_time = level_data.intOptProp('level_time_seconds') ?? 30;
+    final level_data = _preloaded!.$2;
+    level_time = level_data.intOptProp('level_time_seconds')?.toDouble() ?? configuration.level_time;
 
     brick_rows.clear();
 
@@ -233,13 +266,14 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
     }
   }
 
-  double _re_sweep = 5.0;
-
   void _on_active(double dt) {
+    if (player.state == PlayerState.playing && phase == GamePhase.game_on) {
+      level_time -= min(level_time, dt);
+    }
     _re_sweep -= min(_re_sweep, dt);
     if (_re_sweep <= 0) {
-      _re_sweep = 5.0;
-      _sweep_level(extras_only: true);
+      _re_sweep = 10.0;
+      _sweep_level();
     }
     for (var row in brick_rows) {
       for (var x = 0; x < row.length; x++) {
@@ -255,6 +289,7 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
         if (brick.hit_highlight > 0) brick.hit_highlight -= min(brick.hit_highlight, dt);
         if (brick.destroyed && brick.destroy_progress < 1.0) brick.destroy_progress += dt * 4;
         if (brick.destroyed && !brick.spawned) {
+          model.state.score += (brick.id.score * (1 + level_number_starting_at_1 * 0.2)).round();
           if (brick.extra_id != null) {
             logInfo('brick destroyed - extra id: ${brick.extra_id}');
             sendMessage(SpawnExtraFromBrick(brick));

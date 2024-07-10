@@ -39,7 +39,7 @@ class PowerUps extends Component with AutoDispose {
     onMessage<SpawnExtra>((it) => _spawn(it.id));
     onMessage<SpawnExtraFromBrick>((it) => _spawn_power_up(it.brick));
     onMessage<LevelComplete>((_) => removeAll(children));
-    onMessage<RoundIntro>((_) => removeAll(children));
+    onMessage<EnterRound>((_) => removeAll(children));
   }
 
   // Implementation
@@ -153,7 +153,7 @@ class PowerUp extends SpriteAnimationComponent {
       ExtraId.catcher => Sound.catcher,
       ExtraId.disruptor => Sound.disruptor,
       ExtraId.expander => Sound.expander,
-      ExtraId.extra_life => Sound.extra_life,
+      ExtraId.extra_life => Sound.extra_life_jingle,
       ExtraId.multi_ball => Sound.multi_ball,
       ExtraId.slow_down => Sound.slow_down,
     });

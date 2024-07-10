@@ -5,13 +5,17 @@ class GameConfiguration {
 
   GameConfiguration._();
 
+  int enemy_score = 333;
+
+  double level_time = 60;
+
   double mode_time = 30;
   double expand_time = 60;
   double slow_down_time = 60;
   double disruptor_time = 10;
 
   double force_hold_timeout = 1.0;
-  double plasma_cool_down = 3.0;
+  double plasma_cool_down = 1.0;
   double plasma_disruptor = 1.0;
 
   final max_ball_speed = 150.0;

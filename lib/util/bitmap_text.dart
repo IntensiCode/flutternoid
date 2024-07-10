@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 
 import 'bitmap_font.dart';
