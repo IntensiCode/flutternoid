@@ -107,6 +107,7 @@ class GameScreen extends PositionComponent
       onKey('c', () => sendMessage(LevelComplete()));
       onKey('g', () => sendMessage(GameComplete()));
       onKey('n', () => sendMessage(LevelComplete()));
+      onKey('s', () => state.score += 5000);
       onKey('x', () => phase = GamePhase.game_over);
 
       onKey('e', () {

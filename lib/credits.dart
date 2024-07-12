@@ -20,7 +20,7 @@ class Credits extends GameScriptComponent {
       text: await game.assets.readFile('data/credits.txt'),
       font: tiny_font,
       position: Vector2(0, 24) ,
-      size: Vector2(320, 160 - 24),
+      size: Vector2(320, 160 - 16),
     ));
 
     softkeys('Back', null, (_) => popScreen());

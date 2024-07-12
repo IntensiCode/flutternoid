@@ -41,11 +41,6 @@ class Scoreboard extends PositionComponent with AutoDispose, HasVisibility, Game
 
     fontSelect(fancy_font, scale: 1);
     await add(textXY('PLAYER 1', size.x / 2, 45, anchor: Anchor.topCenter));
-
-    fontSelect(mini_font, scale: 1);
-    await add(textXY('HIGH SCORE', size.x / 2, 24, anchor: Anchor.topCenter));
-
-    await add(textXY('SCORE', size.x / 2, 58, anchor: Anchor.topCenter));
   }
 
   int? display_score;
@@ -53,13 +48,22 @@ class Scoreboard extends PositionComponent with AutoDispose, HasVisibility, Game
   int? display_lives;
   int? display_blasts;
 
+  double highlight_high_score = 0;
+  double highlight_good_score = 0;
   double highlight_round = 0;
   double highlight_lives = 0;
   double highlight_blasts = 0;
 
+  bool show_new_hiscore = false;
+  bool blink_high_score = false;
+  bool toggle_high_score = false;
+  bool blink_ranked_score = false;
+  bool toggle_ranked_score = false;
+
   @override
   void update(double dt) {
     super.update(dt);
+
     if (display_score != state.score) {
       if (display_score != null) {
         final was = display_score;
@@ -70,6 +74,32 @@ class Scoreboard extends PositionComponent with AutoDispose, HasVisibility, Game
       } else {
         display_score = state.score;
       }
+
+      if (hiscore.isNewHiscore(display_score!)) {
+        highlight_high_score = 1;
+        highlight_good_score = 0;
+        toggle_ranked_score = false;
+        show_new_hiscore = true;
+      } else if (hiscore.isHiscoreRank(display_score!)) {
+        highlight_good_score = 1;
+      }
+    }
+
+    if (highlight_high_score > 0) {
+      highlight_high_score -= min(highlight_high_score, dt / 3);
+      if (highlight_high_score <= 0) {
+        highlight_high_score = 1;
+      }
+      toggle_high_score = highlight_high_score < 0.5;
+      blink_high_score = (highlight_high_score % 0.5) < 0.2;
+    }
+    if (highlight_good_score > 0) {
+      highlight_good_score -= min(highlight_good_score, dt / 3);
+      if (highlight_good_score <= 0) {
+        highlight_good_score = 1;
+      }
+      toggle_ranked_score = highlight_good_score < 0.5;
+      blink_ranked_score = (highlight_good_score % 0.5) < 0.2;
     }
 
     if (display_round != state.level_number_starting_at_1) {
@@ -98,11 +128,24 @@ class Scoreboard extends PositionComponent with AutoDispose, HasVisibility, Game
 
     mini_font.paint.opacity = 1;
 
-    final hiscore_ = hiscore.entries.first.score.toString().padLeft(7, '0');
-    mini_font.drawStringAligned(canvas, size.x / 2, 32, hiscore_, Anchor.topCenter);
+    fontSelect(mini_font, scale: 1);
+    var label = toggle_high_score ? '*** NEW ***' : 'HIGH SCORE';
+    mini_font.drawStringAligned(canvas, size.x / 2, 24, label, Anchor.topCenter);
 
-    final score = (display_score ?? state.score).toString().padLeft(7, '0');
-    mini_font.drawStringAligned(canvas, size.x / 2, 66, score, Anchor.topCenter);
+    if (!blink_high_score) {
+      final hiscore_ = show_new_hiscore
+          ? display_score!.toString().padLeft(7, '0')
+          : hiscore.entries.first.score.toString().padLeft(7, '0');
+      mini_font.drawStringAligned(canvas, size.x / 2, 32, hiscore_, Anchor.topCenter);
+    }
+
+    label = toggle_ranked_score ? 'RANKED' : 'SCORE';
+    mini_font.drawStringAligned(canvas, size.x / 2, 58, label, Anchor.topCenter);
+
+    if (!blink_ranked_score) {
+      final score = (display_score ?? state.score).toString().padLeft(7, '0');
+      mini_font.drawStringAligned(canvas, size.x / 2, 66, score, Anchor.topCenter);
+    }
 
     final round = state.level_number_starting_at_1.toString().padLeft(2, ' ');
     if (highlight_round > 0) mini_font.paint.opacity = (highlight_round * 4) % 1;
