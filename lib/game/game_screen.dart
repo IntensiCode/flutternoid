@@ -21,7 +21,7 @@ import 'flash_text.dart';
 import 'game_frame.dart';
 import 'game_messages.dart';
 import 'game_phase.dart';
-import 'game_state.dart';
+import 'game_state.dart' as gs;
 import 'hiscore.dart';
 import 'laser_weapon.dart';
 import 'level.dart';
@@ -39,7 +39,7 @@ class GameScreen extends PositionComponent
 
   final Keys keys;
 
-  final state = GameState();
+  final state = gs.state;
   final level = Level();
   final flash_text = FlashText();
   final enemies = EnemySpawner();

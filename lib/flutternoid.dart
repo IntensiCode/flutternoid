@@ -66,6 +66,7 @@ class Flutternoid extends Forge2DGame<MainController>
       onKey('<C-S-+>', () => _speedUp());
       onKey('<C-a>', () => showScreen(Screen.audio_menu));
       onKey('<C-c>', () => showScreen(Screen.credits));
+      onKey('<C-e>', () => showScreen(Screen.end));
       onKey('<C-d>', () => _toggleDebug());
       onKey('<C-g>', () => showScreen(Screen.game));
       onKey('<C-h>', () => showScreen(Screen.hiscore));

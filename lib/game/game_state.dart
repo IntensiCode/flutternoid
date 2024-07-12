@@ -9,6 +9,8 @@ import 'game_messages.dart';
 import 'game_object.dart';
 import 'soundboard.dart';
 
+final state = GameState();
+
 class GameState extends Component with AutoDispose, HasGameData {
   var level_number_starting_at_1 = 1;
   var _score = 0;

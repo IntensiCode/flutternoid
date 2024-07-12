@@ -194,7 +194,6 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
   void _on_game_complete() {
     _switch_overlay(LevelBonus(() {
       add(Delayed(0.5, () async {
-        await model.state.delete();
         showScreen(Screen.end);
       }));
     }, game_complete: true));

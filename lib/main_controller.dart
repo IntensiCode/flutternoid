@@ -14,6 +14,7 @@ import 'game/game_controller.dart';
 import 'help_screen.dart';
 import 'hiscore_screen.dart';
 import 'loading_screen.dart';
+import 'the_end.dart';
 import 'title_screen.dart';
 import 'util/extensions.dart';
 import 'video_menu.dart';
@@ -89,7 +90,7 @@ class MainController extends Forge2DWorld implements ScreenNavigation {
   Component _makeScreen(Screen it) => switch (it) {
         Screen.audio_menu => AudioMenu(show_back: true, music_theme: 'music/theme.mp3'),
         Screen.credits => Credits(),
-        Screen.end => Credits(),
+        Screen.end => TheEnd(),
         Screen.game => GameController(),
         Screen.help => HelpScreen(),
         Screen.hiscore => HiscoreScreen(),
