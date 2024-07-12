@@ -73,7 +73,7 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
     final layer = _level_data?.$2.tileMap.getLayer('doh') as ObjectGroup?;
     final doh = layer?.objects.singleOrNull;
     if (doh == null) return null;
-    return Vector2(doh.x + doh.width / 3, doh.y - doh.height/2);
+    return Vector2(doh.x + doh.width / 3, doh.y - doh.height / 2);
   }
 
   Iterable<Brick> get bricks sync* {
@@ -253,9 +253,24 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
 
     const outset = 2.0;
     final size = visual.game_pixels;
-    await add(Wall(start: Vector2(-outset, -outset), end: Vector2(size.x + outset, -outset)));
-    await add(Wall(start: Vector2(-outset, -outset), end: Vector2(-outset, size.y * 2)));
-    await add(Wall(start: Vector2(size.x + outset, -outset), end: Vector2(size.x + outset, size.y * 2)));
+    await add(Wall(hull: [
+      Vector2(-outset - 32, -outset - 32),
+      Vector2(-outset - 32, -outset),
+      Vector2(size.x + outset + 32, -outset),
+      Vector2(size.x + outset + 32, -outset - 32),
+    ]));
+    await add(Wall(hull: [
+      Vector2(-outset - 32, -outset),
+      Vector2(-outset, -outset),
+      Vector2(-outset, size.y * 2),
+      Vector2(-outset - 32, size.y * 2),
+    ]));
+    await add(Wall(hull: [
+      Vector2(size.x + outset, -outset),
+      Vector2(size.x + outset + 32, -outset),
+      Vector2(size.x + outset + 32, size.y * 2),
+      Vector2(size.x + outset, size.y * 2),
+    ]));
 
     // doh/boss level
     if (bricks.isEmpty) {

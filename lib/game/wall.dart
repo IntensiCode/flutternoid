@@ -1,17 +1,19 @@
+import 'dart:ui';
+
 import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:flutternoid/core/common.dart';
 
 class Wall extends BodyComponent {
-  final Vector2 start;
-  final Vector2 end;
-  final bool sensor;
+  final List<Vector2> hull;
 
-  Wall({required this.start, required this.end, this.sensor = false});
+  Wall({required this.hull}) {
+    paint.style = PaintingStyle.stroke;
+  }
 
   @override
   Body createBody() {
-    final shape = EdgeShape()..set(start, end);
-    final fixtureDef = FixtureDef(shape, friction: 0.0, isSensor: sensor);
+    final shape = PolygonShape()..set(hull);
+    final fixtureDef = FixtureDef(shape, friction: 0.0);
     final bodyDef = BodyDef(
       userData: this, // To be able to determine object in collision
       position: Vector2.zero(),

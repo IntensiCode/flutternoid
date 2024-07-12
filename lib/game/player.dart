@@ -5,7 +5,6 @@ import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 import 'package:flame/sprite.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
-import 'package:flutternoid/game/enemy.dart';
 
 import '../core/common.dart';
 import '../core/functions.dart';
@@ -15,6 +14,7 @@ import '../util/auto_dispose.dart';
 import '../util/extensions.dart';
 import '../util/on_message.dart';
 import 'ball.dart';
+import 'enemy.dart';
 import 'game_configuration.dart';
 import 'game_context.dart';
 import 'game_messages.dart';
@@ -132,6 +132,8 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
   }
 
   void explode() {
+    if (state == PlayerState.exploding) return;
+
     left_thruster.opacity = 0;
     right_thruster.opacity = 0;
     state = PlayerState.exploding;
