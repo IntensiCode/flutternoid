@@ -1,11 +1,14 @@
 import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 import 'package:flutternoid/components/flow_text.dart';
+import 'package:flutternoid/game/game_dialog.dart';
+import 'package:flutternoid/game/game_state.dart';
 import 'package:flutternoid/util/fonts.dart';
 
 import 'core/common.dart';
 import 'core/screens.dart';
 import 'game/soundboard.dart';
+import 'input/game_keys.dart';
 import 'input/shortcuts.dart';
 import 'scripting/game_script.dart';
 import 'util/bitmap_button.dart';
@@ -50,7 +53,7 @@ class TitleScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
     add(_cheats = FlowText(
       text: cheats,
       font: tiny_font,
-      insets: Vector2(5,6),
+      insets: Vector2(5, 6),
       position: Vector2(0, 64),
       anchor: Anchor.topLeft,
       size: Vector2(120, 112),
@@ -88,9 +91,39 @@ class TitleScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
     }
   }
 
+  @override
+  bool get is_active => children.whereType<GameDialog>().isEmpty;
+
   // Implementation
 
   void _showScreen(Screen it) {
+    if (children.whereType<GameDialog>().isNotEmpty) return;
+
+    if (it == Screen.game) {
+      if (state.level_number_starting_at_1 > 1) {
+        add(GameDialog(
+          {
+            GameKey.soft1: () async {
+              await state.delete();
+              await state.reset();
+              soundboard.fade_out_music();
+              showScreen(Screen.game);
+            },
+            GameKey.soft2: () {
+              soundboard.fade_out_music();
+              showScreen(Screen.game);
+            },
+          },
+          'Game in progress.\n\nResume game?\n\nOr start new game?',
+          'New Game',
+          'Resume Game',
+          flow_text: true,
+          shortcuts: true,
+        ));
+        return;
+      }
+    }
+
     if (it == Screen.game) soundboard.fade_out_music();
     showScreen(it);
   }
