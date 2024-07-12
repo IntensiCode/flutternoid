@@ -5,6 +5,7 @@ import 'common.dart';
 enum Screen {
   audio_menu,
   credits,
+  end,
   enter_hiscore,
   game,
   help,

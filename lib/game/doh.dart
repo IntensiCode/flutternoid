@@ -110,7 +110,9 @@ class Doh extends BodyComponent with AutoDispose, ContactCallbacks {
       }
     } else if (vanishing) {
       vanish_time += dt / 2;
-      if (vanish_time >= 1.0) sendMessage(GameComplete());
+      if (vanish_time >= 1.0) {
+        sendMessage(GameComplete());
+      }
     } else {
       fire_time -= dt;
       if (fire_time <= 0) {

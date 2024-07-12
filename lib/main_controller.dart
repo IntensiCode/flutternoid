@@ -89,6 +89,7 @@ class MainController extends Forge2DWorld implements ScreenNavigation {
   Component _makeScreen(Screen it) => switch (it) {
         Screen.audio_menu => AudioMenu(show_back: true, music_theme: 'music/theme.mp3'),
         Screen.credits => Credits(),
+        Screen.end => Credits(),
         Screen.game => GameController(),
         Screen.help => HelpScreen(),
         Screen.hiscore => HiscoreScreen(),

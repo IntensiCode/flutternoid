@@ -14,13 +14,16 @@ class GameState extends Component with AutoDispose, HasGameData {
   var _score = 0;
   var lives = 3;
   var blasts = 3;
+  bool game_complete = false;
 
   int get score => _score;
 
   set score(int value) {
-    final b4 = _score ~/ 2000;
-    final now = value ~/ 2000;
-    if (b4 < now) sendMessage(ExtraLife());
+    if (!game_complete) {
+      final b4 = _score ~/ 2000;
+      final now = value ~/ 2000;
+      if (b4 < now) sendMessage(ExtraLife());
+    }
     _score = value;
   }
 
@@ -30,6 +33,7 @@ class GameState extends Component with AutoDispose, HasGameData {
     _score = 0;
     lives = 3;
     blasts = 3;
+    game_complete = false;
     logInfo('reset game state: $level_number_starting_at_1 $score $lives $blasts');
   }
 

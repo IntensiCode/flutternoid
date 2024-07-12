@@ -61,7 +61,7 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
 
     onMessage<LevelComplete>((_) => model.phase = GamePhase.next_round);
     onMessage<PlayerReady>((_) => _on_enter_round_get_ready());
-    onMessage<GameComplete>((_) => model.phase = GamePhase.game_over); // TODO
+    onMessage<GameComplete>((_) => model.phase = GamePhase.game_complete);
     onMessage<GameOver>((_) => model.phase = GamePhase.game_over);
     onMessage<VausLost>((_) => _on_vaus_lost());
 
@@ -106,6 +106,7 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
   Function _phase_handler(GamePhase it) => switch (it) {
         GamePhase.confirm_exit => _on_confirm_exit,
         GamePhase.enter_round => _on_enter_round,
+        GamePhase.game_complete => _on_game_complete,
         GamePhase.game_on => _on_game_on,
         GamePhase.game_over => _on_game_over,
         GamePhase.game_paused => _on_game_paused,
@@ -190,6 +191,15 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
     }));
   }
 
+  void _on_game_complete() {
+    _switch_overlay(LevelBonus(() {
+      add(Delayed(0.5, () async {
+        await model.state.delete();
+        showScreen(Screen.end);
+      }));
+    }, game_complete: true));
+  }
+
   void _on_new_game() {
     _overlay?.fadeOutDeep();
     state.reset();
@@ -213,6 +223,7 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
             GameKey.soft2: () => showScreen(Screen.title),
           },
         GamePhase.enter_round => {},
+        GamePhase.game_complete => {},
         GamePhase.game_on => {
             GameKey.soft1: () => model.phase = GamePhase.confirm_exit,
             GameKey.soft2: () => model.phase = GamePhase.game_paused,

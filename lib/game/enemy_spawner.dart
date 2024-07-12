@@ -51,6 +51,15 @@ class EnemySpawner extends PositionComponent with AutoDispose, HasPaint {
     await add(left_door = EnemyDoor()..position.setValues(22, 0));
     await add(right_door = EnemyDoor()..position.setValues(151, 0));
     onMessage<EnemyDestroyed>((_) => destroyed++);
+    onMessage<GameComplete>((_) {
+      final active = top_level_children<Enemy>();
+      for (final it in active) {
+        logInfo('teleport ${it.id}');
+        sendMessage(SpawnTeleport(it.position));
+        it.removeFromParent();
+      }
+      if (active.isNotEmpty) soundboard.play(Sound.teleport);
+    });
     onMessage<LevelComplete>((_) {
       final active = top_level_children<Enemy>();
       for (final it in active) {

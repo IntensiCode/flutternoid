@@ -23,4 +23,7 @@ class GameConfiguration {
   final min_ball_speed = 25.0;
   final min_ball_y_speed = 15.0;
   final min_ball_x_speed_after_brick_hit = 10;
+
+  int eog_blast_bonus = 1111;
+  int eog_life_bonus = 2222;
 }

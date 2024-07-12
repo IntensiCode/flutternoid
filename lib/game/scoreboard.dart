@@ -1,21 +1,19 @@
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
-import 'package:flutternoid/game/game_context.dart';
-import 'package:flutternoid/game/hiscore.dart';
-import 'package:flutternoid/game/slow_down_area.dart';
-import 'package:flutternoid/scripting/game_script_functions.dart';
-import 'package:flutternoid/util/auto_dispose.dart';
-import 'package:flutternoid/util/bitmap_font.dart';
-import 'package:flutternoid/util/extensions.dart';
-import 'package:flutternoid/util/fonts.dart';
 
 import '../core/common.dart';
 import '../core/functions.dart';
+import '../scripting/game_script_functions.dart';
+import '../util/auto_dispose.dart';
+import '../util/extensions.dart';
+import '../util/fonts.dart';
 import 'ball.dart';
+import 'game_context.dart';
+import 'hiscore.dart';
 import 'player.dart';
+import 'slow_down_area.dart';
 
 class Scoreboard extends PositionComponent with AutoDispose, HasVisibility, GameScriptFunctions {
   @override
@@ -121,8 +119,10 @@ class Scoreboard extends PositionComponent with AutoDispose, HasVisibility, Game
     mini_font.drawStringAligned(canvas, size.x / 2, 92, 'BLAST $blasts', Anchor.topCenter);
     mini_font.paint.opacity = 1;
 
-    final bonus = level.level_time.round().toString().padLeft(2, ' ');
-    mini_font.drawStringAligned(canvas, size.x / 2, 104, 'BONUS $bonus', Anchor.topCenter);
+    if (level.level_time > 0) {
+      final bonus = level.level_time.round().toString().padLeft(2, ' ');
+      mini_font.drawStringAligned(canvas, size.x / 2, 104, 'BONUS $bonus', Anchor.topCenter);
+    }
 
     final stats = {
       'EXPAND ': player.expanded_seconds,

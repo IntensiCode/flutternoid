@@ -1,6 +1,7 @@
 enum GamePhase {
   confirm_exit,
   enter_round,
+  game_complete,
   game_on,
   game_over,
   game_paused,

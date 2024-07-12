@@ -2,6 +2,8 @@ import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:flutternoid/core/random.dart';
 import 'package:flutternoid/game/ball.dart';
 import 'package:flutternoid/game/doh.dart';
+import 'package:flutternoid/game/game_messages.dart';
+import 'package:flutternoid/util/on_message.dart';
 
 import '../core/functions.dart';
 import 'enemy.dart';

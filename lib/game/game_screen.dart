@@ -105,6 +105,10 @@ class GameScreen extends PositionComponent
       onKey('7', () => sendMessage(SpawnExtra(ExtraId.extra_life)));
       onKey('b', () => add(Ball()));
       onKey('c', () => sendMessage(LevelComplete()));
+      onKey('g', () => sendMessage(GameComplete()));
+      onKey('n', () => sendMessage(LevelComplete()));
+      onKey('x', () => phase = GamePhase.game_over);
+
       onKey('e', () {
         state.level_number_starting_at_1 = 33;
         state.save_checkpoint();
@@ -125,7 +129,6 @@ class GameScreen extends PositionComponent
         state.save_checkpoint();
         phase = GamePhase.enter_round;
       });
-      onKey('n', () => sendMessage(LevelComplete()));
       onKey('<C-j>', () {
         state.level_number_starting_at_1 += 10;
         state.save_checkpoint();
@@ -149,7 +152,6 @@ class GameScreen extends PositionComponent
         removeAll(children.whereType<Ball>());
         add(Ball());
       });
-      onKey('x', () => phase = GamePhase.game_over);
     }
   }
 
