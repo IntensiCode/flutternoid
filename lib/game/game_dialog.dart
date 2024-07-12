@@ -1,9 +1,8 @@
 import 'dart:ui';
 
 import 'package:flame/components.dart';
-import 'package:flutternoid/components/flow_text.dart';
-import 'package:flutternoid/input/shortcuts.dart';
 
+import '../components/flow_text.dart';
 import '../components/soft_keys.dart';
 import '../core/common.dart';
 import '../core/functions.dart';
@@ -31,10 +30,9 @@ class GameDialog extends PositionComponent with AutoDispose, GameScriptFunctions
     super.onLoad();
 
     if (flow_text) {
-      position.setValues(16 + 20, 68 + 16 );
+      position.setValues(16 + 20, 68 + 16);
       size.setValues(160, 64 - 16);
-    }
-    else {
+    } else {
       position.setValues(16 + 20, 68);
       size.setValues(160, 64);
     }
@@ -46,7 +44,7 @@ class GameDialog extends PositionComponent with AutoDispose, GameScriptFunctions
       add(RectangleComponent(position: -position, size: gameSize, paint: pixelPaint()..color = dark));
       add(FlowText(
         text: _text,
-        insets: Vector2(6,7),
+        insets: Vector2(6, 7),
         font: tiny_font,
         position: Vector2.zero(),
         size: size,

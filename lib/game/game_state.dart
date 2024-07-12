@@ -2,12 +2,20 @@ import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 
 import '../core/messaging.dart';
-import 'storage.dart';
 import '../util/auto_dispose.dart';
 import '../util/on_message.dart';
 import 'game_messages.dart';
 import 'game_object.dart';
 import 'soundboard.dart';
+import 'storage.dart';
+
+Future<bool> first_time() async {
+  final map = await load_data('first_time');
+  if (map == null) return true;
+  return map['first_time'] != null;
+}
+
+Future save_not_first_time() async => (await save_data('first_time', {'first_time': false}));
 
 final state = GameState();
 

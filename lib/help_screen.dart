@@ -8,6 +8,8 @@ import 'core/screens.dart';
 import 'scripting/game_script.dart';
 import 'util/fonts.dart';
 
+bool help_triggered_at_first_start = false;
+
 class HelpScreen extends GameScriptComponent {
   @override
   void onLoad() async {
@@ -30,6 +32,7 @@ class HelpScreen extends GameScriptComponent {
       size: Vector2(160, 176),
     ));
 
-    softkeys('Back', null, (_) => popScreen());
+    final label = help_triggered_at_first_start ? 'Start' : 'Back';
+    softkeys(label, null, (_) => popScreen());
   }
 }

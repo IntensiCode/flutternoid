@@ -1,28 +1,37 @@
 import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
-import 'package:flutternoid/components/flow_text.dart';
-import 'package:flutternoid/game/game_dialog.dart';
-import 'package:flutternoid/game/game_state.dart';
-import 'package:flutternoid/util/fonts.dart';
 
+import 'components/flow_text.dart';
 import 'core/common.dart';
 import 'core/screens.dart';
+import 'game/game_dialog.dart';
+import 'game/game_state.dart';
 import 'game/soundboard.dart';
+import 'help_screen.dart';
 import 'input/game_keys.dart';
 import 'input/shortcuts.dart';
 import 'scripting/game_script.dart';
 import 'util/bitmap_button.dart';
 import 'util/effects.dart';
 import 'util/extensions.dart';
+import 'util/fonts.dart';
 
 class TitleScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
   static const x = 243.0;
   static const y = 42.0;
 
   static bool seen = false;
+  static bool first_time_playing = false;
 
   @override
   onLoad() async {
+    if (help_triggered_at_first_start) {
+      help_triggered_at_first_start = false;
+      soundboard.fade_out_music();
+      showScreen(Screen.game);
+      return;
+    }
+
     await spriteXY('title.png', xCenter, yCenter);
 
     final delta = seen ? 0.0 : 0.2;
@@ -59,6 +68,9 @@ class TitleScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
       size: Vector2(120, 112),
     ));
     _cheats.isVisible = dev;
+
+    first_time_playing = await first_time();
+    logInfo('first time playing? $first_time_playing');
   }
 
   late final FlowText _cheats;
@@ -99,8 +111,11 @@ class TitleScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
   void _showScreen(Screen it) {
     if (children.whereType<GameDialog>().isNotEmpty) return;
 
+    logInfo('check1');
     if (it == Screen.game) {
+      logInfo('check2');
       if (state.level_number_starting_at_1 > 1) {
+        logInfo('check3');
         add(GameDialog(
           {
             GameKey.soft1: () async {
@@ -120,6 +135,11 @@ class TitleScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
           flow_text: true,
           shortcuts: true,
         ));
+        return;
+      } else if (first_time_playing) {
+        logInfo('check4');
+        help_triggered_at_first_start = true;
+        showScreen(Screen.help);
         return;
       }
     }

@@ -23,6 +23,7 @@ import 'game_dialog.dart';
 import 'game_messages.dart';
 import 'game_phase.dart';
 import 'game_screen.dart';
+import 'game_state.dart';
 import 'level_bonus.dart';
 import 'player.dart';
 import 'scoreboard.dart';
@@ -179,6 +180,9 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
         model.state.level_number_starting_at_1++;
         logInfo('next round: ${model.state.level_number_starting_at_1}');
         await model.state.save_checkpoint();
+        if (model.state.level_number_starting_at_1 == 2) {
+          await save_not_first_time();
+        }
 
         // really only for dev
         final ok = await level.preload_level();
