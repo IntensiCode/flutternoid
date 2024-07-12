@@ -96,6 +96,7 @@ class Doh extends BodyComponent with AutoDispose, ContactCallbacks {
     onMessage<LevelDataAvailable>((_) {
       if (level.doh == null) removeFromParent();
     });
+    soundboard.play_one_shot_sample('doh_laugh.ogg');
   }
 
   @override
