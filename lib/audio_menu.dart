@@ -79,6 +79,6 @@ class AudioMenu extends GameScriptComponent {
 
   void _make_sound() {
     final which = Sound.values.random().name;
-    soundboard.play_one_shot_sample('sound/$which');
+    soundboard.play_one_shot_sample('sound/$which.ogg');
   }
 }

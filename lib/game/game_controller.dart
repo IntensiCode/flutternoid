@@ -73,7 +73,7 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
 
     model.phase = GamePhase.enter_round;
 
-    soundboard.play_music('music/game.mp3');
+    soundboard.play_music('music/game.ogg');
   }
 
   void _on_vaus_lost() {

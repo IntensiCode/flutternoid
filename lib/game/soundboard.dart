@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart' hide Timer;
@@ -9,8 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:mp_audio_stream/mp_audio_stream.dart';
 
 import '../core/common.dart';
-import 'storage.dart';
 import 'game_object.dart';
+import 'storage.dart';
 
 enum Sound {
   ball_held,
@@ -98,6 +97,12 @@ class Soundboard extends Component with HasGameData {
         _muted = false;
     }
 
+    if (kIsWeb) {
+      if (FlameAudio.bgm.isPlaying) {
+        FlameAudio.bgm.audioPlayer.setVolume(_music);
+      }
+      return;
+    }
     active_music?.$2.volume = _music;
     active_music?.$2.paused = _music == 0;
   }
@@ -130,12 +135,38 @@ class Soundboard extends Component with HasGameData {
 
   int? note_index;
 
+  // for web version
+  final _sounds = <Sound, AudioPlayer>{};
+
   toggleMute() => _muted = !_muted;
 
   clear(String filename) => FlameAudio.audioCache.clear(filename);
 
   _preload() async {
+    if (_blocked) return;
     _blocked = true;
+
+    if (kIsWeb) {
+      if (_sounds.isEmpty) {
+        for (final it in Sound.values) {
+          logVerbose('preload sample $it');
+          try {
+            // can't figure out why this one sound does not play in the web version ‾\_('')_/‾
+            final wtf = it == Sound.enemy_destroyed ? Sound.explosion : it;
+
+            await FlameAudio.audioCache.load('sound/${wtf.name}.ogg');
+            final player = _sounds[it] = await FlameAudio.play('sound/${wtf.name}.ogg', volume: _sound);
+            player.setReleaseMode(ReleaseMode.stop);
+            player.setPlayerMode(PlayerMode.lowLatency);
+            player.stop();
+          } catch (e) {
+            logError('failed loading $it: $e');
+          }
+        }
+      }
+      _blocked = false;
+      return;
+    }
 
     if (_samples.isEmpty) {
       for (final it in Sound.values) {
@@ -178,6 +209,19 @@ class Soundboard extends Component with HasGameData {
     if (_muted) return;
     if (_blocked) return;
 
+    if (kIsWeb) {
+      final it = _sounds[sound];
+      if (it == null) {
+        logError('null sound: $sound');
+        _preload();
+        return;
+      }
+      if (it.state != PlayerState.stopped) await it.stop();
+      await it.setVolume(_sound);
+      await it.resume();
+      return;
+    }
+
     if (sound == Sound.wall_hit) {
       final index = note_index ?? 0;
       if (_notes.length <= index) {
@@ -195,6 +239,12 @@ class Soundboard extends Component with HasGameData {
   }
 
   play_one_shot_sample(String filename, {double? volume}) async {
+    if (kIsWeb) {
+      final it = await FlameAudio.play(filename, volume: volume ?? _voice);
+      it.setReleaseMode(ReleaseMode.release);
+      return;
+    }
+
     if (filename.endsWith('.ogg')) filename = filename.replaceFirst('.ogg', '');
 
     logVerbose('play sample $filename');
@@ -206,6 +256,15 @@ class Soundboard extends Component with HasGameData {
   (String, double?)? pending_music;
 
   play_music(String filename, {double? volume}) async {
+    if (kIsWeb) {
+      if (FlameAudio.bgm.isPlaying) {
+        logInfo('stopping active bgm');
+        await FlameAudio.bgm.stop();
+      }
+      await FlameAudio.bgm.play(filename, volume: volume ?? _music);
+      return;
+    }
+
     if (filename == active_music?.$1) {
       logInfo('skip playing same music $filename');
       return;
@@ -236,6 +295,10 @@ class Soundboard extends Component with HasGameData {
   double? fade_out_volume;
 
   void fade_out_music() {
+    if (kIsWeb) {
+      return;
+    }
+
     logInfo('fade out music ${active_music?.$2.volume}');
     fade_out_volume = active_music?.$2.volume;
   }
@@ -246,13 +309,21 @@ class Soundboard extends Component with HasGameData {
   onLoad() async {
     super.onLoad();
     await load('soundboard', this);
-    _preload();
+    if (!kIsWeb) _preload();
   }
 
   @override
   update(double dt) {
     super.update(dt);
 
+    if (!kIsWeb) _fade_music(dt);
+
+    if (_triggered.isEmpty) return;
+    _triggered.forEach(play);
+    _triggered.clear();
+  }
+
+  void _fade_music(double dt) {
     double? fov = fade_out_volume;
     if (fov != null) {
       fov -= dt;
@@ -269,10 +340,6 @@ class Soundboard extends Component with HasGameData {
         fade_out_volume = fov;
       }
     }
-
-    if (_triggered.isEmpty) return;
-    _triggered.forEach(play);
-    _triggered.clear();
   }
 
   // HasGameData
