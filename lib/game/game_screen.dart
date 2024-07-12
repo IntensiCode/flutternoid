@@ -107,6 +107,7 @@ class GameScreen extends PositionComponent
       onKey('c', () => sendMessage(LevelComplete()));
       onKey('g', () => sendMessage(GameComplete()));
       onKey('n', () => sendMessage(LevelComplete()));
+      onKey('p', () => state.blasts++);
       onKey('s', () => state.score += 5000);
       onKey('x', () => phase = GamePhase.game_over);
 
@@ -143,10 +144,6 @@ class GameScreen extends PositionComponent
       onKey('j', () {
         state.level_number_starting_at_1++;
         state.save_checkpoint();
-        phase = GamePhase.enter_round;
-      });
-      onKey('p', () {
-        state.level_number_starting_at_1--;
         phase = GamePhase.enter_round;
       });
       onKey('r', () {

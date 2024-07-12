@@ -13,11 +13,6 @@ So here is one more...
 There are a few bugs with the ball and enemies. Not really game breaking. You can always just quit and restart at the
 same level.
 
-The audio lag is annoying, however. It's much better in the desktop version. But I'll try to fix the web version, too.
-This is probably the only major/primary open task atm.
-
-I have some ideas for how to add Revenge Of DOH levels. But probably won't have time.
-
 ### Credits
 
 #### Graphics

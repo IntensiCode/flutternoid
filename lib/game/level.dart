@@ -94,7 +94,7 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
     return matches.reduce((a, b) => a.topLeft.y < b.topLeft.y ? a : b);
   }
 
-  void _reset({bool clear_time = true}) {
+  void _reset({bool full_clear = true}) {
     removeAll(children); // TODO?
     brick_rows.clear(); // TODO?
 
@@ -106,9 +106,11 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
     spawn_mode = SpawnMode.none;
     _re_sweep = 10.0;
 
-    enemies.clear();
-
-    if (clear_time) level_time = configuration.level_time;
+    if (full_clear) {
+      logInfo('enemies clear now');
+      enemies.clear();
+      level_time = configuration.level_time;
+    }
   }
 
   // Component
@@ -124,7 +126,7 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
     sprites = await sheetIWH('game_blocks.png', visual.brick_width, visual.brick_height, spacing: 1);
 
     onMessage<EnterRound>((_) => _reset());
-    onMessage<LevelComplete>((_) => _reset(clear_time: false));
+    onMessage<LevelComplete>((_) => _reset(full_clear: false));
     onMessage<LoadLevel>((_) => _load_level());
     onMessage<PlayerReady>((_) => _sweep_level());
   }
