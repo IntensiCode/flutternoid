@@ -61,7 +61,6 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
 
     onMessage<LevelComplete>((_) => model.phase = GamePhase.next_round);
     onMessage<PlayerReady>((_) => _on_enter_round_get_ready());
-    // onMessage<PlayerReady>((_) => _game.phase = GamePhase.game_on);
     onMessage<GameComplete>((_) => model.phase = GamePhase.game_over); // TODO
     onMessage<GameOver>((_) => model.phase = GamePhase.game_over);
     onMessage<VausLost>((_) => _on_vaus_lost());

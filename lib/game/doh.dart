@@ -3,6 +3,10 @@ import 'dart:ui';
 import 'package:flame/components.dart';
 import 'package:flame/sprite.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
+import 'package:flutternoid/core/random.dart';
+import 'package:flutternoid/game/doh_disc.dart';
+import 'package:flutternoid/game/game_context.dart';
+import 'package:flutternoid/util/on_message.dart';
 
 import '../core/common.dart';
 import '../core/functions.dart';
@@ -22,8 +26,10 @@ class Doh extends BodyComponent with AutoDispose, ContactCallbacks {
 
   int hits = 33;
 
+  double appear_time = 0;
   bool vanishing = false;
   double vanish_time = 0;
+  double fire_time = 2;
 
   // BodyComponent
 
@@ -75,6 +81,8 @@ class Doh extends BodyComponent with AutoDispose, ContactCallbacks {
         vanishing = true;
         soundboard.play_one_shot_sample('doh_no.ogg');
       }
+    } else {
+      contact.isEnabled = false;
     }
   }
 
@@ -84,6 +92,10 @@ class Doh extends BodyComponent with AutoDispose, ContactCallbacks {
   onLoad() async {
     super.onLoad();
     _sprites = await sheetIWH('doh.png', 32, 47);
+    onMessage<GameComplete>((_) => removeFromParent());
+    onMessage<LevelDataAvailable>((_) {
+      if (level.doh == null) removeFromParent();
+    });
   }
 
   @override
@@ -91,11 +103,25 @@ class Doh extends BodyComponent with AutoDispose, ContactCallbacks {
     super.update(dt);
     renderBody = debug;
 
-    if (vanishing) {
+    if (appear_time < 1.0) {
+      appear_time += dt / 2;
+      if (appear_time >= 1.0) {
+        appear_time = 1;
+      }
+    } else if (vanishing) {
       vanish_time += dt / 2;
-      if (vanish_time >= 1.0) {
-        sendMessage(GameComplete());
-        removeFromParent();
+      if (vanish_time >= 1.0) sendMessage(GameComplete());
+    } else {
+      fire_time -= dt;
+      if (fire_time <= 0) {
+        fire_time = 2 + rng.nextDoubleLimit(2);
+        final start = visual.game_pixels / 2;
+        final velocity = Vector2.zero();
+        velocity.setFrom(player.position);
+        velocity.sub(start);
+        velocity.normalize();
+        velocity.scale(22.5);
+        spawn_top_level(DohDisc(start, velocity));
       }
     }
   }
@@ -105,7 +131,7 @@ class Doh extends BodyComponent with AutoDispose, ContactCallbacks {
     super.render(canvas);
     final frame = vanish_time * (_sprites.columns - 1);
     final sprite = _sprites.getSpriteById(frame.round());
-    _paint.opacity = (1 - vanish_time).clamp(0, 1);
+    _paint.opacity = (appear_time - vanish_time).clamp(0, 1);
     sprite.render(canvas, anchor: Anchor.center, overridePaint: _paint);
   }
 

@@ -34,17 +34,19 @@ abstract class Enemy extends BodyComponent with AutoDispose, ContactCallbacks {
 
   EnemyState state = EnemyState.spawned;
 
-  final _forced_position = Vector2.zero();
-  final _forced_velocity = Vector2.zero();
-  double _anim_time = 0.0;
+  final forced_position = Vector2.zero();
+  final forced_velocity = Vector2.zero();
+  double anim_time = 0.0;
   double _explode_time = 0.0;
 
   double radius;
   int hit_points;
 
+  bool scores = true;
+
   spawn_at(Vector2 position) {
-    _forced_position.setFrom(position);
-    _forced_velocity.setValues(0, 25);
+    forced_position.setFrom(position);
+    forced_velocity.setValues(0, 25);
     state = EnemyState.spawned;
   }
 
@@ -64,9 +66,11 @@ abstract class Enemy extends BodyComponent with AutoDispose, ContactCallbacks {
       return;
     }
 
-    model.state.score += configuration.enemy_score;
+    if (scores) {
+      model.state.score += configuration.enemy_score;
+    }
 
-    _forced_position.setFrom(position);
+    forced_position.setFrom(position);
     body.linearVelocity.setZero();
 
     state = EnemyState.exploding;
@@ -135,13 +139,13 @@ abstract class Enemy extends BodyComponent with AutoDispose, ContactCallbacks {
     super.update(dt);
     switch (state) {
       case EnemyState.spawned:
-        body.setTransform(_forced_position, 0);
+        body.setTransform(forced_position, 0);
         if (body.position.y < 10) {
-          _forced_position.add(_forced_velocity * dt);
-          _anim_time += dt;
-          if (_anim_time > 1.0) _anim_time -= 1.0;
+          forced_position.add(forced_velocity * dt);
+          anim_time += dt;
+          if (anim_time > 1.0) anim_time -= 1.0;
         } else {
-          body.applyLinearImpulse(_forced_velocity / dt);
+          body.applyLinearImpulse(forced_velocity / dt);
           state = EnemyState.active;
         }
 
@@ -149,12 +153,12 @@ abstract class Enemy extends BodyComponent with AutoDispose, ContactCallbacks {
         if (body.position.y > visual.game_pixels.y + 8) {
           removeFromParent();
         } else {
-          _anim_time += dt;
-          if (_anim_time > 1.0) _anim_time -= 1.0;
+          anim_time += dt;
+          if (anim_time > 1.0) anim_time -= 1.0;
         }
 
       case EnemyState.exploding:
-        body.setTransform(_forced_position, 0);
+        body.setTransform(forced_position, 0);
         _explode_time += dt * 3;
         if (_explode_time > 1.0) removeFromParent();
     }
@@ -169,7 +173,7 @@ abstract class Enemy extends BodyComponent with AutoDispose, ContactCallbacks {
 
   void _render_sprite(Canvas canvas) {
     final frames = animation.columns * animation.rows;
-    final frame = ((frames - 1) * _anim_time).clamp(0, frames - 1).toInt();
+    final frame = ((frames - 1) * anim_time).clamp(0, frames - 1).toInt();
     final sprite = animation.getSpriteById(frame);
     sprite.render(canvas, anchor: Anchor.center);
   }

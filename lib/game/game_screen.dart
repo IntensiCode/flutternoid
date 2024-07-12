@@ -105,6 +105,11 @@ class GameScreen extends PositionComponent
       onKey('7', () => sendMessage(SpawnExtra(ExtraId.extra_life)));
       onKey('b', () => add(Ball()));
       onKey('c', () => sendMessage(LevelComplete()));
+      onKey('e', () {
+        state.level_number_starting_at_1 = 33;
+        state.save_checkpoint();
+        phase = GamePhase.enter_round;
+      });
       onKey('<C-k>', () {
         state.level_number_starting_at_1 -= 10;
         state.save_checkpoint();

@@ -3,6 +3,7 @@ import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
 import 'package:flutternoid/core/messaging.dart';
 import 'package:flutternoid/game/doh.dart';
+import 'package:flutternoid/game/doh_disc.dart';
 import 'package:flutternoid/game/soundboard.dart';
 import 'package:flutternoid/util/delayed.dart';
 
@@ -21,6 +22,7 @@ import 'player.dart';
 
 extension on Enemy {
   String get id {
+    if (this is DohDisc) return 'disc';
     if (this is EnemyCrystal) return 'crystal';
     if (this is EnemyGlobolus) return 'globolus';
     throw 'unknown enemy type: $this';
@@ -70,6 +72,7 @@ class EnemySpawner extends PositionComponent with AutoDispose, HasPaint {
         logInfo('teleport ${it.id}');
         sendMessage(SpawnTeleport(it.position));
         it.removeFromParent();
+        if (it is DohDisc) continue;
         pending_enemies.insert(0, it.id);
       }
       if (active.isNotEmpty) soundboard.play(Sound.teleport);
