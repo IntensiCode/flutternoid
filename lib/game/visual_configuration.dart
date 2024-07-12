@@ -1,7 +1,7 @@
 import 'package:flame/components.dart';
 
 import '../core/common.dart' as common;
-import '../core/storage.dart';
+import 'storage.dart';
 import 'game_object.dart';
 
 final visual = VisualConfiguration.instance;

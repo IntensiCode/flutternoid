@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:mp_audio_stream/mp_audio_stream.dart';
 
 import '../core/common.dart';
-import '../core/storage.dart';
+import 'storage.dart';
 import 'game_object.dart';
 
 enum Sound {

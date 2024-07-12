@@ -1,6 +1,6 @@
 import 'package:flame/components.dart';
 
-import '../core/storage.dart';
+import 'storage.dart';
 import 'game_object.dart';
 
 final hiscore = Hiscore();

@@ -2,7 +2,7 @@ import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 
 import '../core/messaging.dart';
-import '../core/storage.dart';
+import 'storage.dart';
 import '../util/auto_dispose.dart';
 import '../util/on_message.dart';
 import 'game_messages.dart';

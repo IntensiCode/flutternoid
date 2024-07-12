@@ -5,7 +5,7 @@ class GameConfiguration {
 
   GameConfiguration._();
 
-  int enemy_score = 333;
+  int enemy_score = 200;
 
   double level_time = 60;
 
