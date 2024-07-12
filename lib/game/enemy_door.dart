@@ -67,6 +67,9 @@ class EnemyDoor extends PositionComponent with AutoDispose, HasPaint {
           spawn_top_level(spawn_target!);
         }
       case DoorState.spawning:
+        if (spawn_target?.isMounted != true) {
+          spawn_target = null;
+        }
         if (spawn_target?.state != EnemyState.spawned) {
           state = DoorState.closing;
         }
