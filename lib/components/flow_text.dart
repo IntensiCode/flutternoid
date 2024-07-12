@@ -9,7 +9,7 @@ import '../util/bitmap_font.dart';
 import '../util/bitmap_text.dart';
 import '../util/extensions.dart';
 
-class FlowText extends PositionComponent with AutoDispose, GameScriptFunctions {
+class FlowText extends PositionComponent with AutoDispose, GameScriptFunctions, HasVisibility {
   //
   late final List<String> _lines;
   late final int _visible_lines;

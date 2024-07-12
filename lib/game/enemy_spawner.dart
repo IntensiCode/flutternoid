@@ -2,7 +2,9 @@ import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
 import 'package:flutternoid/core/messaging.dart';
+import 'package:flutternoid/game/doh.dart';
 import 'package:flutternoid/game/soundboard.dart';
+import 'package:flutternoid/util/delayed.dart';
 
 import '../core/random.dart';
 import '../util/auto_dispose.dart';
@@ -18,7 +20,11 @@ import 'game_phase.dart';
 import 'player.dart';
 
 extension on Enemy {
-  String get id => runtimeType.toString().replaceFirst('Enemy', '').toLowerCase();
+  String get id {
+    if (this is EnemyCrystal) return 'crystal';
+    if (this is EnemyGlobolus) return 'globolus';
+    throw 'unknown enemy type: $this';
+  }
 }
 
 class EnemySpawner extends PositionComponent with AutoDispose, HasPaint {
@@ -26,10 +32,13 @@ class EnemySpawner extends PositionComponent with AutoDispose, HasPaint {
   late final EnemyDoor right_door;
 
   final pending_enemies = <String>[];
+  int destroyed = 0;
 
   double random_delay = 0.0;
 
   Iterable<Enemy> get active_enemies => top_level_children<Enemy>();
+
+  bool get all_enemies_destroyed => destroyed == level.enemies.length;
 
   // Component
 
@@ -39,6 +48,7 @@ class EnemySpawner extends PositionComponent with AutoDispose, HasPaint {
     position.setFrom(visual.background_offset);
     await add(left_door = EnemyDoor()..position.setValues(22, 0));
     await add(right_door = EnemyDoor()..position.setValues(151, 0));
+    onMessage<EnemyDestroyed>((_) => destroyed++);
     onMessage<LevelComplete>((_) {
       final active = top_level_children<Enemy>();
       for (final it in active) {
@@ -52,6 +62,7 @@ class EnemySpawner extends PositionComponent with AutoDispose, HasPaint {
     onMessage<EnterRound>((_) {
       pending_enemies.clear();
       pending_enemies.addAll(level.enemies);
+      destroyed = 0;
     });
     onMessage<VausLost>((_) {
       final active = top_level_children<Enemy>();
@@ -63,6 +74,16 @@ class EnemySpawner extends PositionComponent with AutoDispose, HasPaint {
       }
       if (active.isNotEmpty) soundboard.play(Sound.teleport);
       logInfo(pending_enemies);
+    });
+    onMessage<LevelDataAvailable>((_) {
+      pending_enemies.clear();
+      pending_enemies.addAll(level.enemies);
+      destroyed = 0;
+
+      final doh = level.doh;
+      if (doh != null) {
+        add(Delayed(0.5, () => spawn_top_level(Doh(doh)..fadeInDeep())));
+      }
     });
   }
 

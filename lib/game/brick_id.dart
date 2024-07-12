@@ -14,19 +14,28 @@ enum BrickId {
   gray2('G2', strength: 1, score: 2, extras: {}),
   red2('R2', strength: 1, score: 1, extras: {ExtraId.laser}),
   // bottom
-  double('DD', strength: 6, score: 3, extras: {ExtraId.extra_life}),
+  double('DD', strength: 6, score: 3, extras: {ExtraId.extra_life}, returning: true),
   green3('G3', strength: 3, score: 1, extras: {ExtraId.catcher}),
   orange3('O3', strength: 3, score: 1, extras: {ExtraId.slow_down}),
   gray3('G3', strength: 3, score: 2, extras: {}),
-  massive('MM', strength: 0, score: 0, extras: {}),
+  massive('MM', strength: 0, score: 0, extras: {}, indestructible: true),
   ;
 
   final String id;
   final int strength;
   final int score;
   final Set<ExtraId> extras;
+  final bool returning;
+  final bool indestructible;
 
-  const BrickId(this.id, {required this.strength, required this.score, required this.extras});
+  const BrickId(
+    this.id, {
+    required this.strength,
+    required this.score,
+    required this.extras,
+    this.returning = false,
+    this.indestructible = false,
+  });
 
   static BrickId from(String name) => BrickId.values.firstWhere((e) => e.name == name);
 

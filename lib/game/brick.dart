@@ -26,7 +26,8 @@ class Brick extends BodyComponent {
 
   late final spawn_center = (topLeft + bottomRight) / 2;
 
-  late final bool indestructible = id.strength == 0;
+  late final bool counts = !id.indestructible && !id.returning;
+  late final bool indestructible = id.indestructible;
 
   Brick(this.id, this.topLeft, this.bottomRight) {
     renderBody = false;

@@ -8,6 +8,7 @@ import 'package:flame_forge2d/flame_forge2d.dart';
 
 import '../core/common.dart';
 import '../core/functions.dart';
+import '../core/messaging.dart';
 import '../util/auto_dispose.dart';
 import '../util/on_message.dart';
 import 'ball.dart';
@@ -71,6 +72,8 @@ abstract class Enemy extends BodyComponent with AutoDispose, ContactCallbacks {
     state = EnemyState.exploding;
     _explode_time = 0.0;
     soundboard.play(Sound.enemy_destroyed);
+
+    sendMessage(EnemyDestroyed());
   }
 
   // BodyComponent
@@ -103,7 +106,12 @@ abstract class Enemy extends BodyComponent with AutoDispose, ContactCallbacks {
     if (state == EnemyState.exploding) {
       contact.isEnabled = false;
     } else if (other is Ball) {
-      hit();
+      if (other.disruptor > 0) {
+        contact.isEnabled = false;
+        explode();
+      } else {
+        hit();
+      }
     } else if (other is Player && other.state == PlayerState.playing) {
       explode();
     }

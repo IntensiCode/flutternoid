@@ -20,8 +20,8 @@ extension RenderableTiledMapExtensions on RenderableTiledMap {
     it.refreshCache();
   }
 
-  void renderSingleLayer(Canvas canvas, Layer layer) {
-    final it = renderableLayers.firstWhere((it) => it.layer.id == layer.id);
+  void renderSingleLayer(Canvas canvas, String name) {
+    final it = renderableLayers.firstWhere((it) => it.layer.name == name);
     it.render(canvas, camera);
   }
 

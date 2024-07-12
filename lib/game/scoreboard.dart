@@ -1,12 +1,14 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 import 'package:flutternoid/game/game_context.dart';
 import 'package:flutternoid/game/hiscore.dart';
 import 'package:flutternoid/game/slow_down_area.dart';
 import 'package:flutternoid/scripting/game_script_functions.dart';
 import 'package:flutternoid/util/auto_dispose.dart';
+import 'package:flutternoid/util/bitmap_font.dart';
 import 'package:flutternoid/util/extensions.dart';
 import 'package:flutternoid/util/fonts.dart';
 
@@ -48,6 +50,50 @@ class Scoreboard extends PositionComponent with AutoDispose, HasVisibility, Game
     await add(textXY('SCORE', size.x / 2, 58, anchor: Anchor.topCenter));
   }
 
+  int? display_score;
+  int? display_round;
+  int? display_lives;
+  int? display_blasts;
+
+  double highlight_round = 0;
+  double highlight_lives = 0;
+  double highlight_blasts = 0;
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    if (display_score != state.score) {
+      if (display_score != null) {
+        final was = display_score;
+        display_score = lerpDouble(display_score!, state.score, 0.1)!.toInt();
+        if (display_score == was && display_score! < state.score) {
+          display_score = display_score! + 1;
+        }
+      } else {
+        display_score = state.score;
+      }
+    }
+
+    if (display_round != state.level_number_starting_at_1) {
+      if (display_round != null) highlight_round += 1;
+      display_round = state.level_number_starting_at_1;
+    }
+
+    if (display_lives != state.lives) {
+      if (display_lives != null) highlight_lives += 1;
+      display_lives = state.lives;
+    }
+
+    if (display_blasts != state.blasts) {
+      if (display_blasts != null) highlight_blasts += 1;
+      display_blasts = state.blasts;
+    }
+
+    if (highlight_round > 0) highlight_round -= min(highlight_round, dt);
+    if (highlight_lives > 0) highlight_lives -= min(highlight_lives, dt);
+    if (highlight_blasts > 0) highlight_blasts -= min(highlight_blasts, dt);
+  }
+
   @override
   void render(Canvas canvas) {
     super.render(canvas);
@@ -57,17 +103,23 @@ class Scoreboard extends PositionComponent with AutoDispose, HasVisibility, Game
     final hiscore_ = hiscore.entries.first.score.toString().padLeft(7, '0');
     mini_font.drawStringAligned(canvas, size.x / 2, 32, hiscore_, Anchor.topCenter);
 
-    final score = state.score.toString().padLeft(7, '0');
+    final score = (display_score ?? state.score).toString().padLeft(7, '0');
     mini_font.drawStringAligned(canvas, size.x / 2, 66, score, Anchor.topCenter);
 
     final round = state.level_number_starting_at_1.toString().padLeft(2, ' ');
+    if (highlight_round > 0) mini_font.paint.opacity = (highlight_round * 4) % 1;
     mini_font.drawStringAligned(canvas, size.x / 2, 76, 'ROUND $round', Anchor.topCenter);
+    mini_font.paint.opacity = 1;
 
     final lives = state.lives.toString().padLeft(2, ' ');
+    if (highlight_lives > 0) mini_font.paint.opacity = (highlight_lives * 4) % 1;
     mini_font.drawStringAligned(canvas, size.x / 2, 84, 'LIVES $lives', Anchor.topCenter);
+    mini_font.paint.opacity = 1;
 
     final blasts = state.blasts.toString().padLeft(2, ' ');
+    if (highlight_blasts > 0) mini_font.paint.opacity = (highlight_blasts * 4) % 1;
     mini_font.drawStringAligned(canvas, size.x / 2, 92, 'BLAST $blasts', Anchor.topCenter);
+    mini_font.paint.opacity = 1;
 
     final bonus = level.level_time.round().toString().padLeft(2, ' ');
     mini_font.drawStringAligned(canvas, size.x / 2, 104, 'BONUS $bonus', Anchor.topCenter);

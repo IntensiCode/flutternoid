@@ -11,7 +11,6 @@ import '../core/common.dart';
 import '../core/functions.dart';
 import '../core/messaging.dart';
 import '../core/random.dart';
-import 'soundboard.dart';
 import '../util/auto_dispose.dart';
 import '../util/extensions.dart';
 import '../util/on_message.dart';
@@ -21,6 +20,7 @@ import 'game_context.dart';
 import 'game_messages.dart';
 import 'game_object.dart';
 import 'player.dart';
+import 'soundboard.dart';
 import 'wall.dart';
 
 enum BallState {
@@ -84,7 +84,9 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
 
     if (_jiggle > 0) {
       final factor = max(0.0, _jiggle - 0.25);
+      logInfo('jiggle factor: $factor');
       _push_delta.rotate(rng.nextDoublePM(factor));
+      _push_delta.scale(1 + factor * 3);
     }
   }
 
@@ -153,7 +155,18 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
     super.postSolve(other, contact, impulse);
     if (other is Brick) {
       if (body.linearVelocity.x.abs() < configuration.min_ball_x_speed_after_brick_hit) {
+        logInfo('brick bump x speed up');
         body.linearVelocity.x += body.linearVelocity.x.sign;
+      } else if (body.linearVelocity.length < configuration.max_ball_speed) {
+        logInfo('brick bump speed up');
+        body.linearVelocity.scale(1.025);
+      }
+    } else if (other is Wall) {
+      if (body.linearVelocity.y.abs() < configuration.min_ball_y_speed) {
+        if (body.position.y > visual.game_pixels.y * 0.1) {
+          logInfo('wall bump y speed up');
+          body.linearVelocity.y += body.linearVelocity.y.sign;
+        }
       }
     }
   }
@@ -190,7 +203,7 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
   void _on_trigger_plasma_blast() {
     if (state != BallState.active) return;
     sendMessage(TriggerPlasmaBlast(position));
-    body.linearVelocity.x = rng.nextDoublePM(1);
+    body.linearVelocity.x = rng.nextDoublePM(pi / 6);
     body.linearVelocity.y = -1;
     body.linearVelocity.scale(configuration.opt_ball_speed);
     disruptor += configuration.plasma_disruptor;
@@ -265,17 +278,23 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
     if (disruptor > 0) disruptor -= min(disruptor, dt);
     _check_ball_lost();
 
-    if (body.linearVelocity.length > configuration.max_ball_speed) {
+    var current_speed = body.linearVelocity.length;
+    if (current_speed > configuration.max_ball_speed) {
       body.linearVelocity.normalize();
       body.linearVelocity.scale(configuration.max_ball_speed);
-    }
-    if (body.linearVelocity.y.abs() < configuration.min_ball_speed) {
-      final speed = body.linearVelocity.length;
+    } else if (body.linearVelocity.y.abs() < configuration.min_ball_y_speed) {
+      logInfo('ball speed: $current_speed');
+      logInfo('ball velocity: ${body.linearVelocity}');
+      logInfo('y speed < min');
+      final speed = current_speed;
       body.linearVelocity.y = configuration.min_ball_speed * body.linearVelocity.y.sign;
       body.linearVelocity.normalize();
       body.linearVelocity.scale(speed);
-    }
-    if (body.linearVelocity.y.round() == 0) {
+      logInfo('corrected velocity: ${body.linearVelocity}');
+    } else if (current_speed < configuration.opt_ball_speed && position.y < model.slow_down_area.slow_down_top) {
+      logInfo('auto speed up');
+      body.linearVelocity *= 1.01;
+    } else if (body.linearVelocity.y.round() == 0) {
       final speed = body.linearVelocity.normalize();
       body.linearVelocity.y = -configuration.min_ball_speed;
       body.linearVelocity.normalize();

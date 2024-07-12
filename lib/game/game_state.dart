@@ -18,15 +18,19 @@ class GameState extends Component with AutoDispose, HasGameData {
   int get score => _score;
 
   set score(int value) {
-    if (_score < 2000 && value >= 2000) sendMessage(ExtraLife());
+    final b4 = _score ~/ 2000;
+    final now = value ~/ 2000;
+    if (b4 < now) sendMessage(ExtraLife());
     _score = value;
   }
 
   reset() async {
+    logInfo('reset game state');
     level_number_starting_at_1 = 1;
     _score = 0;
     lives = 3;
     blasts = 3;
+    logInfo('reset game state: $level_number_starting_at_1 $score $lives $blasts');
   }
 
   delete() async => await clear('game_state');
@@ -38,7 +42,6 @@ class GameState extends Component with AutoDispose, HasGameData {
   @override
   onLoad() async {
     super.onLoad();
-    logInfo('load?');
     await load('game_state', this);
     logInfo('loaded game state: $level_number_starting_at_1');
     onMessage<ExtraLife>((_) {

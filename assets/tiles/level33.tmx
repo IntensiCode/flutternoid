@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="12" height="12" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="5">
+ <properties>
+  <property name="level_time" type="int" value="125"/>
+  <property name="spawn_mode" value="random"/>
+ </properties>
+ <tileset firstgid="1" source="game_blocks.tsx"/>
+ <tileset firstgid="31" source="doh.tsx"/>
+ <tileset firstgid="36" source="doh_background.tsx"/>
+ <layer id="1" name="blocks" width="12" height="12">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <layer id="5" name="background" width="12" height="12">
+  <data encoding="csv">
+51,50,51,50,51,50,51,50,51,50,51,50,
+57,56,57,56,57,56,57,56,57,56,57,56,
+51,50,51,36,37,38,39,40,41,50,51,50,
+57,56,57,42,43,44,45,46,47,56,57,56,
+51,50,51,48,49,44,44,52,59,50,51,50,
+57,56,57,54,55,44,44,58,53,56,57,56,
+51,50,51,54,61,62,63,64,53,50,51,50,
+57,56,57,60,61,62,63,64,59,56,57,56,
+51,50,51,66,67,68,69,70,71,50,51,50,
+57,56,57,56,57,56,57,56,57,56,57,56,
+51,50,51,50,51,50,51,50,51,50,51,50,
+57,56,57,56,57,56,57,56,57,56,57,56
+</data>
+ </layer>
+ <objectgroup id="4" name="doh">
+  <object id="3" gid="31" x="80" y="112" width="32" height="47"/>
+ </objectgroup>
+</map>

@@ -18,9 +18,11 @@ enum Sound {
   bat_expand_arcade,
   catcher,
   disruptor,
+  doh_ugh,
   enemy_destroyed,
   expander,
   explosion,
+  extra_blast,
   extra_life_jingle,
   game_over,
   get_ready,
@@ -96,8 +98,8 @@ class Soundboard extends Component with HasGameData {
         _muted = false;
     }
 
-    active_music?.volume = _music;
-    active_music?.paused = _music == 0;
+    active_music?.$2.volume = _music;
+    active_music?.$2.paused = _music == 0;
   }
 
   final double _master = 0.5;
@@ -186,6 +188,7 @@ class Soundboard extends Component with HasGameData {
         }
       }
       _play_state.add(PlayState(_notes[index], volume: volume ?? _sound));
+      note_index = 0;
     } else {
       _play_state.add(PlayState(_samples[sound]!, volume: volume ?? _sound));
     }
@@ -199,17 +202,42 @@ class Soundboard extends Component with HasGameData {
     _play_state.add(PlayState(data, volume: volume ?? _voice));
   }
 
-  PlayState? active_music;
+  (String, PlayState)? active_music;
+  (String, double?)? pending_music;
 
   play_music(String filename, {double? volume}) async {
-    _play_state.remove(active_music);
+    if (filename == active_music?.$1) {
+      logInfo('skip playing same music $filename');
+      return;
+    }
+    if (active_music != null) {
+      if (fade_out_volume != null) {
+        logInfo('schedule music $filename');
+        pending_music = (filename, volume);
+        return;
+      } else {
+        _play_state.remove(active_music?.$2);
+        active_music = null;
+      }
+    }
+
+    logInfo('play music $filename');
+    _play_state.remove(active_music?.$2);
     active_music = null;
 
     filename = filename.replaceFirst('.ogg', '').replaceFirst('.mp3', '');
 
     logVerbose('loop sample $filename');
     final data = await _make_sample('audio/$filename.raw');
-    _play_state.add(active_music = PlayState(data, loop: true, volume: volume ?? _music));
+    active_music = (filename, PlayState(data, loop: true, volume: volume ?? _music));
+    _play_state.add(active_music!.$2);
+  }
+
+  double? fade_out_volume;
+
+  void fade_out_music() {
+    logInfo('fade out music ${active_music?.$2.volume}');
+    fade_out_volume = active_music?.$2.volume;
   }
 
   // Component
@@ -224,6 +252,24 @@ class Soundboard extends Component with HasGameData {
   @override
   update(double dt) {
     super.update(dt);
+
+    double? fov = fade_out_volume;
+    if (fov != null) {
+      fov -= dt;
+      if (fov <= 0) {
+        _play_state.remove(active_music?.$2);
+        active_music = null;
+        fade_out_volume = null;
+        if (pending_music != null) {
+          play_music(pending_music!.$1, volume: pending_music!.$2);
+          pending_music = null;
+        }
+      } else {
+        active_music?.$2.volume = fov;
+        fade_out_volume = fov;
+      }
+    }
+
     if (_triggered.isEmpty) return;
     _triggered.forEach(play);
     _triggered.clear();

@@ -23,6 +23,7 @@ import 'game_dialog.dart';
 import 'game_messages.dart';
 import 'game_phase.dart';
 import 'game_screen.dart';
+import 'level_bonus.dart';
 import 'player.dart';
 import 'scoreboard.dart';
 import 'soundboard.dart';
@@ -71,6 +72,8 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
     });
 
     model.phase = GamePhase.enter_round;
+
+    soundboard.play_music('music/game.mp3');
   }
 
   void _on_vaus_lost() {
@@ -113,8 +116,8 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
   void _on_confirm_exit() => _switch_overlay(GameDialog(
         _key_handlers(),
         'END GAME?',
-        'YES',
         'NO',
+        'YES',
       ));
 
   void _on_enter_round() async {
@@ -135,7 +138,7 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
     final bt = _overlay as BitmapText;
     bt.add(BitmapText(
       text: 'GET READY',
-      position: Vector2(bt.width / 2, 14),
+      position: Vector2(bt.width / 2, 12),
       anchor: Anchor.center,
       font: mini_font,
     ));
@@ -171,18 +174,20 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
       ));
 
   void _on_next_round() {
-    add(Delayed(0.5, () async {
-      model.state.level_number_starting_at_1++;
-      logInfo('next round: ${model.state.level_number_starting_at_1}');
-      await model.state.save_checkpoint();
+    _switch_overlay(LevelBonus(() {
+      add(Delayed(0.5, () async {
+        model.state.level_number_starting_at_1++;
+        logInfo('next round: ${model.state.level_number_starting_at_1}');
+        await model.state.save_checkpoint();
 
-      // really only for dev
-      final ok = await level.preload_level();
-      if (ok) {
-        model.phase = GamePhase.enter_round;
-      } else {
-        model.phase = GamePhase.game_over;
-      }
+        // really only for dev
+        final ok = await level.preload_level();
+        if (ok) {
+          model.phase = GamePhase.enter_round;
+        } else {
+          model.phase = GamePhase.game_over;
+        }
+      }));
     }));
   }
 
@@ -205,8 +210,8 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
 
   Map<GameKey, Function> _key_handlers() => switch (model.phase) {
         GamePhase.confirm_exit => {
-            GameKey.soft1: () => showScreen(Screen.title),
-            GameKey.soft2: () => model.phase = GamePhase.game_on,
+            GameKey.soft1: () => model.phase = GamePhase.game_on,
+            GameKey.soft2: () => showScreen(Screen.title),
           },
         GamePhase.enter_round => {},
         GamePhase.game_on => {
@@ -250,7 +255,7 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
     _overlay?.fadeOutDeep();
     _overlay = it;
     await add(it);
-    if (it is! GameDialog) it.fadeInDeep();
+    if (it is BitmapText) it.fadeInDeep();
   }
 
   Component _make_in_game_overlay() => Component(children: [

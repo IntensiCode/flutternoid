@@ -46,7 +46,7 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
   late final SpriteSheet sprites;
 
   final brick_rows = <Row>[];
-  final enemies = ['globolus', 'crystal', 'globolus', 'crystal'];
+  final enemies = <String>[];
   final max_concurrent_enemies = 2;
 
   int get level_number_starting_at_1 => this.model.state.level_number_starting_at_1;
@@ -55,10 +55,26 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
   double state_progress = 0.0;
 
   SpawnMode spawn_mode = SpawnMode.none;
+  bool boss_level = false;
 
   late double level_time = configuration.level_time;
 
   double _re_sweep = 10.0;
+
+  (int, TiledComponent)? _level_data;
+
+  bool get has_background => background != null;
+
+  TileLayer? get background => _level_data?.$2.tileMap.getLayer('background') as TileLayer?;
+
+  TiledMap? get map => _level_data?.$2.tileMap.map;
+
+  Vector2? get doh {
+    final layer = _level_data?.$2.tileMap.getLayer('doh') as ObjectGroup?;
+    final doh = layer?.objects.singleOrNull;
+    if (doh == null) return null;
+    return Vector2(doh.x + doh.width / 3, doh.y - doh.height/2);
+  }
 
   Iterable<Brick> get bricks sync* {
     for (final row in brick_rows) {
@@ -78,7 +94,7 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
     return matches.reduce((a, b) => a.topLeft.y < b.topLeft.y ? a : b);
   }
 
-  void _reset() {
+  void _reset({bool clear_time = true}) {
     removeAll(children); // TODO?
     brick_rows.clear(); // TODO?
 
@@ -86,9 +102,13 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
     state = LevelState.waiting;
     opacity = 0.0;
 
+    boss_level = false;
     spawn_mode = SpawnMode.none;
-    level_time = configuration.level_time;
     _re_sweep = 10.0;
+
+    enemies.clear();
+
+    if (clear_time) level_time = configuration.level_time;
   }
 
   // Component
@@ -104,7 +124,7 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
     sprites = await sheetIWH('game_blocks.png', visual.brick_width, visual.brick_height, spacing: 1);
 
     onMessage<EnterRound>((_) => _reset());
-    onMessage<LevelComplete>((_) => _reset());
+    onMessage<LevelComplete>((_) => _reset(clear_time: false));
     onMessage<LoadLevel>((_) => _load_level());
     onMessage<PlayerReady>((_) => _sweep_level());
   }
@@ -125,8 +145,6 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
     }
   }
 
-  (int, TiledComponent)? _preloaded;
-
   Future<bool> preload_level() async {
     final which = level_number_starting_at_1.toString().padLeft(2, '0');
 
@@ -136,7 +154,7 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
         Vector2(12.0, 6.0),
         layerPaintFactory: (it) => pixelPaint(),
       );
-      _preloaded = (level_number_starting_at_1, level_data);
+      _level_data = (level_number_starting_at_1, level_data);
       return true;
     } catch (e) {
       logError('failed to load level $which: $e');
@@ -154,7 +172,7 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
 
     removeAll(children);
 
-    if (_preloaded == null || _preloaded?.$1 != level_number_starting_at_1) {
+    if (_level_data == null || _level_data?.$1 != level_number_starting_at_1) {
       final which = level_number_starting_at_1.toString().padLeft(2, '0');
       try {
         final TiledComponent level_data = await TiledComponent.load(
@@ -162,7 +180,7 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
           Vector2(12.0, 6.0),
           layerPaintFactory: (it) => pixelPaint(),
         );
-        _preloaded = (level_number_starting_at_1, level_data);
+        _level_data = (level_number_starting_at_1, level_data);
       } catch (e) {
         logError('failed to load level $which: $e');
         sendMessage(GameOver());
@@ -170,8 +188,8 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
       }
     }
 
-    final level_data = _preloaded!.$2;
-    level_time = level_data.intOptProp('level_time_seconds')?.toDouble() ?? configuration.level_time;
+    final level_data = _level_data!.$2;
+    level_time = level_data.intOptProp('level_time')?.toDouble() ?? configuration.level_time;
 
     brick_rows.clear();
 
@@ -230,11 +248,22 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
       }
     }
 
+    enemies.clear();
+    enemies.addAll(['globolus', 'crystal', 'globolus', 'crystal']);
+
     const outset = 2.0;
     final size = visual.game_pixels;
     await add(Wall(start: Vector2(-outset, -outset), end: Vector2(size.x + outset, -outset)));
     await add(Wall(start: Vector2(-outset, -outset), end: Vector2(-outset, size.y * 2)));
     await add(Wall(start: Vector2(size.x + outset, -outset), end: Vector2(size.x + outset, size.y * 2)));
+
+    // doh/boss level
+    if (bricks.isEmpty) {
+      enemies.clear();
+      boss_level = true;
+    }
+
+    sendMessage(LevelDataAvailable());
 
     add(Delayed(0.5, () {
       state = LevelState.appearing;
@@ -300,8 +329,7 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
         if (brick.gone) row[x] = null;
       }
     }
-    if (brick_rows.every((it) => it.every((it) => it == null || it.indestructible))) {
-      logInfo('LEVEL COMPLETE???');
+    if (!boss_level && brick_rows.every((it) => it.every((it) => it == null || !it.counts))) {
       sendMessage(LevelComplete());
     }
   }
@@ -374,8 +402,14 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
 extension on TiledComponent {
   SpawnMode get spawn_mode {
     var spawn_mode = stringOptProp('spawn_mode');
-    final extra_rows = getLayer('extras') as TileLayer?;
-    spawn_mode ??= extra_rows != null ? 'none' : 'once_per_color';
+    if (spawn_mode == null) {
+      final extra_rows = getLayer('extras') as TileLayer?;
+      final got_extras = extra_rows?.data?.any((it) => it != 0) ?? false;
+      spawn_mode ??= got_extras ? 'none' : 'once_per_color';
+      logInfo('level default spawn mode: $spawn_mode from extras? $got_extras');
+    } else {
+      logInfo('level defines spawn mode: $spawn_mode');
+    }
     return SpawnMode.values.firstWhere((it) => it.name == spawn_mode);
   }
 }

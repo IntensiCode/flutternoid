@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:flame/components.dart';
 import 'package:flame_forge2d/body_component.dart';
-import 'package:flutternoid/game/teleports.dart';
 import 'package:supercharged/supercharged.dart';
 
 import '../core/common.dart';
@@ -31,6 +30,7 @@ import 'player.dart';
 import 'power_ups.dart';
 import 'shadows.dart';
 import 'slow_down_area.dart';
+import 'teleports.dart';
 import 'visual_configuration.dart';
 
 class GameScreen extends PositionComponent
@@ -42,6 +42,7 @@ class GameScreen extends PositionComponent
   final state = GameState();
   final level = Level();
   final flash_text = FlashText();
+  final enemies = EnemySpawner();
   final power_ups = PowerUps();
   final laser = LaserWeapon();
   final player = Player();
@@ -76,14 +77,16 @@ class GameScreen extends PositionComponent
     await add(state);
     await add(visual);
     await add(hiscore);
+
     await add(BackgroundScreen());
+    await add(GameFrame());
     await add(Shadows(() => children.whereType<Ball>()));
+
     await add(level);
-    await add(EnemySpawner());
+    await add(enemies);
     await add(flash_text);
     await add(power_ups);
     await add(laser);
-    await add(GameFrame());
     await add(player);
     await add(slow_down_area);
     await add(plasma_blasts);
@@ -102,7 +105,37 @@ class GameScreen extends PositionComponent
       onKey('7', () => sendMessage(SpawnExtra(ExtraId.extra_life)));
       onKey('b', () => add(Ball()));
       onKey('c', () => sendMessage(LevelComplete()));
+      onKey('<C-k>', () {
+        state.level_number_starting_at_1 -= 10;
+        state.save_checkpoint();
+        phase = GamePhase.enter_round;
+      });
+      onKey('K', () {
+        state.level_number_starting_at_1 -= 5;
+        state.save_checkpoint();
+        phase = GamePhase.enter_round;
+      });
+      onKey('k', () {
+        state.level_number_starting_at_1--;
+        state.save_checkpoint();
+        phase = GamePhase.enter_round;
+      });
       onKey('n', () => sendMessage(LevelComplete()));
+      onKey('<C-j>', () {
+        state.level_number_starting_at_1 += 10;
+        state.save_checkpoint();
+        phase = GamePhase.enter_round;
+      });
+      onKey('J', () {
+        state.level_number_starting_at_1 += 5;
+        state.save_checkpoint();
+        phase = GamePhase.enter_round;
+      });
+      onKey('j', () {
+        state.level_number_starting_at_1++;
+        state.save_checkpoint();
+        phase = GamePhase.enter_round;
+      });
       onKey('p', () {
         state.level_number_starting_at_1--;
         phase = GamePhase.enter_round;

@@ -19,12 +19,16 @@ class SlowDown with Message {}
 
 class MultiBall with Message {}
 
+class EnemyDestroyed with Message {}
+
 // alias for GamePhaseUpdate(enter_round)
 class EnterRound with Message {}
 
 class ExtraLife with Message {}
 
 class LevelComplete with Message {}
+
+class LevelDataAvailable with Message {}
 
 class LevelReady with Message {}
 
