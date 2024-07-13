@@ -71,14 +71,21 @@ class TitleScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
     ));
     _cheats.isVisible = dev;
 
-    first_time_playing = await first_time();
-    logInfo('first time playing? $first_time_playing');
+    try {
+      await state.preload();
+    } catch (ignored) {
+      logError('error loading game state: $ignored');
+    }
 
-    await state.preload();
-
-    if (first_time_playing || state.level_number_starting_at_1 == 1) {
-      await state.delete();
-      state.reset();
+    try {
+      first_time_playing = await first_time();
+      logInfo('first time playing? $first_time_playing');
+      if (first_time_playing || state.level_number_starting_at_1 == 1) {
+        await state.delete();
+        state.reset();
+      }
+    } catch (ignored) {
+      logError('error loading first time playing state: $ignored');
     }
   }
 
