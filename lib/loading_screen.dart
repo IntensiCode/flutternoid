@@ -27,7 +27,6 @@ class LoadingScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
 
     final intro = await image('intro.png');
     at(1.0, () => fadeIn(spriteIXY(intro, xCenter, yCenter), duration: 1));
-    at(0.0, () => soundboard.preload());
     at(10.0, () => fadeOutAll(1.0));
 
     at(1.0, () => _leave());

@@ -44,15 +44,6 @@ class TitleScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
     at(delta, () async => await add(fadeIn(await _credits())));
     at(delta, () async => await added(await _insert_coin()).add(BlinkEffect()));
 
-    add(FlowText(
-      text: 'Check Audio and Video options if game or sound is laggy.',
-      font: tiny_font,
-      insets: Vector2(5, 6),
-      position: Vector2(xCenter, 66),
-      anchor: Anchor.topCenter,
-      size: Vector2(128 + 16, 24),
-    ));
-
     final cheats = [
       'Laser :: 1',
       'Catcher :: 2',

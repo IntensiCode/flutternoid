@@ -6,8 +6,8 @@ import 'package:flame_forge2d/flame_forge2d.dart' hide Particle;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-bool debug = kDebugMode;
-bool dev = kDebugMode;
+bool debug = kDebugMode && !kIsWeb;
+bool dev = kDebugMode && !kIsWeb;
 
 const tps = 120;
 

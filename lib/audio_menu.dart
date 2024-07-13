@@ -4,7 +4,6 @@ import 'package:flame/extensions.dart';
 
 import 'components/basic_menu.dart';
 import 'components/basic_menu_button.dart';
-import 'components/flow_text.dart';
 import 'components/soft_keys.dart';
 import 'components/volume_component.dart';
 import 'core/common.dart';
@@ -21,7 +20,6 @@ enum AudioMenuEntry {
   sound_only,
   silent_mode,
   brick_notes,
-  stream_music,
 }
 
 class AudioMenu extends GameScriptComponent {
@@ -65,10 +63,7 @@ class AudioMenu extends GameScriptComponent {
       ..preselectEntry(preselected));
 
     brick_notes = menu.addEntry(AudioMenuEntry.brick_notes, 'Brick Notes', anchor: Anchor.centerLeft);
-    brick_notes.checked = soundboard.stream_music;
-
-    stream_music = menu.addEntry(AudioMenuEntry.stream_music, 'Stream Music', anchor: Anchor.centerLeft);
-    stream_music.checked = soundboard.stream_music;
+    brick_notes.checked = soundboard.brick_notes;
 
     menu.position.setValues(xCenter, yCenter);
     menu.anchor = Anchor.center;
@@ -76,16 +71,6 @@ class AudioMenu extends GameScriptComponent {
     menu.onPreselected = (it) => _preselected(it);
 
     if (show_back) softkeys('Back', null, (_) => popScreen());
-
-    add(FlowText(
-      text: "If game sounds are glitched, try turning 'Brick Notes' off.\n\n"
-          "If music isn't playing, try toggling 'Stream Music' option.",
-      font: tiny_font,
-      insets: Vector2(5, 5),
-      position: Vector2(160 - 64, 174 - 16),
-      size: Vector2(160 + 64, 24 + 16),
-      anchor: Anchor.topLeft,
-    ));
 
     add(_master = VolumeComponent(
       bg_nine_patch: await image('button_plain.png'),
@@ -131,10 +116,6 @@ class AudioMenu extends GameScriptComponent {
       soundboard.brick_notes = !soundboard.brick_notes;
       brick_notes.checked = soundboard.brick_notes;
     }
-    if (it == AudioMenuEntry.stream_music) {
-      soundboard.stream_music = !soundboard.stream_music;
-      stream_music.checked = soundboard.stream_music;
-    }
     return menu.preselectEntry(it);
   }
 
@@ -165,8 +146,6 @@ class AudioMenu extends GameScriptComponent {
         _master.isVisible = false;
         _music.isVisible = false;
         _sound.isVisible = false;
-      case AudioMenuEntry.stream_music:
-        break;
       case null:
         break;
     }

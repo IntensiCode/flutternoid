@@ -3,7 +3,6 @@ import 'dart:math';
 
 import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart' hide Timer;
-import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mp_audio_stream/mp_audio_stream.dart';
 
@@ -60,7 +59,7 @@ class PlayState {
 class Soundboard extends Component with HasGameData {
   void _save() => save('soundboard', this);
 
-  bool _brick_notes = !kIsWeb;
+  bool _brick_notes = true;
 
   bool get brick_notes => _brick_notes;
 
@@ -68,38 +67,6 @@ class Soundboard extends Component with HasGameData {
     if (_brick_notes == value) return;
     _brick_notes = value;
     _save();
-  }
-
-  bool _stream_music = !kIsWeb;
-
-  bool get stream_music => _stream_music;
-
-  set stream_music(bool value) {
-    if (_stream_music == value) return;
-    _stream_music = value;
-
-    logInfo('switch stream_music: $value');
-
-    if (_stream_music && FlameAudio.bgm.isPlaying) {
-      logInfo('stop bgm music');
-      FlameAudio.bgm.stop();
-      logInfo('switch to streaming: $active_music_name?');
-      _replay_music();
-    }
-
-    if (!_stream_music && active_music != null) {
-      logInfo('stop streaming music');
-      _play_state.remove(active_music);
-      active_music = null;
-      logInfo('switch to bgm: $active_music_name?');
-      _replay_music();
-    }
-
-    _save();
-  }
-
-  void _replay_music() {
-    if (active_music_name != null) play_music(active_music_name!);
   }
 
   AudioMode _audio_mode = AudioMode.music_and_sound;
@@ -131,15 +98,6 @@ class Soundboard extends Component with HasGameData {
         _music = 0.0;
         _sound = 1.0;
         _muted = false;
-    }
-
-    if (kIsWeb && FlameAudio.bgm.isPlaying) {
-      FlameAudio.bgm.audioPlayer.setVolume(_music);
-      FlameAudio.bgm.pause();
-    }
-    if (kIsWeb && FlameAudio.bgm.audioPlayer.state == PlayerState.paused) {
-      FlameAudio.bgm.audioPlayer.setVolume(_music);
-      FlameAudio.bgm.resume();
     }
 
     active_music?.volume = _music;
@@ -208,10 +166,6 @@ class Soundboard extends Component with HasGameData {
 
   int? note_index;
 
-  // for web version
-  final _sounds = <Sound, AudioPlayer>{};
-  final _web_notes = <AudioPlayer>[];
-
   String? active_music_name;
   PlayState? active_music;
   String? pending_music;
@@ -219,17 +173,11 @@ class Soundboard extends Component with HasGameData {
 
   toggleMute() => muted = !muted;
 
-  clear(String filename) => FlameAudio.audioCache.clear(filename);
-
   preload() async {
     if (_blocked) return;
     _blocked = true;
 
-    if (kIsWeb) {
-      if (_sounds.isEmpty) await _preload_sounds();
-    } else {
-      if (_samples.isEmpty) await _make_samples();
-    }
+    if (_samples.isEmpty) await _make_samples();
 
     // mp_audio_stream has too much lag for kIsWeb. audio_players works fine for kIsWeb.
     // therefore, the if just above.
@@ -256,29 +204,6 @@ class Soundboard extends Component with HasGameData {
     logInfo('preload done');
   }
 
-  Future _preload_sounds() async {
-    for (final it in Sound.values) {
-      try {
-        // can't figure out why this one sound does not play in the web version ‾\_('')_/‾
-        final ext = it == Sound.enemy_destroyed ? 'mp3' : 'ogg';
-        _sounds[it] = await _preload_player('${it.name}.$ext');
-      } catch (e) {
-        logError('failed loading $it: $e');
-      }
-    }
-    for (int i = 0; i <= 20; i++) {
-      _web_notes.add(await _preload_player('note$i.ogg'));
-    }
-  }
-
-  Future<AudioPlayer> _preload_player(String name) async {
-    final player = await FlameAudio.play('sound/$name', volume: _sound);
-    player.setReleaseMode(ReleaseMode.stop);
-    player.setPlayerMode(PlayerMode.lowLatency);
-    player.stop();
-    return player;
-  }
-
   Future _make_samples() async {
     for (final it in Sound.values) {
       _samples[it] = await _make_sample('audio/sound/${it.name}.raw');
@@ -300,20 +225,6 @@ class Soundboard extends Component with HasGameData {
     if (_muted) return;
     if (_blocked) return;
 
-    if (kIsWeb) {
-      final it = (sound == Sound.wall_hit && soundboard.brick_notes) ? _web_notes[note_index ?? 0] : _sounds[sound];
-      if (it == null) {
-        logError('null sound: $sound');
-        preload();
-        return;
-      }
-      if (it.state != PlayerState.stopped) await it.stop();
-      await it.setVolume(_sound);
-      await it.resume();
-      note_index = 0;
-      return;
-    }
-
     if (sound == Sound.wall_hit && soundboard.brick_notes) {
       final index = note_index ?? 0;
       if (_notes.length <= index) {
@@ -331,12 +242,6 @@ class Soundboard extends Component with HasGameData {
   }
 
   play_one_shot_sample(String filename) async {
-    if (kIsWeb) {
-      final it = await FlameAudio.play(filename, volume: _sound);
-      it.setReleaseMode(ReleaseMode.release);
-      return;
-    }
-
     if (filename.endsWith('.ogg')) filename = filename.replaceFirst('.ogg', '');
 
     logVerbose('play sample $filename');
@@ -345,16 +250,6 @@ class Soundboard extends Component with HasGameData {
   }
 
   play_music(String filename) async {
-    if (kIsWeb && !_stream_music) {
-      logInfo('playing music via audio_players');
-      if (FlameAudio.bgm.isPlaying) {
-        logInfo('stopping active bgm');
-        await FlameAudio.bgm.stop();
-      }
-      await FlameAudio.bgm.play(filename, volume: _music);
-      return;
-    }
-
     logInfo('play music via mp_audio_stream');
 
     if (filename == active_music_name && active_music != null) {
@@ -435,7 +330,6 @@ class Soundboard extends Component with HasGameData {
   void load_state(Map<String, dynamic> data) {
     audio_mode = AudioMode.from_name(data['audio_mode'] ?? audio_mode.name);
     brick_notes = data['brick_notes'] ?? brick_notes;
-    stream_music = data['stream_music'] ?? stream_music;
     _master = data['master'] ?? _master;
     _music = data['music'] ?? _music;
     _muted = data['muted'] ?? _muted;
@@ -449,8 +343,7 @@ class Soundboard extends Component with HasGameData {
     ..['muted'] = _muted
     ..['sound'] = _sound
     ..['audio_mode'] = audio_mode.name
-    ..['brick_notes'] = brick_notes
-    ..['stream_music'] = stream_music;
+    ..['brick_notes'] = brick_notes;
 
   // Implementation
 
