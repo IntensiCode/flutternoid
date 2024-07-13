@@ -121,9 +121,6 @@ class TitleScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
     }
   }
 
-  @override
-  bool get is_active => children.whereType<GameDialog>().isEmpty;
-
   // Implementation
 
   void _showScreen(Screen it) {

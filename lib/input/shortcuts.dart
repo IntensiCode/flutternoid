@@ -12,9 +12,7 @@ mixin HasAutoDisposeShortcuts on Component, AutoDispose {
   void onKey(String pattern, void Function() callback) {
     autoDispose(
       'key-$pattern',
-      shortcuts.onKey(pattern, () {
-        if (is_active) callback();
-      }));
+      shortcuts.onKey(pattern, callback, is_active: () => is_active),);
   }
 
   void onKeys(List<String> patterns, void Function() callback) {
@@ -36,11 +34,12 @@ extension ComponentExtension on Component {
 mixin Shortcuts<T extends World> on HasKeyboardHandlerComponents<T> {
   late final keyboard = HardwareKeyboard.instance;
 
-  final handlers = <(String, void Function())>[];
+  final handlers = <(String, void Function(), bool Function() is_active)>[];
 
-  Disposable onKey(String pattern, void Function() callback) {
+  Disposable onKey(String pattern, void Function() callback, {bool Function()? is_active}) {
+    is_active ??= () => true;
     logVerbose('onKey $pattern');
-    final handler = (pattern, callback);
+    final handler = (pattern, callback, is_active);
     handlers.add(handler);
     return Disposable.wrap(() => handlers.remove(handler));
   }
@@ -62,7 +61,7 @@ mixin Shortcuts<T extends World> on HasKeyboardHandlerComponents<T> {
       bool handled = false;
       final cloned = [...handlers]; // clone to avoid concurrent modification from add/remove handlers
       for (final it in cloned) {
-        if (it.$1 == pattern) {
+        if (it.$1 == pattern && it.$3()) {
           it.$2();
           handled = true;
         }
@@ -79,7 +78,7 @@ mixin Shortcuts<T extends World> on HasKeyboardHandlerComponents<T> {
       bool handled = false;
       final cloned = [...handlers]; // clone to avoid concurrent modification from add/remove handlers
       for (final it in cloned) {
-        if (it.$1 == pattern) {
+        if (it.$1 == pattern && it.$3()) {
           it.$2();
           handled = true;
         }
