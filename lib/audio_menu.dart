@@ -1,8 +1,11 @@
 import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutternoid/components/flow_text.dart';
 
 import 'components/basic_menu.dart';
+import 'components/basic_menu_button.dart';
 import 'components/soft_keys.dart';
 import 'core/common.dart';
 import 'core/functions.dart';
@@ -17,6 +20,7 @@ enum AudioMenuEntry {
   music_only,
   sound_only,
   silent_mode,
+  stream_music,
 }
 
 class AudioMenu extends GameScriptComponent {
@@ -26,6 +30,7 @@ class AudioMenu extends GameScriptComponent {
   AudioMenu({required this.show_back, required this.music_theme});
 
   late final BasicMenu menu;
+  late final BasicMenuButton stream_music;
 
   @override
   onLoad() async {
@@ -49,15 +54,37 @@ class AudioMenu extends GameScriptComponent {
       ..addEntry(AudioMenuEntry.silent_mode, 'Silent Mode')
       ..preselectEntry(preselected));
 
+    if (kIsWeb) {
+      stream_music = menu.addEntry(AudioMenuEntry.stream_music, 'Stream Music', anchor: Anchor.centerLeft);
+      stream_music.checked = soundboard.stream_music;
+    }
+
     menu.position.setValues(xCenter, yCenter);
     menu.anchor = Anchor.center;
 
     menu.onPreselected = (it) => _preselected(it);
 
     if (show_back) softkeys('Back', null, (_) => popScreen());
+
+    if (kIsWeb) {
+      add(FlowText(
+        text: "If music isn't playing, try toggling 'Stream Music' option.",
+        font: tiny_font,
+        insets: Vector2(5, 5),
+        position: Vector2(160, 174),
+        size: Vector2(160, 24),
+        anchor: Anchor.topLeft,
+      ));
+    }
   }
 
-  _selected(AudioMenuEntry it) => menu.preselectEntry(it);
+  _selected(AudioMenuEntry it) {
+    if (kIsWeb && it == AudioMenuEntry.stream_music) {
+      soundboard.stream_music = !soundboard.stream_music;
+      stream_music.checked = soundboard.stream_music;
+    }
+    return menu.preselectEntry(it);
+  }
 
   _preselected(AudioMenuEntry? it) {
     logInfo('audio menu preselected: $it');
@@ -72,6 +99,8 @@ class AudioMenu extends GameScriptComponent {
         _make_sound();
       case AudioMenuEntry.silent_mode:
         soundboard.audio_mode = AudioMode.silent;
+      case AudioMenuEntry.stream_music:
+        break;
       case null:
         break;
     }

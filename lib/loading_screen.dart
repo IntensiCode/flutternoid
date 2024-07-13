@@ -12,6 +12,7 @@ class LoadingScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
     at(0.0, () => fontSelect(menu_font, scale: 0.25));
 
     at(0.0, () => fadeIn(textXY('An', xCenter, yCenter - lineHeight), duration: 1));
+    at(0.0, () => soundboard.preload());
     at(1.0, () => fadeIn(textXY('IntensiCode', xCenter, yCenter), duration: 1));
     at(1.0, () => fadeIn(textXY('Presentation', xCenter, yCenter + lineHeight), duration: 1));
     at(2.0, () => fadeOutAll(1.0));

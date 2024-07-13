@@ -32,6 +32,8 @@ class TitleScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
       return;
     }
 
+    soundboard.preload();
+
     await spriteXY('title.png', xCenter, yCenter);
 
     final delta = seen ? 0.0 : 0.2;

@@ -17,7 +17,7 @@ import 'loading_screen.dart';
 import 'the_end.dart';
 import 'title_screen.dart';
 import 'util/extensions.dart';
-import 'video_menu.dart';
+import 'options.dart';
 import 'web_play_screen.dart';
 
 class MainController extends Forge2DWorld implements ScreenNavigation {
@@ -28,7 +28,7 @@ class MainController extends Forge2DWorld implements ScreenNavigation {
 
   @override
   void onMount() {
-    if (dev) {
+    if (dev && !kIsWeb) {
       showScreen(Screen.game);
     } else if (kIsWeb) {
       add(WebPlayScreen());
@@ -97,6 +97,6 @@ class MainController extends Forge2DWorld implements ScreenNavigation {
         Screen.enter_hiscore => EnterHiscoreScreen(),
         Screen.loading => LoadingScreen(),
         Screen.title => TitleScreen(),
-        Screen.video_menu => VideoMenu(),
+        Screen.video_menu => Options(),
       };
 }

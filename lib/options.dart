@@ -18,7 +18,7 @@ enum OptionsMenuEntry {
   pixelate,
 }
 
-class VideoMenu extends GameScriptComponent with HasAutoDisposeShortcuts, KeyboardHandler, HasGameKeys {
+class Options extends GameScriptComponent with HasAutoDisposeShortcuts, KeyboardHandler, HasGameKeys {
   static OptionsMenuEntry? rememberSelection;
 
   late final BasicMenuButton pixelate;
