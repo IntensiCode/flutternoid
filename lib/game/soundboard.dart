@@ -170,6 +170,7 @@ class Soundboard extends Component with HasGameData {
 
   // for web version
   final _sounds = <Sound, AudioPlayer>{};
+  final _web_notes = <AudioPlayer>[];
 
   String? active_music_name;
   PlayState? active_music;
@@ -217,25 +218,29 @@ class Soundboard extends Component with HasGameData {
 
   Future _preload_sounds() async {
     for (final it in Sound.values) {
-      logVerbose('preload sample $it');
       try {
         // can't figure out why this one sound does not play in the web version ‾\_('')_/‾
         final ext = it == Sound.enemy_destroyed ? 'mp3' : 'ogg';
-
-        // await FlameAudio.audioCache.load('sound/${it.name}.$ext');
-        final player = _sounds[it] = await FlameAudio.play('sound/${it.name}.$ext', volume: _sound);
-        player.setReleaseMode(ReleaseMode.stop);
-        player.setPlayerMode(PlayerMode.lowLatency);
-        player.stop();
+        _sounds[it] = await _preload_player('${it.name}.$ext');
       } catch (e) {
         logError('failed loading $it: $e');
       }
     }
+    for (int i = 0; i <= 20; i++) {
+      _web_notes.add(await _preload_player('note$i.ogg'));
+    }
+  }
+
+  Future<AudioPlayer> _preload_player(String name) async {
+    final player = await FlameAudio.play('sound/$name', volume: _sound);
+    player.setReleaseMode(ReleaseMode.stop);
+    player.setPlayerMode(PlayerMode.lowLatency);
+    player.stop();
+    return player;
   }
 
   Future _make_samples() async {
     for (final it in Sound.values) {
-      logVerbose('preload sample $it');
       _samples[it] = await _make_sample('audio/sound/${it.name}.raw');
     }
   }
@@ -256,7 +261,7 @@ class Soundboard extends Component with HasGameData {
     if (_blocked) return;
 
     if (kIsWeb) {
-      final it = _sounds[sound];
+      final it = sound == Sound.wall_hit ? _web_notes[note_index ?? 0] : _sounds[sound];
       if (it == null) {
         logError('null sound: $sound');
         preload();
@@ -265,13 +270,14 @@ class Soundboard extends Component with HasGameData {
       if (it.state != PlayerState.stopped) await it.stop();
       await it.setVolume(_sound);
       await it.resume();
+      note_index = 0;
       return;
     }
 
     if (sound == Sound.wall_hit) {
       final index = note_index ?? 0;
       if (_notes.length <= index) {
-        for (int i = _notes.length; i <= index; i++) {
+        for (int i = _notes.length; i <= max(20, index); i++) {
           final freq = 261.626 + i * (293.665 - 261.626);
           final wave = _synth_sine_wave(freq, 11025, const Duration(milliseconds: 50));
           _notes.add(wave);
