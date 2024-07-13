@@ -71,7 +71,7 @@ class Soundboard extends Component with HasGameData {
     _save();
   }
 
-  bool _stream_music = !kIsWeb;
+  bool _stream_music = true;
 
   bool get stream_music => _stream_music;
 
