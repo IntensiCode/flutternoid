@@ -62,6 +62,8 @@ class PlayState {
 }
 
 class Soundboard extends Component with HasGameData {
+  void _save() => save('soundboard', this);
+
   bool _brick_notes = true;
 
   bool get brick_notes => _brick_notes;
@@ -69,7 +71,7 @@ class Soundboard extends Component with HasGameData {
   set brick_notes(bool value) {
     if (_brick_notes == value) return;
     _brick_notes = value;
-    save('soundboard', this);
+    _save();
   }
 
   bool _stream_music = true;
@@ -88,6 +90,7 @@ class Soundboard extends Component with HasGameData {
       logInfo('switch to streaming: $active_music_name?');
       _replay_music();
     }
+
     if (!_stream_music && active_music != null) {
       logInfo('stop streaming music');
       _play_state.remove(active_music);
@@ -95,7 +98,8 @@ class Soundboard extends Component with HasGameData {
       logInfo('switch to bgm: $active_music_name?');
       _replay_music();
     }
-    save('soundboard', this);
+
+    _save();
   }
 
   void _replay_music() {
@@ -112,28 +116,24 @@ class Soundboard extends Component with HasGameData {
 
     logVerbose('change audio mode: $mode');
 
-    save('soundboard', this);
+    _save();
 
     switch (mode) {
       case AudioMode.music_and_sound:
         _music = 0.4;
         _sound = 0.6;
-        _voice = 0.8;
         _muted = false;
       case AudioMode.music_only:
         _music = 1.0;
         _sound = 0.0;
-        _voice = 0.0;
         _muted = false;
       case AudioMode.silent:
         _music = 0.0;
         _sound = 0.0;
-        _voice = 0.0;
         _muted = true;
       case AudioMode.sound_only:
         _music = 0.0;
-        _sound = 0.8;
-        _voice = 1.0;
+        _sound = 1.0;
         _muted = false;
     }
 
@@ -150,13 +150,47 @@ class Soundboard extends Component with HasGameData {
     active_music?.paused = _music == 0;
   }
 
-  final double _master = 0.5;
+  double _master = 0.5;
+
+  double get master => _master;
+
+  set master(double value) {
+    if (_master == value) return;
+    _master = value;
+    _save();
+  }
 
   double _music = 0.4;
+
+  double get music => _music;
+
+  set music(double value) {
+    if (_music == value) return;
+    _music = value;
+    active_music?.volume = _music;
+    active_music?.paused = _music == 0;
+    _save();
+  }
+
   double _sound = 0.6;
-  double _voice = 0.8;
+
+  double get sound => _sound;
+
+  set sound(double value) {
+    if (_sound == value) return;
+    _sound = value;
+    _save();
+  }
 
   bool _muted = false;
+
+  bool get muted => _muted;
+
+  set muted(bool value) {
+    if (_muted == value) return;
+    _muted = value;
+    _save();
+  }
 
   // flag used during initialization
   bool _blocked = false;
@@ -187,7 +221,7 @@ class Soundboard extends Component with HasGameData {
   String? pending_music;
   double? fade_out_volume;
 
-  toggleMute() => _muted = !_muted;
+  toggleMute() => muted = !muted;
 
   clear(String filename) => FlameAudio.audioCache.clear(filename);
 
@@ -300,9 +334,9 @@ class Soundboard extends Component with HasGameData {
     }
   }
 
-  play_one_shot_sample(String filename, {double? volume}) async {
+  play_one_shot_sample(String filename) async {
     if (kIsWeb) {
-      final it = await FlameAudio.play(filename, volume: volume ?? _voice);
+      final it = await FlameAudio.play(filename, volume: _sound);
       it.setReleaseMode(ReleaseMode.release);
       return;
     }
@@ -311,7 +345,7 @@ class Soundboard extends Component with HasGameData {
 
     logVerbose('play sample $filename');
     final data = await _make_sample('audio/$filename.raw');
-    _play_state.add(PlayState(data, volume: volume ?? _voice));
+    _play_state.add(PlayState(data, volume: _sound));
   }
 
   play_music(String filename) async {
@@ -406,10 +440,18 @@ class Soundboard extends Component with HasGameData {
     audio_mode = AudioMode.from_name(data['audio_mode'] ?? audio_mode.name);
     brick_notes = data['brick_notes'] ?? brick_notes;
     stream_music = data['stream_music'] ?? stream_music;
+    _master = data['master'] ?? _master;
+    _music = data['music'] ?? _music;
+    _muted = data['muted'] ?? _muted;
+    _sound = data['sound'] ?? _sound;
   }
 
   @override
   GameData save_state(Map<String, dynamic> data) => data
+    ..['master'] = _master
+    ..['music'] = _music
+    ..['muted'] = _muted
+    ..['sound'] = _sound
     ..['audio_mode'] = audio_mode.name
     ..['brick_notes'] = brick_notes
     ..['stream_music'] = stream_music;

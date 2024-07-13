@@ -6,6 +6,7 @@ import 'components/basic_menu.dart';
 import 'components/basic_menu_button.dart';
 import 'components/flow_text.dart';
 import 'components/soft_keys.dart';
+import 'components/volume_component.dart';
 import 'core/common.dart';
 import 'core/functions.dart';
 import 'core/screens.dart';
@@ -85,7 +86,45 @@ class AudioMenu extends GameScriptComponent {
       size: Vector2(160 + 64, 24 + 16),
       anchor: Anchor.topLeft,
     ));
+
+    add(_master = VolumeComponent(
+      bg_nine_patch: await image('button_plain.png'),
+      label: 'Master Volume - / +',
+      position: Vector2(16, 46),
+      anchor: Anchor.topLeft,
+      size: Vector2(96, 32),
+      key_down: '-',
+      key_up: '+',
+      change: (volume) => soundboard.master = volume,
+      volume: () => soundboard.master,
+    ));
+    add(_music = VolumeComponent(
+      bg_nine_patch: await image('button_plain.png'),
+      label: 'Music Volume [ / ]',
+      position: Vector2(16, 46 + 34),
+      anchor: Anchor.topLeft,
+      size: Vector2(96, 32),
+      key_down: '[',
+      key_up: ']',
+      change: (volume) => soundboard.music = volume,
+      volume: () => soundboard.music,
+    ));
+    add(_sound = VolumeComponent(
+      bg_nine_patch: await image('button_plain.png'),
+      label: 'Sound Volume { / }',
+      position: Vector2(16, 46 + 34 * 2),
+      anchor: Anchor.topLeft,
+      size: Vector2(96, 32),
+      key_down: '{',
+      key_up: '}',
+      change: (volume) => soundboard.sound = volume,
+      volume: () => soundboard.sound,
+    ));
   }
+
+  late final VolumeComponent _master;
+  late final VolumeComponent _music;
+  late final VolumeComponent _sound;
 
   _selected(AudioMenuEntry it) {
     if (it == AudioMenuEntry.brick_notes) {
@@ -104,16 +143,28 @@ class AudioMenu extends GameScriptComponent {
     switch (it) {
       case AudioMenuEntry.music_and_sound:
         soundboard.audio_mode = AudioMode.music_and_sound;
+        _master.isVisible = true;
+        _music.isVisible = true;
+        _sound.isVisible = true;
         _make_sound();
       case AudioMenuEntry.music_only:
         soundboard.audio_mode = AudioMode.music_only;
+        _master.isVisible = true;
+        _music.isVisible = true;
+        _sound.isVisible = false;
       case AudioMenuEntry.sound_only:
         soundboard.audio_mode = AudioMode.sound_only;
+        _master.isVisible = true;
+        _music.isVisible = false;
+        _sound.isVisible = true;
         _make_sound();
       case AudioMenuEntry.brick_notes:
         break;
       case AudioMenuEntry.silent_mode:
         soundboard.audio_mode = AudioMode.silent;
+        _master.isVisible = false;
+        _music.isVisible = false;
+        _sound.isVisible = false;
       case AudioMenuEntry.stream_music:
         break;
       case null:
