@@ -87,8 +87,8 @@ class GameScreen extends PositionComponent
     await add(flash_text);
     await add(power_ups);
     await add(laser);
-    await add(player);
     await add(slow_down_area);
+    await add(player);
     await add(plasma_blasts);
     await add(Teleports());
 

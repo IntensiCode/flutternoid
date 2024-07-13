@@ -85,6 +85,7 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
 
   void reset(PlayerState state) {
     this.state = state;
+    priority = 2;
     _seen_ball = false;
     state_progress = 0.0;
     expanded = 0;
