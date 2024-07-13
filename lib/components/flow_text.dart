@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:collection/collection.dart';
 import 'package:flame/components.dart';
 import 'package:flutternoid/core/functions.dart';
@@ -41,13 +43,13 @@ class FlowText extends PositionComponent with AutoDispose, GameScriptFunctions, 
     // _visible_lines = (size.y - _insets.y * 2 + _line_height / 2) ~/ _line_height;
 
     var visible_lines = 0;
-    var taken_height = _insets.y * 2;
+    var taken_height = _insets.y;
     for (final it in _lines) {
       taken_height += it.isEmpty ? _line_height / 2 : _line_height;
       if (taken_height > size.y) break;
       visible_lines++;
     }
-    _visible_lines = visible_lines;
+    _visible_lines = max(1, visible_lines);
   }
 
   @override
