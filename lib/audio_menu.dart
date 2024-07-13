@@ -1,7 +1,6 @@
 import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutternoid/components/flow_text.dart';
 
 import 'components/basic_menu.dart';
@@ -20,6 +19,7 @@ enum AudioMenuEntry {
   music_only,
   sound_only,
   silent_mode,
+  brick_notes,
   stream_music,
 }
 
@@ -30,6 +30,7 @@ class AudioMenu extends GameScriptComponent {
   AudioMenu({required this.show_back, required this.music_theme});
 
   late final BasicMenu menu;
+  late final BasicMenuButton brick_notes;
   late final BasicMenuButton stream_music;
 
   @override
@@ -46,7 +47,7 @@ class AudioMenu extends GameScriptComponent {
       AudioMode.silent => AudioMenuEntry.silent_mode,
     };
 
-    final buttonSheet = await sheetI('button_menu.png', 1, 2);
+    final buttonSheet = await sheetI('button_option.png', 1, 2);
     menu = added(BasicMenu<AudioMenuEntry>(buttonSheet, tiny_font, _selected, spacing: 2)
       ..addEntry(AudioMenuEntry.music_and_sound, 'Music & Sound')
       ..addEntry(AudioMenuEntry.music_only, 'Music Only')
@@ -54,10 +55,11 @@ class AudioMenu extends GameScriptComponent {
       ..addEntry(AudioMenuEntry.silent_mode, 'Silent Mode')
       ..preselectEntry(preselected));
 
-    if (kIsWeb) {
-      stream_music = menu.addEntry(AudioMenuEntry.stream_music, 'Stream Music', anchor: Anchor.centerLeft);
-      stream_music.checked = soundboard.stream_music;
-    }
+    brick_notes = menu.addEntry(AudioMenuEntry.brick_notes, 'Brick Notes', anchor: Anchor.centerLeft);
+    brick_notes.checked = soundboard.stream_music;
+
+    stream_music = menu.addEntry(AudioMenuEntry.stream_music, 'Stream Music', anchor: Anchor.centerLeft);
+    stream_music.checked = soundboard.stream_music;
 
     menu.position.setValues(xCenter, yCenter);
     menu.anchor = Anchor.center;
@@ -66,20 +68,23 @@ class AudioMenu extends GameScriptComponent {
 
     if (show_back) softkeys('Back', null, (_) => popScreen());
 
-    if (kIsWeb) {
-      add(FlowText(
-        text: "If music isn't playing, try toggling 'Stream Music' option.",
-        font: tiny_font,
-        insets: Vector2(5, 5),
-        position: Vector2(160, 174),
-        size: Vector2(160, 24),
-        anchor: Anchor.topLeft,
-      ));
-    }
+    add(FlowText(
+      text: "If game sounds are glitched, try turning 'Brick Notes' off.\n\n"
+          "If music isn't playing, try toggling 'Stream Music' option.",
+      font: tiny_font,
+      insets: Vector2(5, 5),
+      position: Vector2(160 - 64, 174 - 16),
+      size: Vector2(160 + 64, 24 + 16),
+      anchor: Anchor.topLeft,
+    ));
   }
 
   _selected(AudioMenuEntry it) {
-    if (kIsWeb && it == AudioMenuEntry.stream_music) {
+    if (it == AudioMenuEntry.brick_notes) {
+      soundboard.brick_notes = !soundboard.brick_notes;
+      brick_notes.checked = soundboard.brick_notes;
+    }
+    if (it == AudioMenuEntry.stream_music) {
       soundboard.stream_music = !soundboard.stream_music;
       stream_music.checked = soundboard.stream_music;
     }
@@ -87,7 +92,7 @@ class AudioMenu extends GameScriptComponent {
   }
 
   _preselected(AudioMenuEntry? it) {
-    logInfo('audio menu preselected: $it');
+    logVerbose('audio menu preselected: $it');
     switch (it) {
       case AudioMenuEntry.music_and_sound:
         soundboard.audio_mode = AudioMode.music_and_sound;
@@ -97,6 +102,8 @@ class AudioMenu extends GameScriptComponent {
       case AudioMenuEntry.sound_only:
         soundboard.audio_mode = AudioMode.sound_only;
         _make_sound();
+      case AudioMenuEntry.brick_notes:
+        break;
       case AudioMenuEntry.silent_mode:
         soundboard.audio_mode = AudioMode.silent;
       case AudioMenuEntry.stream_music:

@@ -62,6 +62,16 @@ class PlayState {
 }
 
 class Soundboard extends Component with HasGameData {
+  bool _brick_notes = true;
+
+  bool get brick_notes => _brick_notes;
+
+  set brick_notes(bool value) {
+    if (_brick_notes == value) return;
+    _brick_notes = value;
+    save('soundboard', this);
+  }
+
   bool _stream_music = true;
 
   bool get stream_music => _stream_music;
@@ -261,7 +271,7 @@ class Soundboard extends Component with HasGameData {
     if (_blocked) return;
 
     if (kIsWeb) {
-      final it = sound == Sound.wall_hit ? _web_notes[note_index ?? 0] : _sounds[sound];
+      final it = (sound == Sound.wall_hit && soundboard.brick_notes) ? _web_notes[note_index ?? 0] : _sounds[sound];
       if (it == null) {
         logError('null sound: $sound');
         preload();
@@ -274,7 +284,7 @@ class Soundboard extends Component with HasGameData {
       return;
     }
 
-    if (sound == Sound.wall_hit) {
+    if (sound == Sound.wall_hit && soundboard.brick_notes) {
       final index = note_index ?? 0;
       if (_notes.length <= index) {
         for (int i = _notes.length; i <= max(20, index); i++) {
@@ -394,12 +404,14 @@ class Soundboard extends Component with HasGameData {
   @override
   void load_state(Map<String, dynamic> data) {
     audio_mode = AudioMode.from_name(data['audio_mode'] ?? audio_mode.name);
+    brick_notes = data['brick_notes'] ?? brick_notes;
     stream_music = data['stream_music'] ?? stream_music;
   }
 
   @override
   GameData save_state(Map<String, dynamic> data) => data
     ..['audio_mode'] = audio_mode.name
+    ..['brick_notes'] = brick_notes
     ..['stream_music'] = stream_music;
 
   // Implementation

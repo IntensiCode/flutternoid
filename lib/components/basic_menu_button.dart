@@ -1,4 +1,3 @@
-import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
@@ -52,7 +51,6 @@ class BasicMenuButton extends SpriteComponent with HasVisibility, TapCallbacks {
   BitmapText? _checked;
 
   set checked(bool value) {
-    logInfo(value);
     _checked?.removeFromParent();
     final p = Vector2.copy(size);
     p.x -= 6;

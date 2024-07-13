@@ -14,10 +14,10 @@ import 'game/game_controller.dart';
 import 'help_screen.dart';
 import 'hiscore_screen.dart';
 import 'loading_screen.dart';
+import 'options.dart';
 import 'the_end.dart';
 import 'title_screen.dart';
 import 'util/extensions.dart';
-import 'options.dart';
 import 'web_play_screen.dart';
 
 class MainController extends Forge2DWorld implements ScreenNavigation {
@@ -65,7 +65,7 @@ class MainController extends Forge2DWorld implements ScreenNavigation {
     _triggered = screen;
     _previous = StackTrace.current;
 
-    logInfo('show $screen');
+    if (skip_fade_out) logInfo('show $screen');
     logVerbose('screen stack: $_stack');
     logVerbose('children: ${children.map((it) => it.runtimeType)}');
 
@@ -77,6 +77,7 @@ class MainController extends Forge2DWorld implements ScreenNavigation {
         } else if (_triggered != screen) {
           return;
         }
+        logInfo('show $screen');
         showScreen(screen, skip_fade_out: skip_fade_out, skip_fade_in: skip_fade_in);
       });
     } else {

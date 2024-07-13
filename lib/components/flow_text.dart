@@ -38,7 +38,16 @@ class FlowText extends PositionComponent with AutoDispose, GameScriptFunctions, 
     _lines = text.lines().map((it) => _font.reflow(it, avail_width.toInt(), scale: _font_scale)).flattened.toList();
 
     _line_height = _font.lineHeight(_font_scale) * 1.1;
-    _visible_lines = (size.y - _insets.y * 2) ~/ _line_height;
+    // _visible_lines = (size.y - _insets.y * 2 + _line_height / 2) ~/ _line_height;
+
+    var visible_lines = 0;
+    var taken_height = _insets.y * 2;
+    for (final it in _lines) {
+      taken_height += it.isEmpty ? _line_height / 2 : _line_height;
+      if (taken_height > size.y) break;
+      visible_lines++;
+    }
+    _visible_lines = visible_lines;
   }
 
   @override
@@ -54,7 +63,7 @@ class FlowText extends PositionComponent with AutoDispose, GameScriptFunctions, 
     final add_pos = Vector2.copy(_insets);
     final lines = _lines.take(_visible_lines).map((line) {
       final it = BitmapText(text: line, font: _font, anchor: Anchor.topLeft, position: add_pos, scale: _font_scale);
-      add_pos.y += _line_height;
+      add_pos.y += line.isEmpty ? _line_height / 2 : _line_height;
       return it;
     });
 
