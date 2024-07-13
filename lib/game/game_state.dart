@@ -47,6 +47,8 @@ class GameState extends Component with AutoDispose, HasGameData {
     logInfo('reset game state: $level_number_starting_at_1 $score $lives $blasts');
   }
 
+  preload() async => await load('game_state', this);
+
   delete() async => await clear('game_state');
 
   save_checkpoint() async => await save('game_state', this);

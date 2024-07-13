@@ -76,12 +76,19 @@ class TitleScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
       insets: Vector2(5, 5),
       position: Vector2(0, 66),
       anchor: Anchor.topLeft,
-      size: Vector2(120, 112 - 8 ),
+      size: Vector2(120, 112 - 8),
     ));
     _cheats.isVisible = dev;
 
     first_time_playing = await first_time();
     logInfo('first time playing? $first_time_playing');
+
+    await state.preload();
+
+    if (first_time_playing || state.level_number_starting_at_1 == 1) {
+      await state.delete();
+      state.reset();
+    }
   }
 
   late final FlowText _cheats;
@@ -122,11 +129,8 @@ class TitleScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
   void _showScreen(Screen it) {
     if (children.whereType<GameDialog>().isNotEmpty) return;
 
-    logInfo('check1');
     if (it == Screen.game) {
-      logInfo('check2');
       if (state.level_number_starting_at_1 > 1) {
-        logInfo('check3');
         add(GameDialog(
           {
             GameKey.soft1: () async {
@@ -148,7 +152,6 @@ class TitleScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
         ));
         return;
       } else if (first_time_playing) {
-        logInfo('check4');
         help_triggered_at_first_start = true;
         showScreen(Screen.help);
         return;
