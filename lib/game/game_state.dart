@@ -3,19 +3,20 @@ import 'package:flame/components.dart';
 
 import '../core/messaging.dart';
 import '../util/auto_dispose.dart';
-import '../util/on_message.dart';
 import 'game_messages.dart';
 import 'game_object.dart';
-import 'soundboard.dart';
 import 'storage.dart';
 
 Future<bool> first_time() async {
   final map = await load_data('first_time');
   if (map == null) return true;
-  return map['first_time'] != null;
+  logInfo('first time data: $map');
+  return map['first_time'] != false;
 }
 
-Future save_not_first_time() async => (await save_data('first_time', {'first_time': false}));
+Future save_not_first_time() async {
+  await save_data('first_time', {'first_time': false});
+}
 
 final state = GameState();
 
@@ -47,24 +48,14 @@ class GameState extends Component with AutoDispose, HasGameData {
     logInfo('reset game state: $level_number_starting_at_1 $score $lives $blasts');
   }
 
-  preload() async => await load('game_state', this);
+  preload() async {
+    await load('game_state', this);
+    logInfo('loaded game state: $level_number_starting_at_1');
+  }
 
   delete() async => await clear('game_state');
 
   save_checkpoint() async => await save('game_state', this);
-
-  // Component
-
-  @override
-  onLoad() async {
-    super.onLoad();
-    await load('game_state', this);
-    logInfo('loaded game state: $level_number_starting_at_1');
-    onMessage<ExtraLife>((_) {
-      lives++;
-      soundboard.play(Sound.extra_life_jingle);
-    });
-  }
 
   // HasGameData
 

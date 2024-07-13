@@ -30,6 +30,7 @@ import 'player.dart';
 import 'power_ups.dart';
 import 'shadows.dart';
 import 'slow_down_area.dart';
+import 'soundboard.dart';
 import 'teleports.dart';
 import 'visual_configuration.dart';
 
@@ -94,6 +95,10 @@ class GameScreen extends PositionComponent
 
     onMessage<PlayerReady>((it) => add(Ball()));
     onMessage<MultiBall>((_) => _split_ball());
+    onMessage<ExtraLife>((_) {
+      state.lives++;
+      soundboard.play(Sound.extra_life_jingle);
+    });
 
     if (dev) {
       onKey('1', () => sendMessage(SpawnExtra(ExtraId.laser)));
