@@ -153,7 +153,7 @@ class PowerUp extends SpriteAnimationComponent {
       ExtraId.catcher => Sound.catcher,
       ExtraId.disruptor => Sound.disruptor,
       ExtraId.expander => Sound.expander,
-      ExtraId.extra_life => Sound.extra_life_jingle,
+      ExtraId.extra_life => Sound.extra_life,
       ExtraId.multi_ball => Sound.multi_ball,
       ExtraId.slow_down => Sound.slow_down,
     });

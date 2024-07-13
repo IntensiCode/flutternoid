@@ -40,6 +40,8 @@ class LevelBonus extends PositionComponent with AutoDispose, GameScriptFunctions
       it.fadeInDeep();
     }
 
+    soundboard.play_one_shot_sample('sound/level_complete.ogg');
+
     if (game_complete) {
       at(1.0, () => content.lines.add(''));
       at(0.0, () => content.lines.add('DOH DEFEATED:'));
@@ -101,11 +103,18 @@ class LevelBonus extends PositionComponent with AutoDispose, GameScriptFunctions
   double counted_blasts = 0;
   double and_game_complete = 0;
 
+  double wait = -2;
   double counted_seconds = 0;
   double all_enemies = -1;
   double level_complete = -1;
 
+  // TODO remake into script, too
   void _level_complete(double dt) {
+    if (wait < 0) {
+      wait += dt;
+      return;
+    }
+
     final seconds = level.level_time.round();
     if (seconds > 0) {
       if (counted_seconds < seconds) {
@@ -135,7 +144,7 @@ class LevelBonus extends PositionComponent with AutoDispose, GameScriptFunctions
         if (all_enemies >= 1) {
           content.lines.add('*EXTRA PLASMA BLAST*');
           state.blasts++;
-          soundboard.play(Sound.extra_blast);
+          soundboard.play_one_shot_sample('sound/extra_blast.ogg');
         }
         return;
       }
@@ -156,7 +165,7 @@ class LevelBonus extends PositionComponent with AutoDispose, GameScriptFunctions
       if (level_complete >= 1) {
         content.lines.add('*EXTRA PLASMA BLAST*');
         state.blasts++;
-        soundboard.play(Sound.extra_blast);
+        soundboard.play_one_shot_sample('sound/extra_blast.ogg');
       }
       return;
     }
