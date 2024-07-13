@@ -31,6 +31,11 @@ class BasicMenu<T> extends PositionComponent with AutoDispose, HasAutoDisposeSho
     super.anchor,
   });
 
+  void _onSelected(T id) {
+    onPreselected(id);
+    onSelected(id);
+  }
+
   @override
   onMount() {
     if (defaultShortcuts) {
@@ -64,7 +69,7 @@ class BasicMenu<T> extends PositionComponent with AutoDispose, HasAutoDisposeSho
       text,
       sheet: buttonSheet,
       font: font,
-      onTap: () => onSelected(id),
+      onTap: () => _onSelected(id),
       text_anchor: anchor,
     );
     _entries.add((id, it));
@@ -97,6 +102,6 @@ class BasicMenu<T> extends PositionComponent with AutoDispose, HasAutoDisposeSho
 
   select() {
     final it = _preselected;
-    if (it != null) onSelected(it);
+    if (it != null) _onSelected(it);
   }
 }
