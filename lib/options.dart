@@ -36,7 +36,11 @@ class Options extends GameScriptComponent with HasAutoDisposeShortcuts, Keyboard
     textXY('Video Mode', xCenter, 16, scale: 2);
 
     final buttonSheet = await sheetI('button_option.png', 1, 2);
-    final menu = added(BasicMenu<OptionsMenuEntry>(buttonSheet, tiny_font, _selected));
+    final menu = added(BasicMenu<OptionsMenuEntry>(
+      button: buttonSheet,
+      font: tiny_font,
+      onSelected: _selected,
+    ));
     pixelate = menu.addEntry(OptionsMenuEntry.pixelate, 'Pixelate FX', anchor: Anchor.centerLeft);
     pixelate_screen = menu.addEntry(OptionsMenuEntry.pixelate_screen, 'Pixelate Screen', anchor: Anchor.centerLeft);
     animate_stars = menu.addEntry(OptionsMenuEntry.animate_stars, 'Animate Stars', anchor: Anchor.centerLeft);

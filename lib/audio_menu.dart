@@ -1,10 +1,10 @@
 import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
-import 'package:flutternoid/components/flow_text.dart';
 
 import 'components/basic_menu.dart';
 import 'components/basic_menu_button.dart';
+import 'components/flow_text.dart';
 import 'components/soft_keys.dart';
 import 'core/common.dart';
 import 'core/functions.dart';
@@ -40,6 +40,7 @@ class AudioMenu extends GameScriptComponent {
     fontSelect(tiny_font, scale: 2);
     textXY('Audio Mode', xCenter, 20, scale: 2, anchor: Anchor.topCenter);
 
+    logInfo('initial audio mode: ${soundboard.audio_mode}');
     final preselected = switch (soundboard.audio_mode) {
       AudioMode.music_and_sound => AudioMenuEntry.music_and_sound,
       AudioMode.music_only => AudioMenuEntry.music_only,
@@ -48,7 +49,14 @@ class AudioMenu extends GameScriptComponent {
     };
 
     final buttonSheet = await sheetI('button_option.png', 1, 2);
-    menu = added(BasicMenu<AudioMenuEntry>(buttonSheet, tiny_font, _selected, spacing: 2)
+    menu = added(BasicMenu<AudioMenuEntry>(
+      button: buttonSheet,
+      font: tiny_font,
+      onSelected: _selected,
+      spacing: 2,
+      fixed_position: Vector2(gameWidth - 16, 48),
+      fixed_anchor: Anchor.topRight,
+    )
       ..addEntry(AudioMenuEntry.music_and_sound, 'Music & Sound')
       ..addEntry(AudioMenuEntry.music_only, 'Music Only')
       ..addEntry(AudioMenuEntry.sound_only, 'Sound Only')

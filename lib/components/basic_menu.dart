@@ -8,7 +8,7 @@ import '../util/bitmap_font.dart';
 import 'basic_menu_button.dart';
 
 class BasicMenu<T> extends PositionComponent with AutoDispose, HasAutoDisposeShortcuts {
-  final SpriteSheet buttonSheet;
+  final SpriteSheet button;
   final BitmapFont font;
   final Function(T) onSelected;
   final bool defaultShortcuts;
@@ -20,16 +20,20 @@ class BasicMenu<T> extends PositionComponent with AutoDispose, HasAutoDisposeSho
 
   Function(T?) onPreselected = (_) {};
 
-  BasicMenu(
-    this.buttonSheet,
-    this.font,
-    this.onSelected, {
+  BasicMenu({
+    required this.button,
+    required this.font,
+    required this.onSelected,
     this.defaultShortcuts = true,
     this.spacing = 10,
-    super.position,
-    super.size,
-    super.anchor,
-  });
+    this.fixed_position,
+    this.fixed_size,
+    this.fixed_anchor,
+  }) : super(anchor: Anchor.center);
+
+  Vector2? fixed_position;
+  Vector2? fixed_size;
+  Anchor? fixed_anchor;
 
   void _onSelected(T id) {
     onPreselected(id);
@@ -47,7 +51,8 @@ class BasicMenu<T> extends PositionComponent with AutoDispose, HasAutoDisposeSho
       onKey('<Space>', () => select());
     }
 
-    final width = size.isZero() ? gameWidth : size.x;
+    final button_width = button.getSpriteById(0).srcSize.x;
+    final width = size.isZero() ? button_width : size.x;
 
     var offset = 0.0;
     for (final (_, it) in _entries) {
@@ -59,15 +64,19 @@ class BasicMenu<T> extends PositionComponent with AutoDispose, HasAutoDisposeSho
     }
 
     if (size.isZero()) {
-      size.x = gameWidth;
+      size.x = button_width;
       size.y = offset;
     }
+
+    if (fixed_position != null) position.setFrom(fixed_position!);
+    if (fixed_size != null) size.setFrom(fixed_size!);
+    if (fixed_anchor != null) anchor = fixed_anchor!;
   }
 
   BasicMenuButton addEntry(T id, String text, {Anchor anchor = Anchor.center}) {
     final it = BasicMenuButton(
       text,
-      sheet: buttonSheet,
+      sheet: button,
       font: font,
       onTap: () => _onSelected(id),
       text_anchor: anchor,
