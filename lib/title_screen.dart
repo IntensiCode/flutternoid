@@ -21,13 +21,14 @@ class TitleScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
   static const y = 42.0;
 
   static bool seen = false;
+  static bool music = false;
   static bool first_time_playing = false;
 
   @override
   onLoad() async {
     if (help_triggered_at_first_start) {
       help_triggered_at_first_start = false;
-      soundboard.fade_out_music();
+      if (music) soundboard.fade_out_music();
       showScreen(Screen.game);
       return;
     }
@@ -94,6 +95,7 @@ class TitleScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
   @override
   void onMount() {
     super.onMount();
+    if (!seen) music = true;
     if (!seen) soundboard.play_one_shot_sample('arkanoid.ogg');
     if (!seen) soundboard.play_music('music/theme.mp3');
     // onKey('<Space>', () => _showScreen(Screen.game)); handled by _insert_coin below
@@ -131,11 +133,11 @@ class TitleScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
             GameKey.soft1: () async {
               await state.delete();
               await state.reset();
-              soundboard.fade_out_music();
+              if (music) soundboard.fade_out_music();
               showScreen(Screen.game);
             },
             GameKey.soft2: () {
-              soundboard.fade_out_music();
+              if (music) soundboard.fade_out_music();
               showScreen(Screen.game);
             },
           },
@@ -153,7 +155,7 @@ class TitleScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
       }
     }
 
-    if (it == Screen.game) soundboard.fade_out_music();
+    if (it == Screen.game) if (music) soundboard.fade_out_music();
     showScreen(it);
   }
 
