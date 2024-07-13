@@ -77,9 +77,7 @@ class Soundboard extends Component with HasGameData {
     if (_audio_mode == mode) return;
     _audio_mode = mode;
 
-    logVerbose('change audio mode: $mode');
-
-    _save();
+    logInfo('change audio mode: $mode');
 
     switch (mode) {
       case AudioMode.music_and_sound:
@@ -99,6 +97,8 @@ class Soundboard extends Component with HasGameData {
         _sound = 1.0;
         _muted = false;
     }
+
+    _save();
 
     active_music?.volume = _music;
     active_music?.paused = _music == 0;
@@ -328,6 +328,7 @@ class Soundboard extends Component with HasGameData {
 
   @override
   void load_state(Map<String, dynamic> data) {
+    logInfo('load soundboard: $data');
     audio_mode = AudioMode.from_name(data['audio_mode'] ?? audio_mode.name);
     brick_notes = data['brick_notes'] ?? brick_notes;
     _master = data['master'] ?? _master;
