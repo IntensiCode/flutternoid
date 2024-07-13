@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart' hide World;
 import 'package:flame/sprite.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
@@ -48,10 +47,7 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
 
   BallState get state => _state;
 
-  set state(BallState value) {
-    logVerbose('new ball state: $value');
-    _state = value;
-  }
+  set state(BallState value) => _state = value;
 
   var state_progress = 0.0;
   var disruptor = 0.0;
@@ -84,7 +80,6 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
 
     if (_jiggle > 0) {
       final factor = max(0.0, _jiggle - 0.25);
-      logInfo('jiggle factor: $factor');
       _push_delta.rotate(rng.nextDoublePM(factor));
       _push_delta.scale(1 + factor * 3);
     }
@@ -155,16 +150,13 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
     super.postSolve(other, contact, impulse);
     if (other is Brick) {
       if (body.linearVelocity.x.abs() < configuration.min_ball_x_speed_after_brick_hit) {
-        logInfo('brick bump x speed up');
         body.linearVelocity.x += body.linearVelocity.x.sign;
       } else if (body.linearVelocity.length < configuration.max_ball_speed) {
-        logInfo('brick bump speed up');
         body.linearVelocity.scale(1.025);
       }
     } else if (other is Wall) {
       if (body.linearVelocity.y.abs() < configuration.min_ball_y_speed) {
         if (body.position.y > visual.game_pixels.y * 0.1) {
-          logInfo('wall bump y speed up');
           body.linearVelocity.y += body.linearVelocity.y.sign;
         }
       }
@@ -229,7 +221,6 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
         state_progress += dt;
         if (state_progress >= 1.0) {
           state = BallState.gone;
-          logInfo('ball exploded');
           removeFromParent();
         }
     }
@@ -283,16 +274,11 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
       body.linearVelocity.normalize();
       body.linearVelocity.scale(configuration.max_ball_speed);
     } else if (body.linearVelocity.y.abs() < configuration.min_ball_y_speed) {
-      logInfo('ball speed: $current_speed');
-      logInfo('ball velocity: ${body.linearVelocity}');
-      logInfo('y speed < min');
       final speed = current_speed;
       body.linearVelocity.y = configuration.min_ball_speed * body.linearVelocity.y.sign;
       body.linearVelocity.normalize();
       body.linearVelocity.scale(speed);
-      logInfo('corrected velocity: ${body.linearVelocity}');
     } else if (current_speed < configuration.opt_ball_speed && position.y < model.slow_down_area.slow_down_top) {
-      logInfo('auto speed up');
       body.linearVelocity *= 1.01;
     } else if (body.linearVelocity.y.round() == 0) {
       final speed = body.linearVelocity.normalize();
