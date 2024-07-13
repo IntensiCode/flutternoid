@@ -369,7 +369,7 @@ class Soundboard extends Component with HasGameData {
   }
 
   _mix_stream() async {
-    const hz = 10;
+    const hz = 25;
     const rate = 11025;
     const step = rate ~/ hz;
     final mixed = Float32List(step);
