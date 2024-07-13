@@ -244,7 +244,7 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
 
   @override
   void renderTree(Canvas canvas) {
-    if (visual.pixelate && false) {
+    if (visual.pixelate_screen) {
       final recorder = PictureRecorder();
       super.renderTree(Canvas(recorder));
       final picture = recorder.endRecording();

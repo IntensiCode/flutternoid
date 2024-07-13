@@ -1,8 +1,8 @@
 import 'package:flame/components.dart';
 
 import '../core/common.dart' as common;
-import 'storage.dart';
 import 'game_object.dart';
+import 'storage.dart';
 
 final visual = VisualConfiguration.instance;
 
@@ -12,11 +12,19 @@ class VisualConfiguration extends Component with HasGameData {
   VisualConfiguration._();
 
   bool _pixelate = true;
+  bool _pixelate_screen = false;
 
   bool get pixelate => _pixelate;
 
+  bool get pixelate_screen => _pixelate_screen;
+
   set pixelate(bool value) {
     _pixelate = value;
+    save('visual', this);
+  }
+
+  set pixelate_screen(bool value) {
+    _pixelate_screen = value;
     save('visual', this);
   }
 
@@ -60,11 +68,13 @@ class VisualConfiguration extends Component with HasGameData {
   @override
   void load_state(Map<String, dynamic> data) {
     _pixelate = data['pixelate'] ?? _pixelate;
+    _pixelate_screen = data['pixelate_screen'] ?? _pixelate;
     debug = data['debug'] ?? debug;
   }
 
   @override
   GameData save_state(Map<String, dynamic> data) => data
     ..['pixelate'] = _pixelate
+    ..['pixelate_screen'] = _pixelate_screen
     ..['debug'] = debug;
 }

@@ -13,7 +13,7 @@ import 'game_particles.dart';
 class FlashText extends GameParticles<_FlashLetter> {
   FlashText() : super(_FlashLetter.new);
 
-  static const _font_scale = 0.5;
+  double get _font_scale => visual.pixelate_screen ? 1.0 :  0.5;
 
   late final BitmapFont _font;
 

@@ -5,6 +5,7 @@ import 'components/soft_keys.dart';
 import 'core/common.dart';
 import 'core/functions.dart';
 import 'core/screens.dart';
+import 'input/keys.dart';
 import 'scripting/game_script.dart';
 import 'util/fonts.dart';
 
@@ -34,5 +35,17 @@ class HelpScreen extends GameScriptComponent {
 
     final label = help_triggered_at_first_start ? 'Start' : 'Back';
     softkeys(label, null, (_) => popScreen());
+
+    add(keys);
+  }
+
+  final keys = Keys();
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    if (keys.check_and_consume(GameKey.fire1)) {
+      popScreen();
+    }
   }
 }
