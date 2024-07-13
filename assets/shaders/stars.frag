@@ -12,10 +12,10 @@ out vec4 fragColor;
 // Star Nest by Pablo Roman Andrioli
 // License: MIT
 
-#define iterations 15
+#define iterations 11
 #define formuparam 0.54
 
-#define volsteps 15
+#define volsteps 11
 #define stepsize 0.1
 
 #define zoom   2.900

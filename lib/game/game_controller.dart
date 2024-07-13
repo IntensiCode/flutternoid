@@ -69,6 +69,7 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
     onMessage<GamePhaseUpdate>((it) {
       logInfo('game phase update: ${it.phase}');
       _phase_handler(it.phase).call();
+      _stars.split_mode = it.phase == GamePhase.game_on;
     });
 
     model.phase = GamePhase.enter_round;
