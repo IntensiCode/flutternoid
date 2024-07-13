@@ -12,10 +12,10 @@ out vec4 fragColor;
 // Star Nest by Pablo Roman Andrioli
 // License: MIT
 
-#define iterations 12
-#define formuparam 0.65
+#define iterations 15
+#define formuparam 0.54
 
-#define volsteps 20
+#define volsteps 15
 #define stepsize 0.1
 
 #define zoom   2.900
@@ -23,9 +23,9 @@ out vec4 fragColor;
 #define speed  0.001
 
 #define brightness 0.0005
-#define darkmatter 0.500
-#define distfading 0.830
-#define saturation 0.700
+#define darkmatter 0.900
+#define distfading 0.930
+#define saturation 0.900
 
 void main()
 {
