@@ -7,6 +7,6 @@ import 'flutternoid.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  logLevel = kDebugMode ? LogLevel.debug : LogLevel.info;
+  logLevel = kDebugMode ? LogLevel.debug : LogLevel.none;
   runApp(GameWidget(game: Flutternoid()));
 }
