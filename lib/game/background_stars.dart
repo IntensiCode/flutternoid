@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:flame/components.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutternoid/game/game_context.dart';
 
 import '../core/common.dart';
 
@@ -41,7 +41,7 @@ class BackgroundStars extends PositionComponent with HasPaint {
     final shader_paint = pixelPaint();
     shader_paint.shader = shader;
 
-    if (!kIsWeb) {
+    if (!visual.animate_stars) {
       if (_snapshot != null) {
         canvas.drawImage(_snapshot!, Offset.zero, paint);
       } else {

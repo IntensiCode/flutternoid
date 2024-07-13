@@ -18,6 +18,7 @@ import 'util/fonts.dart';
 enum OptionsMenuEntry {
   pixelate,
   pixelate_screen,
+  animate_stars,
 }
 
 class Options extends GameScriptComponent with HasAutoDisposeShortcuts, KeyboardHandler, HasGameKeys {
@@ -25,6 +26,7 @@ class Options extends GameScriptComponent with HasAutoDisposeShortcuts, Keyboard
 
   late final BasicMenuButton pixelate;
   late final BasicMenuButton pixelate_screen;
+  late final BasicMenuButton animate_stars;
 
   @override
   onLoad() async {
@@ -36,10 +38,12 @@ class Options extends GameScriptComponent with HasAutoDisposeShortcuts, Keyboard
     final buttonSheet = await sheetI('button_option.png', 1, 2);
     final menu = added(BasicMenu<OptionsMenuEntry>(buttonSheet, tiny_font, _selected));
     pixelate = menu.addEntry(OptionsMenuEntry.pixelate, 'Pixelate FX', anchor: Anchor.centerLeft);
-    pixelate_screen = menu.addEntry(OptionsMenuEntry.pixelate_screen, 'Pixelate Game Screen', anchor: Anchor.centerLeft);
+    pixelate_screen = menu.addEntry(OptionsMenuEntry.pixelate_screen, 'Pixelate Screen', anchor: Anchor.centerLeft);
+    animate_stars = menu.addEntry(OptionsMenuEntry.animate_stars, 'Animate Stars', anchor: Anchor.centerLeft);
 
     pixelate.checked = visual.pixelate;
     pixelate_screen.checked = visual.pixelate_screen;
+    animate_stars.checked = visual.animate_stars;
 
     menu.position.setValues(xCenter, yCenter);
     menu.anchor = Anchor.center;
@@ -52,11 +56,15 @@ class Options extends GameScriptComponent with HasAutoDisposeShortcuts, Keyboard
     softkeys('Back', null, (_) => popScreen());
 
     add(FlowText(
-      text: '"Pixelating Game Screen" is a bit more retro, but does not play well with the "hi-res physics". Give it a try anyway!',
+      text: '"Pixelate Screen" is a bit '
+          'more retro, but does not play '
+          'well with the "hi-res physics". '
+          'Give it a try anyway!\n\n'
+          '"Animate Stars" may break rendering on some devices.',
       font: tiny_font,
-      insets: Vector2(6,6),
-      position: Vector2(160, 159),
-      size: Vector2(160, 40),
+      insets: Vector2(4, 4),
+      position: Vector2(103, 151),
+      size: Vector2(216, 48),
       anchor: Anchor.topLeft,
     ));
   }
@@ -68,8 +76,11 @@ class Options extends GameScriptComponent with HasAutoDisposeShortcuts, Keyboard
         visual.pixelate = !visual.pixelate;
       case OptionsMenuEntry.pixelate_screen:
         visual.pixelate_screen = !visual.pixelate_screen;
+      case OptionsMenuEntry.animate_stars:
+        visual.animate_stars = !visual.animate_stars;
     }
     pixelate.checked = visual.pixelate;
     pixelate_screen.checked = visual.pixelate_screen;
+    animate_stars.checked = visual.animate_stars;
   }
 }

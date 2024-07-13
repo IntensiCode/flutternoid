@@ -1,4 +1,5 @@
 import 'package:flame/components.dart';
+import 'package:flutter/foundation.dart';
 
 import '../core/common.dart' as common;
 import 'game_object.dart';
@@ -13,10 +14,13 @@ class VisualConfiguration extends Component with HasGameData {
 
   bool _pixelate = true;
   bool _pixelate_screen = false;
+  bool _animate_stars = kIsWeb;
 
   bool get pixelate => _pixelate;
 
   bool get pixelate_screen => _pixelate_screen;
+
+  bool get animate_stars => _animate_stars;
 
   set pixelate(bool value) {
     _pixelate = value;
@@ -25,6 +29,11 @@ class VisualConfiguration extends Component with HasGameData {
 
   set pixelate_screen(bool value) {
     _pixelate_screen = value;
+    save('visual', this);
+  }
+
+  set animate_stars(bool value) {
+    _animate_stars = value;
     save('visual', this);
   }
 
@@ -69,6 +78,7 @@ class VisualConfiguration extends Component with HasGameData {
   void load_state(Map<String, dynamic> data) {
     _pixelate = data['pixelate'] ?? _pixelate;
     _pixelate_screen = data['pixelate_screen'] ?? _pixelate;
+    _animate_stars = data['animate_stars'] ?? _animate_stars;
     debug = data['debug'] ?? debug;
   }
 
@@ -76,5 +86,6 @@ class VisualConfiguration extends Component with HasGameData {
   GameData save_state(Map<String, dynamic> data) => data
     ..['pixelate'] = _pixelate
     ..['pixelate_screen'] = _pixelate_screen
+    ..['animate_stars'] = _animate_stars
     ..['debug'] = debug;
 }
