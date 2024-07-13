@@ -60,7 +60,7 @@ class PlayState {
 class Soundboard extends Component with HasGameData {
   void _save() => save('soundboard', this);
 
-  bool _brick_notes = true;
+  bool _brick_notes = !kIsWeb;
 
   bool get brick_notes => _brick_notes;
 
@@ -70,7 +70,7 @@ class Soundboard extends Component with HasGameData {
     _save();
   }
 
-  bool _stream_music = true;
+  bool _stream_music = !kIsWeb;
 
   bool get stream_music => _stream_music;
 
