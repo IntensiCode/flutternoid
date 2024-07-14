@@ -2,6 +2,7 @@ import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
 import 'package:flame/sprite.dart';
 import 'package:flutternoid/game/game_phase.dart';
+import 'package:flutternoid/util/extensions.dart';
 
 import '../core/functions.dart';
 import '../util/auto_dispose.dart';
@@ -38,6 +39,8 @@ class EnemyDoor extends PositionComponent with AutoDispose, HasPaint {
   @override
   onLoad() async {
     door = await sheetIWH('game_door.png', 27, 8);
+    opacity = 0;
+    fadeInDeep(seconds: 1);
     onMessage<EnterRound>((_) {
       state = DoorState.idle;
       open_progress = 0;
@@ -50,6 +53,14 @@ class EnemyDoor extends PositionComponent with AutoDispose, HasPaint {
 
   @override
   void update(double dt) {
+    if (phase == GamePhase.next_round && state == DoorState.closing) {
+      open_progress -= dt;
+      if (open_progress <= 0.0) {
+        open_progress = 0.0;
+        state = DoorState.idle;
+      }
+    }
+
     if (phase != GamePhase.game_on) return;
     super.update(dt);
     switch (state) {
