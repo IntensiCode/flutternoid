@@ -1,15 +1,12 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart' hide Timer;
-import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:kart/kart.dart';
-import 'package:mp_audio_stream/mp_audio_stream.dart';
 
 import '../core/common.dart';
 import 'game_object.dart';
+import 'soundboard_mixed.dart' if (dart.library.html) 'soundboard_web.dart';
 import 'storage.dart';
 
 enum Sound {
@@ -34,7 +31,7 @@ enum Sound {
   wall_hit,
 }
 
-final soundboard = Soundboard();
+final soundboard = SoundboardImpl();
 
 enum AudioMode {
   music_and_sound,
@@ -58,7 +55,7 @@ class PlayState {
   double volume;
 }
 
-class Soundboard extends Component with HasGameData {
+abstract class Soundboard extends Component with HasGameData {
   void _save() => save('soundboard', this);
 
   bool _brick_notes = true;
@@ -71,38 +68,6 @@ class Soundboard extends Component with HasGameData {
     _save();
   }
 
-  bool _stream_music = !kIsWeb;
-
-  bool get stream_music => _stream_music;
-
-  set stream_music(bool value) {
-    if (_stream_music == value) return;
-    _stream_music = value;
-
-    logInfo('switch stream_music: $value');
-
-    if (_stream_music && FlameAudio.bgm.isPlaying) {
-      logInfo('stop bgm music');
-      FlameAudio.bgm.stop();
-      logInfo('switch to streaming: $active_music_name?');
-      _replay_music();
-    }
-
-    if (!_stream_music && active_music != null) {
-      logInfo('stop streaming music');
-      _play_state.remove(active_music);
-      active_music = null;
-      logInfo('switch to bgm: $active_music_name?');
-      _replay_music();
-    }
-
-    _save();
-  }
-
-  void _replay_music() {
-    if (active_music_name != null) play_music(active_music_name!);
-  }
-
   AudioMode _audio_mode = AudioMode.music_and_sound;
 
   AudioMode get audio_mode => _audio_mode;
@@ -110,9 +75,13 @@ class Soundboard extends Component with HasGameData {
   set audio_mode(AudioMode mode) {
     if (_audio_mode == mode) return;
     _audio_mode = mode;
-
     logInfo('change audio mode: $mode');
+    _update_volumes(mode);
+    _save();
+    do_update_volume();
+  }
 
+  void _update_volumes(AudioMode mode) {
     switch (mode) {
       case AudioMode.music_and_sound:
         _music = 0.4;
@@ -131,20 +100,6 @@ class Soundboard extends Component with HasGameData {
         _sound = 1.0;
         _muted = false;
     }
-
-    _save();
-
-    if (!stream_music && FlameAudio.bgm.isPlaying) {
-      FlameAudio.bgm.audioPlayer.setVolume(_music);
-      FlameAudio.bgm.pause();
-    }
-    if (!stream_music && FlameAudio.bgm.audioPlayer.state == PlayerState.paused) {
-      FlameAudio.bgm.audioPlayer.setVolume(_music);
-      // FlameAudio.bgm.resume();
-    }
-
-    active_music?.volume = _music;
-    active_music?.paused = _music == 0;
   }
 
   double _master = 0.5;
@@ -164,9 +119,8 @@ class Soundboard extends Component with HasGameData {
   set music(double value) {
     if (_music == value) return;
     _music = value;
-    active_music?.volume = _music;
-    active_music?.paused = _music == 0;
     _save();
+    do_update_volume();
   }
 
   double _sound = 0.6;
@@ -195,224 +149,86 @@ class Soundboard extends Component with HasGameData {
   // used by [trigger] to play every sound only once per tick
   final _triggered = <Sound>{};
 
-  // raw sample data for mixing
-  final _samples = <Sound, Float32List>{};
-
-  // some notes to play instead of wall hit
-  final _notes = <Float32List>[];
-
-  // constant audio stream for mixing sound effects
-  AudioStream? _stream;
-
-  // sample states for mixing into [_stream]
-  final _play_state = <PlayState>[];
-
+  // for playing notes instead of Sound.wall_hit
   int? note_index;
 
-  // for web version
-  final _sounds = <Sound, AudioPlayer>{};
-  final _web_notes = <AudioPlayer>[];
-
   String? active_music_name;
-  PlayState? active_music;
   String? pending_music;
   double? fade_out_volume;
 
-  toggleMute() => muted = !muted;
+  @protected
+  double? get active_music_volume;
 
-  clear(String filename) => FlameAudio.audioCache.clear(filename);
+  set active_music_volume(double? it);
 
-  preload() async {
+  @protected
+  void do_update_volume();
+
+  @protected
+  Future do_init_and_preload();
+
+  @protected
+  Future do_play(Sound sound, double volume_factor);
+
+  @protected
+  Future do_play_one_shot_sample(String filename, double volume_factor);
+
+  @protected
+  Future do_play_music(String filename);
+
+  @protected
+  void do_stop_active_music();
+
+  void toggleMute() => muted = !muted;
+
+  void clear(String filename) => TODO('nyi'); // FlameAudio.audioCache.clear(filename);
+
+  Future preload() async {
     if (_blocked) return;
     _blocked = true;
-
-    if (stream_music) {
-      if (_samples.isEmpty) await _make_samples();
-    } else {
-      if (_sounds.isEmpty) await _preload_sounds();
-    }
-
-    // mp_audio_stream has too much lag for kIsWeb. audio_players works fine for kIsWeb.
-    // therefore, the if just above.
-
-    // but having the stream for music is nice.
-    // therefore, we play samples via audio_players if kIsWeb, but always play music via mp_audio_stream.
-
-    if (stream_music && _stream == null) {
-      logVerbose('start audio mixing stream');
-      _stream = getAudioStream();
-      final result = _stream!.init(
-        bufferMilliSec: 500,
-        waitingBufferMilliSec: 100,
-        channels: 1,
-        sampleRate: 11025,
-      );
-      logVerbose('audio mixing stream started: $result');
-      _stream!.resume();
-      _mix_stream();
-    }
-
-    if (!stream_music && _stream != null) {
-      _mixer?.cancel();
-      _mixer = null;
-      _stream?.uninit();
-      _stream = null;
-    }
-
+    do_init_and_preload();
     _blocked = false;
-
     logInfo('preload done');
   }
 
-  Future _preload_sounds() async {
-    for (final it in Sound.values) {
-      try {
-        // can't figure out why this one sound does not play in the web version ‾\_('')_/‾
-        final ext = it == Sound.enemy_destroyed ? 'mp3' : 'ogg';
-        _sounds[it] = await _preload_player('${it.name}.$ext');
-      } catch (e) {
-        logError('failed loading $it: $e');
-      }
-    }
-    for (int i = 0; i <= 20; i++) {
-      _web_notes.add(await _preload_player('note$i.ogg'));
-    }
-  }
+  void trigger(Sound sound) => _triggered.add(sound);
 
-  Future<AudioPlayer> _preload_player(String name) async {
-    final player = await FlameAudio.play('sound/$name', volume: _sound);
-    player.setReleaseMode(ReleaseMode.stop);
-    player.setPlayerMode(PlayerMode.lowLatency);
-    player.stop();
-    return player;
-  }
-
-  Future _make_samples() async {
-    for (final it in Sound.values) {
-      _samples[it] = await _make_sample('audio/sound/${it.name}.raw');
-    }
-  }
-
-  Future<Float32List> _make_sample(String fileName) async {
-    final bytes = await game.assets.readBinaryFile(fileName);
-    final data = Float32List(bytes.length);
-    for (int i = 0; i < bytes.length; i++) {
-      data[i] = ((bytes[i] / 128) - 1);
-    }
-    return data;
-  }
-
-  trigger(Sound sound) => _triggered.add(sound);
-
-  final _max_sounds = <AudioPlayer>[];
-  final _last_time = <AudioPlayer, int>{};
-
-  play(Sound sound, {double volume_factor = 1}) async {
+  Future play(Sound sound, {double volume_factor = 1}) async {
     if (_muted) return;
     if (_blocked) return;
+    await do_play(sound, volume_factor);
+  }
 
-    final play_notes = sound == Sound.wall_hit && soundboard.brick_notes;
-    if (!stream_music) {
-      final it = play_notes ? _web_notes.getOrNull(note_index ?? 0) : _sounds[sound];
-      if (it == null) {
-        logError('null sound: $sound');
-        preload();
-        return;
-      }
+  Future play_one_shot_sample(String filename, {double volume_factor = 1}) async {
+    if (_muted) return;
+    if (_blocked) return;
+    await do_play_one_shot_sample(filename, volume_factor);
+  }
 
-      final last_played_at = _last_time[it] ?? 0;
-      final now = DateTime.timestamp().millisecondsSinceEpoch;
-      if (now < last_played_at + 100) return;
-      _last_time[it] = now;
-
-      _max_sounds.removeWhere((it) => it.state != PlayerState.playing);
-      if (_max_sounds.length > 10) {
-        if (dev) logWarn('sound killed - overload');
-        final fifo = _max_sounds.removeAt(0);
-        await fifo.stop();
-      }
-
-      if (it.state != PlayerState.stopped) await it.stop();
-      await it.setVolume(volume_factor * _sound);
-      await it.resume();
-      note_index = 0;
-      return;
-    }
-
-    if (play_notes) {
-      final index = note_index ?? 0;
-      if (_notes.length <= index) {
-        for (int i = _notes.length; i <= max(20, index); i++) {
-          final freq = 261.626 + i * (293.665 - 261.626);
-          final wave = _synth_sine_wave(freq, 11025, const Duration(milliseconds: 50));
-          _notes.add(wave);
-        }
-      }
-      _play_state.add(PlayState(_notes[index], volume: volume_factor * _sound));
-      note_index = 0;
+  Future play_music(String filename) async {
+    // TODO check is_playing_music, too?
+    if (active_music_name == filename) {
+      logInfo('music already playing: $filename');
+    } else if (fade_out_volume != null) {
+      logInfo('schedule music $filename');
+      pending_music = filename;
     } else {
-      _play_state.add(PlayState(_samples[sound]!, volume: volume_factor * _sound));
+      logInfo('play music $filename');
+      do_stop_active_music();
+      active_music_name = filename;
+      await do_play_music(filename);
     }
   }
 
-  play_one_shot_sample(String filename, {double volume_factor = 1}) async {
-    if (!stream_music) {
-      final it = await FlameAudio.play(filename, volume: volume_factor * _sound);
-      it.setReleaseMode(ReleaseMode.release);
-      return;
-    }
-
-    if (filename.endsWith('.ogg')) filename = filename.replaceFirst('.ogg', '');
-
-    logVerbose('play sample $filename');
-    final data = await _make_sample('audio/$filename.raw');
-    _play_state.add(PlayState(data, volume: volume_factor * _sound));
-  }
-
-  play_music(String filename) async {
-    if (!stream_music) {
-      logInfo('playing music via audio_players');
-      if (FlameAudio.bgm.isPlaying) {
-        logInfo('stopping active bgm');
-        await FlameAudio.bgm.stop();
-      }
-      await FlameAudio.bgm.play(filename, volume: _music);
-      return;
-    }
-
-    logInfo('play music via mp_audio_stream');
-
-    if (filename == active_music_name && active_music != null) {
-      logInfo('skip playing same music $filename');
-      return;
-    }
-    if (active_music != null) {
-      if (fade_out_volume != null) {
-        logInfo('schedule music $filename');
-        pending_music = filename;
-        return;
-      } else {
-        _play_state.remove(active_music);
-        active_music = null;
-      }
-    }
-
-    logInfo('play music $filename');
-    _play_state.remove(active_music);
-    active_music = null;
-
-    final raw_name = '${filename.replaceFirst('.ogg', '').replaceFirst('.mp3', '')}.raw';
-
-    logVerbose('loop sample $filename');
-    final data = await _make_sample('audio/$raw_name');
-    active_music_name = filename;
-    active_music = PlayState(data, loop: true, volume: _music);
-    _play_state.add(active_music!);
+  void stop_active_music() {
+    fade_out_volume = null;
+    active_music_name = null;
+    do_stop_active_music();
   }
 
   void fade_out_music() {
-    logInfo('fade out music ${active_music?.volume}');
-    fade_out_volume = active_music?.volume;
+    logInfo('fade out music $active_music_volume');
+    fade_out_volume = active_music_volume;
   }
 
   // Component
@@ -421,7 +237,6 @@ class Soundboard extends Component with HasGameData {
   onLoad() async {
     super.onLoad();
     await load('soundboard', this);
-    if (stream_music) preload();
   }
 
   @override
@@ -437,20 +252,19 @@ class Soundboard extends Component with HasGameData {
 
   void _fade_music(double dt) {
     double? fov = fade_out_volume;
-    if (fov != null) {
-      fov -= dt;
-      if (fov <= 0) {
-        _play_state.remove(active_music);
-        active_music = null;
-        fade_out_volume = null;
-        if (pending_music != null) {
-          play_music(pending_music!);
-          pending_music = null;
-        }
-      } else {
-        active_music?.volume = fov;
-        fade_out_volume = fov;
+    if (fov == null) return;
+
+    fov -= dt;
+    if (fov <= 0) {
+      stop_active_music();
+      fade_out_volume = null;
+      if (pending_music != null) {
+        play_music(pending_music!);
+        pending_music = null;
       }
+    } else {
+      active_music_volume = fov;
+      fade_out_volume = fov;
     }
   }
 
@@ -461,7 +275,6 @@ class Soundboard extends Component with HasGameData {
     logInfo('load soundboard: $data');
     audio_mode = AudioMode.from_name(data['audio_mode'] ?? audio_mode.name);
     brick_notes = data['brick_notes'] ?? brick_notes;
-    stream_music = data['stream_music'] ?? stream_music;
     _master = data['master'] ?? _master;
     _music = data['music'] ?? _music;
     _muted = data['muted'] ?? _muted;
@@ -475,86 +288,5 @@ class Soundboard extends Component with HasGameData {
     ..['muted'] = _muted
     ..['sound'] = _sound
     ..['audio_mode'] = audio_mode.name
-    ..['brick_notes'] = brick_notes
-    ..['stream_music'] = stream_music;
-
-  // Implementation
-
-  static Float32List _synth_sine_wave(double freq, int rate, Duration duration) {
-    final length = duration.inMilliseconds * rate ~/ 1000;
-
-    final fadeSamples = min(100, length ~/ 2);
-
-    final sineWave = List.generate(length, (i) {
-      final amp = sin(2 * pi * ((i * freq) % rate) / rate);
-
-      // apply fade in/out to avoid click noise
-      final volume = (i > length - fadeSamples)
-          ? (length - i - 1) / fadeSamples
-          : (i < fadeSamples)
-              ? i / fadeSamples
-              : 1.0;
-
-      return amp * volume;
-    });
-
-    return Float32List.fromList(sineWave);
-  }
-
-  Timer? _mixer;
-
-  // TODO isolate, right?
-
-  _mix_stream() async {
-    const hz = 25;
-    const rate = 11025;
-    const step = rate ~/ hz;
-    final mixed = Float32List(step);
-    logInfo('mixing at $hz hz - frame step $step - buffer bytes ${mixed.length}');
-
-    _mixer = Timer.periodic(const Duration(milliseconds: 1000 ~/ hz), (t) {
-      mixed.fillRange(0, mixed.length, 0);
-      if (_play_state.isEmpty || _muted) {
-        _stream!.push(mixed);
-        return;
-      }
-
-      for (final it in _play_state) {
-        if (it.paused) continue;
-
-        final data = it.sample;
-        final start = it.sample_pos;
-        final end = min(start + step, data.length);
-        for (int i = start; i < end; i++) {
-          final at = i - start;
-          mixed[at] += data[i] * it.volume;
-        }
-        if (end == data.length) {
-          it.sample_pos = it.loop ? 0 : -1;
-        } else {
-          it.sample_pos = end;
-        }
-      }
-
-      double? compress;
-      for (int i = 0; i < mixed.length; i++) {
-        final v = mixed[i];
-        // limit before compression
-        if (v.abs() > 1) compress = max(compress ?? 0, v.abs());
-        // apply master for absolute limit
-        mixed[i] = v * _master;
-      }
-
-      if (compress != null) {
-        logInfo('need compression: $compress');
-        for (int i = 0; i < mixed.length; i++) {
-          mixed[i] /= compress;
-        }
-      }
-
-      _stream!.push(mixed);
-
-      _play_state.removeWhere((e) => e.sample_pos == -1);
-    });
-  }
+    ..['brick_notes'] = brick_notes;
 }

@@ -49,10 +49,11 @@ https://intensicode.github.io/flutternoid/
 
 ### To Do
 
+- [ ] BUG: audio for web messed up
 - [ ] PERF: web performance became bad suddenly - why?
 
-- [ ] BUG: enemies are invisible at (0,0) when spawning - ball sometimes hits them
 - [ ] BUG: audio switching messed up - music does not turn on sometimes?
+- [ ] BUG: enemies are invisible at (0,0) when spawning - ball sometimes hits them
 - [ ] BUG: rarely ball with zero x or y speed but no auto speed up?
 
 - [ ] make vaus pull ball back from void a bit more?

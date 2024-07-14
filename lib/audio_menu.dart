@@ -1,11 +1,9 @@
 import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
-import 'package:flutter/foundation.dart';
 
 import 'components/basic_menu.dart';
 import 'components/basic_menu_button.dart';
-import 'components/flow_text.dart';
 import 'components/soft_keys.dart';
 import 'components/volume_component.dart';
 import 'core/common.dart';
@@ -22,7 +20,6 @@ enum AudioMenuEntry {
   sound_only,
   silent_mode,
   brick_notes,
-  experimental,
 }
 
 class AudioMenu extends GameScriptComponent {
@@ -33,7 +30,6 @@ class AudioMenu extends GameScriptComponent {
 
   late final BasicMenu menu;
   late final BasicMenuButton brick_notes;
-  late final BasicMenuButton experimental_audio;
 
   @override
   onLoad() async {
@@ -41,53 +37,6 @@ class AudioMenu extends GameScriptComponent {
 
     fontSelect(tiny_font, scale: 2);
     textXY('Audio Mode', xCenter, 20, scale: 2, anchor: Anchor.topCenter);
-
-    logInfo('initial audio mode: ${soundboard.audio_mode}');
-    final preselected = switch (soundboard.audio_mode) {
-      AudioMode.music_and_sound => AudioMenuEntry.music_and_sound,
-      AudioMode.music_only => AudioMenuEntry.music_only,
-      AudioMode.sound_only => AudioMenuEntry.sound_only,
-      AudioMode.silent => AudioMenuEntry.silent_mode,
-    };
-
-    final buttonSheet = await sheetI('button_option.png', 1, 2);
-    menu = added(BasicMenu<AudioMenuEntry>(
-      button: buttonSheet,
-      font: tiny_font,
-      onSelected: _selected,
-      spacing: 2,
-      fixed_position: Vector2(gameWidth - 16, 48),
-      fixed_anchor: Anchor.topRight,
-    )
-      ..addEntry(AudioMenuEntry.music_and_sound, 'Music & Sound')
-      ..addEntry(AudioMenuEntry.music_only, 'Music Only')
-      ..addEntry(AudioMenuEntry.sound_only, 'Sound Only')
-      ..addEntry(AudioMenuEntry.silent_mode, 'Silent Mode')
-      ..preselectEntry(preselected));
-
-    brick_notes = menu.addEntry(AudioMenuEntry.brick_notes, 'Brick Notes', anchor: Anchor.centerLeft);
-    brick_notes.checked = soundboard.brick_notes;
-
-    if (kIsWeb || dev) {
-      experimental_audio = menu.addEntry(AudioMenuEntry.experimental, 'Experimental Audio', anchor: Anchor.centerLeft);
-      experimental_audio.checked = soundboard.stream_music;
-    }
-
-    menu.position.setValues(xCenter, yCenter);
-    menu.anchor = Anchor.center;
-
-    menu.onPreselected = (it) => _preselected(it);
-
-    if (show_back) softkeys('Back', null, (_) => popScreen());
-
-    add(FlowText(
-      text: 'If sounds or music are glitched or music does not play, try toggling "Experimental Audio".',
-      font: tiny_font,
-      insets: Vector2(5, 5),
-      position: Vector2(160 - 64, 174),
-      size: Vector2(160 + 64, 24),
-      anchor: Anchor.topLeft,
-    ));
 
     add(_master = VolumeComponent(
       bg_nine_patch: await image('button_plain.png'),
@@ -122,6 +71,40 @@ class AudioMenu extends GameScriptComponent {
       change: (volume) => soundboard.sound = volume,
       volume: () => soundboard.sound,
     ));
+
+    final buttonSheet = await sheetI('button_option.png', 1, 2);
+    menu = added(BasicMenu<AudioMenuEntry>(
+      button: buttonSheet,
+      font: tiny_font,
+      onSelected: _selected,
+      spacing: 2,
+      fixed_position: Vector2(gameWidth - 16, 56),
+      fixed_anchor: Anchor.topRight,
+    )
+      ..addEntry(AudioMenuEntry.music_and_sound, 'Music & Sound')
+      ..addEntry(AudioMenuEntry.music_only, 'Music Only')
+      ..addEntry(AudioMenuEntry.sound_only, 'Sound Only')
+      ..addEntry(AudioMenuEntry.silent_mode, 'Silent Mode'));
+
+    brick_notes = menu.addEntry(AudioMenuEntry.brick_notes, 'Brick Notes', anchor: Anchor.centerLeft);
+    brick_notes.checked = soundboard.brick_notes;
+
+    menu.position.setValues(xCenter, yCenter);
+    menu.anchor = Anchor.center;
+
+    menu.onPreselected = (it) => _preselected(it);
+
+    if (show_back) softkeys('Back', null, (_) => popScreen());
+
+    logInfo('initial audio mode: ${soundboard.audio_mode}');
+    final preselected = switch (soundboard.audio_mode) {
+      AudioMode.music_and_sound => AudioMenuEntry.music_and_sound,
+      AudioMode.music_only => AudioMenuEntry.music_only,
+      AudioMode.sound_only => AudioMenuEntry.sound_only,
+      AudioMode.silent => AudioMenuEntry.silent_mode,
+    };
+    menu.preselectEntry(preselected);
+    _preselected(preselected);
   }
 
   late final VolumeComponent _master;
@@ -132,10 +115,6 @@ class AudioMenu extends GameScriptComponent {
     if (it == AudioMenuEntry.brick_notes) {
       soundboard.brick_notes = !soundboard.brick_notes;
       brick_notes.checked = soundboard.brick_notes;
-    }
-    if (it == AudioMenuEntry.experimental) {
-      soundboard.stream_music = !soundboard.stream_music;
-      experimental_audio.checked = soundboard.stream_music;
     }
     return menu.preselectEntry(it);
   }
@@ -167,8 +146,6 @@ class AudioMenu extends GameScriptComponent {
         _master.isVisible = false;
         _music.isVisible = false;
         _sound.isVisible = false;
-      case AudioMenuEntry.experimental:
-        break;
       case null:
         break;
     }
