@@ -160,9 +160,6 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
     ));
 
     soundboard.play_one_shot_sample('doh_laugh.ogg');
-
-    await model.state.delete();
-    model.state.reset();
   }
 
   void _on_game_over_hiscore() async {
@@ -241,8 +238,14 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
             GameKey.soft2: () => model.phase = GamePhase.game_paused,
           },
         GamePhase.game_over => {
-            GameKey.soft1: () => showScreen(Screen.title),
-            GameKey.soft2: () => _on_new_game(),
+            GameKey.soft1: () {
+              _clear_game_state();
+              showScreen(Screen.title);
+            },
+            GameKey.soft2: () {
+              _clear_game_state();
+              _on_new_game();
+            },
           },
         GamePhase.game_over_hiscore => {
             GameKey.soft2: () => showScreen(Screen.enter_hiscore),
@@ -254,6 +257,11 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
           },
         GamePhase.next_round => {},
       };
+
+  _clear_game_state() async {
+    model.state.reset();
+    await model.state.delete();
+  }
 
   @override
   void renderTree(Canvas canvas) {
