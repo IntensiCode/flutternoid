@@ -121,13 +121,12 @@ class GameScreen extends PositionComponent
         state.save_checkpoint();
         phase = GamePhase.enter_round;
       });
-      onKey('<C-k>', () {
-        state.level_number_starting_at_1 -= 10;
-        state.save_checkpoint();
-        phase = GamePhase.enter_round;
+      onKey('h', () {
+        state.score = hiscore.entries.last.score + 1;
+        phase = GamePhase.game_over_hiscore;
       });
-      onKey('K', () {
-        state.level_number_starting_at_1 -= 5;
+      onKey('j', () {
+        state.level_number_starting_at_1++;
         state.save_checkpoint();
         phase = GamePhase.enter_round;
       });
@@ -136,24 +135,31 @@ class GameScreen extends PositionComponent
         state.save_checkpoint();
         phase = GamePhase.enter_round;
       });
-      onKey('<C-j>', () {
-        state.level_number_starting_at_1 += 10;
-        state.save_checkpoint();
-        phase = GamePhase.enter_round;
+      onKey('r', () {
+        removeAll(children.whereType<Ball>());
+        add(Ball());
       });
+
       onKey('J', () {
         state.level_number_starting_at_1 += 5;
         state.save_checkpoint();
         phase = GamePhase.enter_round;
       });
-      onKey('j', () {
-        state.level_number_starting_at_1++;
+      onKey('K', () {
+        state.level_number_starting_at_1 -= 5;
         state.save_checkpoint();
         phase = GamePhase.enter_round;
       });
-      onKey('r', () {
-        removeAll(children.whereType<Ball>());
-        add(Ball());
+
+      onKey('<C-j>', () {
+        state.level_number_starting_at_1 += 10;
+        state.save_checkpoint();
+        phase = GamePhase.enter_round;
+      });
+      onKey('<C-k>', () {
+        state.level_number_starting_at_1 -= 10;
+        state.save_checkpoint();
+        phase = GamePhase.enter_round;
       });
     }
   }

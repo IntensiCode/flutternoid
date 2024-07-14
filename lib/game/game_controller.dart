@@ -111,6 +111,7 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
         GamePhase.game_complete => _on_game_complete,
         GamePhase.game_on => _on_game_on,
         GamePhase.game_over => _on_game_over,
+        GamePhase.game_over_hiscore => _on_game_over_hiscore,
         GamePhase.game_paused => _on_game_paused,
         GamePhase.next_round => _on_next_round,
       };
@@ -161,6 +162,19 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
       'GAME OVER',
       'EXIT',
       'TRY AGAIN',
+    ));
+
+    soundboard.play_one_shot_sample('doh_laugh.ogg');
+
+    await model.state.delete();
+  }
+
+  void _on_game_over_hiscore() async {
+    _switch_overlay(GameDialog(
+      _key_handlers(),
+      'GAME OVER',
+      null,
+      'ENTER HISCORE',
     ));
 
     soundboard.play_one_shot_sample('doh_laugh.ogg');
@@ -235,6 +249,9 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
         GamePhase.game_over => {
             GameKey.soft1: () => showScreen(Screen.title),
             GameKey.soft2: () => _on_new_game(),
+          },
+        GamePhase.game_over_hiscore => {
+            GameKey.soft2: () => showScreen(Screen.enter_hiscore),
           },
         GamePhase.game_paused => {
             GameKey.soft1: () => showScreen(Screen.title),

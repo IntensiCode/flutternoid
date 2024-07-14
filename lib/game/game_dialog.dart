@@ -18,8 +18,8 @@ class GameDialog extends PositionComponent with AutoDispose, GameScriptFunctions
 
   final Map<GameKey, Function> _handlers;
   final String _text;
-  final String _left;
-  final String _right;
+  final String? _left;
+  final String? _right;
   final bool flow_text;
   final bool shortcuts;
 
@@ -56,8 +56,12 @@ class GameDialog extends PositionComponent with AutoDispose, GameScriptFunctions
       textXY(_text, size.x / 2, size.y / 2, anchor: Anchor.center);
     }
 
-    await add_button(bg, _left, 0, size.y, Anchor.topLeft, () => _handle(SoftKey.left));
-    await add_button(bg, _right, size.x, size.y, Anchor.topRight, () => _handle(SoftKey.right));
+    if (_left != null) {
+      await add_button(bg, _left, 0, size.y, Anchor.topLeft, () => _handle(SoftKey.left));
+    }
+    if (_right != null) {
+      await add_button(bg, _right, size.x, size.y, Anchor.topRight, () => _handle(SoftKey.right));
+    }
 
     for (final it in children) {
       if (it is RectangleComponent) continue;

@@ -4,6 +4,7 @@ enum GamePhase {
   game_complete,
   game_on,
   game_over,
+  game_over_hiscore,
   game_paused,
   next_round,
   ;
