@@ -20,19 +20,21 @@ Future save_not_first_time() async {
 
 final state = GameState();
 
+const extra_life_score = 3333;
+
 class GameState extends Component with AutoDispose, HasGameData {
   var level_number_starting_at_1 = 1;
   var _score = 0;
-  var lives = 3;
-  var blasts = 3;
+  var lives = 5;
+  var blasts = 5;
   bool game_complete = false;
 
   int get score => _score;
 
   set score(int value) {
     if (!game_complete) {
-      final b4 = _score ~/ 2000;
-      final now = value ~/ 2000;
+      final b4 = _score ~/ extra_life_score;
+      final now = value ~/ extra_life_score;
       if (b4 < now) sendMessage(ExtraLife());
     }
     _score = value;
@@ -42,8 +44,8 @@ class GameState extends Component with AutoDispose, HasGameData {
     logInfo('reset game state');
     level_number_starting_at_1 = 1;
     _score = 0;
-    lives = 3;
-    blasts = 3;
+    lives = 5;
+    blasts = 5;
     game_complete = false;
   }
 
