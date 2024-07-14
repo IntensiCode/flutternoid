@@ -150,6 +150,9 @@ abstract class Enemy extends BodyComponent with AutoDispose, ContactCallbacks {
           anim_time += dt;
           if (anim_time > 1.0) anim_time -= 1.0;
         }
+        if (body.linearVelocity.length > 100) {
+          body.linearVelocity..normalize()..scale(100);
+        }
 
       case EnemyState.exploding:
         body.setTransform(forced_position, 0);
