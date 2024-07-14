@@ -31,6 +31,14 @@ class EnemyDoor extends PositionComponent with AutoDispose, HasPaint {
         }
       }
     }
+    final enemies = top_level_children<Enemy>();
+    for (final it in enemies) {
+      if (it.position.y < 32) {
+        if ((it.position.x - position.x + size.x / 2).abs() < 20) {
+          return true;
+        }
+      }
+    }
     return state != DoorState.idle;
   }
 
