@@ -86,6 +86,8 @@ class LevelBonus extends PositionComponent with AutoDispose, GameScriptFunctions
       }
 
       at(1.0, () => when_done());
+    } else {
+      time_bonus = level.level_time.round();
     }
   }
 
@@ -104,6 +106,7 @@ class LevelBonus extends PositionComponent with AutoDispose, GameScriptFunctions
   double and_game_complete = 0;
 
   double wait = -1;
+  int time_bonus = 0;
   double counted_seconds = 0;
   double all_enemies = -1;
   double level_complete = -1;
@@ -115,7 +118,7 @@ class LevelBonus extends PositionComponent with AutoDispose, GameScriptFunctions
       return;
     }
 
-    final seconds = level.level_time.round();
+    final seconds = time_bonus;
     if (seconds > 0) {
       if (counted_seconds < seconds) {
         final was = counted_seconds.round();
@@ -124,6 +127,7 @@ class LevelBonus extends PositionComponent with AutoDispose, GameScriptFunctions
         state.score += (now - was) * 33;
         content.lines.clear();
         content.lines.add('TIME BONUS: $now');
+        level.level_time = (time_bonus - now).toDouble();
         return;
       }
     }
