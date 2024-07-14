@@ -304,6 +304,8 @@ class Soundboard extends Component with HasGameData {
 
   trigger(Sound sound) => _triggered.add(sound);
 
+  final _max_sounds = <AudioPlayer>[];
+
   play(Sound sound, {double? volume}) async {
     if (_muted) return;
     if (_blocked) return;
@@ -316,6 +318,14 @@ class Soundboard extends Component with HasGameData {
         preload();
         return;
       }
+
+      _max_sounds.removeWhere((it) => it.state != PlayerState.playing);
+      if (_max_sounds.length > 10) {
+        if (dev) logWarn('sound killed - overload');
+        final fifo = _max_sounds.removeAt(0);
+        await fifo.stop();
+      }
+
       if (it.state != PlayerState.stopped) await it.stop();
       await it.setVolume(_sound);
       await it.resume();
