@@ -1,7 +1,6 @@
 import 'package:flame/components.dart';
 
 import '../input/keys.dart';
-import 'flash_text.dart';
 import 'game_configuration.dart';
 import 'game_controller.dart';
 import 'game_phase.dart';
@@ -29,8 +28,6 @@ extension ComponentExtensions on Component {
   GameState get state => model.state;
 
   Level get level => model.level;
-
-  FlashText get flash_text => model.flash_text;
 
   Player get player => model.player;
 

@@ -17,7 +17,6 @@ import 'background_screen.dart';
 import 'ball.dart';
 import 'enemy_spawner.dart';
 import 'extra_id.dart';
-import 'flash_text.dart';
 import 'game_frame.dart';
 import 'game_messages.dart';
 import 'game_phase.dart';
@@ -42,7 +41,6 @@ class GameScreen extends PositionComponent
 
   final state = gs.state;
   final level = Level();
-  final flash_text = FlashText();
   final enemies = EnemySpawner();
   final power_ups = PowerUps();
   final laser = LaserWeapon();
@@ -85,7 +83,6 @@ class GameScreen extends PositionComponent
 
     await add(level);
     await add(enemies);
-    await add(flash_text);
     await add(power_ups);
     await add(laser);
     await add(slow_down_area);

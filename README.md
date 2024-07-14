@@ -49,9 +49,6 @@ https://intensicode.github.io/flutternoid/
 
 ### To Do
 
-- [ ] BUG: game completed + ball lost or killed => game not completed OMG
-- [ ] BUG: game completed state not cleared after hiscore
-
 - [ ] PERF: web performance became bad suddenly - why?
 
 - [ ] BUG: extras collected when player destroyed
@@ -86,6 +83,8 @@ https://intensicode.github.io/flutternoid/
 - [X] BUG: enter hiscore after game over not working (unless eog)
 - [X] BUG: extra life broken?
 - [X] BUG: frame shadow and slow down over vaus?
+- [X] BUG: game completed + ball lost or killed => game not completed OMG
+- [X] BUG: game completed state not cleared after hiscore
 - [X] BUG: vaus explodes multiple times if enemies hit in short sequence
 - [X] README with screenshots and animated gif
 - [X] SHOW HOW TO PLAY AT FIRST START
@@ -102,6 +101,7 @@ https://intensicode.github.io/flutternoid/
 - [X] fade in background music when audio mode with music selected
 - [X] fade out title music when leaving title
 - [X] game complete message / scene / handling
+- [X] get rid of text for extras - seems out of place by now
 - [X] hiscore entry
 - [X] hiscore rename
 - [X] laugh when last level starts

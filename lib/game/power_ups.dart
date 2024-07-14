@@ -157,7 +157,5 @@ class PowerUp extends SpriteAnimationComponent {
       ExtraId.multi_ball => Sound.multi_ball,
       ExtraId.slow_down => Sound.slow_down,
     });
-
-    flash_text.spawn(id.name.replaceAll('_', ' ').toUpperCase());
   }
 }
