@@ -49,13 +49,17 @@ https://intensicode.github.io/flutternoid/
 
 ### To Do
 
-- [ ] BUG: audio for web messed up
 - [ ] PERF: web performance became bad suddenly - why?
+- [ ] PERF: split scoreboard into statics and dynamics - then render statics from BackgroundScreen
+- [ ] PERF: split scoreboard into statics and dynamics - then dirty flag for dynamics? maybe
 
-- [ ] BUG: audio switching messed up - music does not turn on sometimes?
+- [ ] BUG: hiscore for web broken completely!? game over without enter hiscore + after, the score is still ranked!?
+- [ ] BUG: enemy hit should not be a note
+- [ ] BUG: blasts lost after retry level? but lives score etc are there!?
 - [ ] BUG: enemies are invisible at (0,0) when spawning - ball sometimes hits them
 - [ ] BUG: rarely ball with zero x or y speed but no auto speed up?
 
+- [ ] extra lives at: 2000 + level * 100 ? play test !
 - [ ] make vaus pull ball back from void a bit more?
 - [ ] make vaus move one or two pixels more towards the walls?
 - [ ] fix min ball speed (in upper part)
@@ -70,6 +74,8 @@ https://intensicode.github.io/flutternoid/
 - [-] BUG: fix random block selection to not pick first block every time [seems to work after all]
 - [-] BUG: last extra is cut off [cannot reproduce]
 - [-] soLoud + audio_players for Web? [soloud breaks web build]
+- [X] BUG: audio for web messed up
+- [X] BUG: audio switching messed up - music does not turn on sometimes?
 - [?] BUG: disable pause when level complete (or other overlay active)
 - [?] BUG: extras collected when player destroyed
 - [?] BUG: multi ball after destroyed is still around [fixed somehow?]
