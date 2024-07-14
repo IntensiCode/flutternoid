@@ -76,6 +76,7 @@ https://intensicode.github.io/flutternoid/
 - [-] BUG: fix random block selection to not pick first block every time [seems to work after all]
 - [-] BUG: last extra is cut off [cannot reproduce]
 - [-] soLoud + audio_players for Web? [soloud breaks web build]
+- [?] PERF: limit audio players by time
 - [X] BUG: ball jumps behind wall - make wall a solid box?
 - [X] BUG: count down level time in bonus screen
 - [X] BUG: door stays open?

@@ -305,6 +305,7 @@ class Soundboard extends Component with HasGameData {
   trigger(Sound sound) => _triggered.add(sound);
 
   final _max_sounds = <AudioPlayer>[];
+  final _last_time = <AudioPlayer, int>{};
 
   play(Sound sound, {double volume_factor = 1}) async {
     if (_muted) return;
@@ -318,6 +319,11 @@ class Soundboard extends Component with HasGameData {
         preload();
         return;
       }
+
+      final last_played_at = _last_time[it] ?? 0;
+      final now = DateTime.timestamp().millisecondsSinceEpoch;
+      if (now < last_played_at + 100) return;
+      _last_time[it] = now;
 
       _max_sounds.removeWhere((it) => it.state != PlayerState.playing);
       if (_max_sounds.length > 10) {
@@ -345,7 +351,7 @@ class Soundboard extends Component with HasGameData {
       _play_state.add(PlayState(_notes[index], volume: volume_factor * _sound));
       note_index = 0;
     } else {
-      _play_state.add(PlayState(_samples[sound]!, volume: volume_factor *  _sound));
+      _play_state.add(PlayState(_samples[sound]!, volume: volume_factor * _sound));
     }
   }
 
@@ -360,7 +366,7 @@ class Soundboard extends Component with HasGameData {
 
     logVerbose('play sample $filename');
     final data = await _make_sample('audio/$filename.raw');
-    _play_state.add(PlayState(data, volume: volume_factor *  _sound));
+    _play_state.add(PlayState(data, volume: volume_factor * _sound));
   }
 
   play_music(String filename) async {
