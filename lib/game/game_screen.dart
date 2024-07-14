@@ -17,7 +17,6 @@ import 'background_screen.dart';
 import 'ball.dart';
 import 'enemy_spawner.dart';
 import 'extra_id.dart';
-import 'game_frame.dart';
 import 'game_messages.dart';
 import 'game_phase.dart';
 import 'game_state.dart' as gs;
@@ -78,7 +77,6 @@ class GameScreen extends PositionComponent
     await add(hiscore);
 
     await add(BackgroundScreen());
-    await add(GameFrame());
     await add(Shadows(() => children.whereType<Ball>()));
 
     await add(level);

@@ -1,9 +1,9 @@
 import 'dart:ui';
 
 import 'package:flame/components.dart';
-import 'package:flutternoid/game/game_context.dart';
 
 import '../core/common.dart';
+import 'game_context.dart';
 
 class BackgroundStars extends PositionComponent with HasPaint {
   BackgroundStars() {

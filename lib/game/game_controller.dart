@@ -17,7 +17,6 @@ import '../util/delayed.dart';
 import '../util/extensions.dart';
 import '../util/fonts.dart';
 import '../util/on_message.dart';
-import 'background_stars.dart';
 import 'game_context.dart';
 import 'game_dialog.dart';
 import 'game_messages.dart';
@@ -39,7 +38,7 @@ import 'soundboard.dart';
 ///
 class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
   final _keys = Keys();
-  final _stars = BackgroundStars();
+
   final _scoreboard = Scoreboard();
 
   late final Image _button;
@@ -53,9 +52,6 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
 
     _button = await image('button_plain.png');
 
-    _stars.split_mode = true;
-
-    await add(_stars);
     await add(_keys);
     await add(model);
     await add(_scoreboard);
@@ -69,7 +65,6 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
     onMessage<GamePhaseUpdate>((it) {
       logInfo('game phase update: ${it.phase}');
       _phase_handler(it.phase).call();
-      _stars.split_mode = it.phase == GamePhase.game_on;
     });
 
     model.phase = GamePhase.enter_round;
