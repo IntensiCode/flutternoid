@@ -49,9 +49,9 @@ https://intensicode.github.io/flutternoid/
 
 ### To Do
 
+- [ ] limit enemy speed
 - [ ] PERF: web performance became bad suddenly - why?
 
-- [ ] BUG: extras collected when player destroyed
 - [ ] BUG: multi ball after destroyed is still around
 - [ ] BUG: enemies are invisible at (0,0) when spawning - ball sometimes hits them
 - [ ] BUG: audio switching messed up - music does not turn on sometimes?
@@ -67,7 +67,6 @@ https://intensicode.github.io/flutternoid/
 - [ ] shader fix for desktop?
 - [ ] shader for tiled background? or render into an image once?
 - [ ] level defines enemies
-- [ ] limit enemy speed
 - [ ] forge2D only inside GameScreen? switch world when in GameController?
 - [ ] pause physics via HasTimeScale on Forge2dWorld?
 - [ ] pause physics via custom Forge2DWorld not calling update when paused?
@@ -76,6 +75,7 @@ https://intensicode.github.io/flutternoid/
 - [-] BUG: fix random block selection to not pick first block every time [seems to work after all]
 - [-] BUG: last extra is cut off [cannot reproduce]
 - [-] soLoud + audio_players for Web? [soloud breaks web build]
+- [?] BUG: extras collected when player destroyed
 - [?] PERF: limit audio players by time
 - [X] BUG: ball jumps behind wall - make wall a solid box?
 - [X] BUG: count down level time in bonus screen

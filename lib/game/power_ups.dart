@@ -125,7 +125,7 @@ class PowerUp extends SpriteAnimationComponent {
       paint.opacity = fade_out.clamp(0.0, 1.0);
       fade_out -= dt * 4;
       if (fade_out <= 0.0) _recycle(this);
-    } else {
+    } else if (_player.state == PlayerState.playing) {
       _player.distance_and_closest(position, _dist);
       _dist.sub(position);
       _dist.absolute();
