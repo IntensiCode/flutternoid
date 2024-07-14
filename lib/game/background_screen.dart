@@ -1,7 +1,5 @@
 import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
-import 'package:flutternoid/game/game_messages.dart';
-import 'package:flutternoid/util/on_message.dart';
 import 'package:tiled/tiled.dart';
 
 import '../core/functions.dart';
@@ -9,7 +7,9 @@ import '../scripting/game_script_functions.dart';
 import '../util/auto_dispose.dart';
 import '../util/delayed.dart';
 import '../util/extensions.dart';
+import '../util/on_message.dart';
 import 'game_context.dart';
+import 'game_messages.dart';
 
 class BackgroundScreen extends PositionComponent with AutoDispose, GameScriptFunctions, HasPaint {
   @override
