@@ -71,7 +71,7 @@ class Soundboard extends Component with HasGameData {
     _save();
   }
 
-  bool _stream_music = true;
+  bool _stream_music = !kIsWeb;
 
   bool get stream_music => _stream_music;
 
@@ -242,8 +242,8 @@ class Soundboard extends Component with HasGameData {
       logVerbose('start audio mixing stream');
       _stream = getAudioStream();
       final result = _stream!.init(
-        bufferMilliSec: kIsWeb ? 1000 : 500,
-        waitingBufferMilliSec: kIsWeb ? 100 : 50,
+        bufferMilliSec: 500,
+        waitingBufferMilliSec: 100,
         channels: 1,
         sampleRate: 11025,
       );
