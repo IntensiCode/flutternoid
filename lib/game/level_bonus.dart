@@ -103,7 +103,7 @@ class LevelBonus extends PositionComponent with AutoDispose, GameScriptFunctions
   double counted_blasts = 0;
   double and_game_complete = 0;
 
-  double wait = -2;
+  double wait = -1;
   double counted_seconds = 0;
   double all_enemies = -1;
   double level_complete = -1;
