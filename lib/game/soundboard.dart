@@ -306,7 +306,7 @@ class Soundboard extends Component with HasGameData {
 
   final _max_sounds = <AudioPlayer>[];
 
-  play(Sound sound, {double? volume}) async {
+  play(Sound sound, {double volume_factor = 1}) async {
     if (_muted) return;
     if (_blocked) return;
 
@@ -327,7 +327,7 @@ class Soundboard extends Component with HasGameData {
       }
 
       if (it.state != PlayerState.stopped) await it.stop();
-      await it.setVolume(_sound);
+      await it.setVolume(volume_factor * _sound);
       await it.resume();
       note_index = 0;
       return;
@@ -342,16 +342,16 @@ class Soundboard extends Component with HasGameData {
           _notes.add(wave);
         }
       }
-      _play_state.add(PlayState(_notes[index], volume: volume ?? _sound));
+      _play_state.add(PlayState(_notes[index], volume: volume_factor * _sound));
       note_index = 0;
     } else {
-      _play_state.add(PlayState(_samples[sound]!, volume: volume ?? _sound));
+      _play_state.add(PlayState(_samples[sound]!, volume: volume_factor *  _sound));
     }
   }
 
-  play_one_shot_sample(String filename) async {
+  play_one_shot_sample(String filename, {double volume_factor = 1}) async {
     if (!stream_music) {
-      final it = await FlameAudio.play(filename, volume: _sound);
+      final it = await FlameAudio.play(filename, volume: volume_factor * _sound);
       it.setReleaseMode(ReleaseMode.release);
       return;
     }
@@ -360,7 +360,7 @@ class Soundboard extends Component with HasGameData {
 
     logVerbose('play sample $filename');
     final data = await _make_sample('audio/$filename.raw');
-    _play_state.add(PlayState(data, volume: _sound));
+    _play_state.add(PlayState(data, volume: volume_factor *  _sound));
   }
 
   play_music(String filename) async {

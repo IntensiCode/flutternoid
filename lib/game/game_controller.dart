@@ -101,7 +101,7 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
 
       add(Delayed(1.0, () => player.reset(PlayerState.entering)));
 
-      soundboard.play(Sound.vaus_lost, volume: 2);
+      soundboard.play(Sound.vaus_lost, volume_factor: 2);
     }));
   }
 
