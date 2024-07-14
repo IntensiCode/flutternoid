@@ -133,6 +133,7 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
   }
 
   void explode() {
+    if (state != PlayerState.playing) return;
     if (state == PlayerState.exploding) return;
 
     left_thruster.opacity = 0;
@@ -140,6 +141,8 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
     state = PlayerState.exploding;
     state_progress = 0;
     soundboard.play(Sound.explosion);
+
+    sendMessage(PlayerExploding());
   }
 
   // BodyComponent
@@ -219,9 +222,10 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
     renderBody = debug;
 
     onMessage<Catcher>((_) => _on_catcher());
-    onMessage<Expander>((_) => _on_expander());
-    onMessage<Laser>((_) => _on_laser());
     onMessage<EnterRound>((_) => reset(PlayerState.gone));
+    onMessage<Expander>((_) => _on_expander());
+    onMessage<GameComplete>((_) => _on_level_complete());
+    onMessage<Laser>((_) => _on_laser());
     onMessage<LevelComplete>((_) => _on_level_complete());
     onMessage<LevelReady>((_) => reset(PlayerState.entering));
   }

@@ -29,6 +29,7 @@ enum BallState {
   active,
   pushed,
   exploding,
+  teleporting,
 }
 
 class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks {
@@ -43,11 +44,7 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
   final _caught_offset = Vector2(0, -3);
   final _update_position = Vector2.zero();
 
-  var _state = BallState.appearing;
-
-  BallState get state => _state;
-
-  set state(BallState value) => _state = value;
+  var state = BallState.appearing;
 
   var state_progress = 0.0;
   var disruptor = 0.0;
@@ -187,9 +184,15 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
     }
 
     onMessage<Disruptor>((it) => disruptor = configuration.disruptor_time);
-    onMessage<TriggerPlasmaBlasts>((_) => _on_trigger_plasma_blast());
-    onMessage<LevelComplete>((_) => removeFromParent());
+    onMessage<DohVanishing>((_) {
+      state = BallState.teleporting;
+      state_progress = 0;
+      sendMessage(SpawnTeleport(position));
+    });
     onMessage<EnterRound>((_) => removeFromParent());
+    onMessage<LevelComplete>((_) => removeFromParent());
+    onMessage<PlayerExploding>((_) => explode());
+    onMessage<TriggerPlasmaBlasts>((_) => _on_trigger_plasma_blast());
   }
 
   void _on_trigger_plasma_blast() {
@@ -209,6 +212,12 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
     switch (state) {
       case BallState.gone:
         break;
+      case BallState.teleporting:
+        state_progress += dt;
+        if (state_progress >= 1) {
+          state_progress = 0;
+          state = BallState.gone;
+        }
       case BallState.appearing:
         _on_appearing(dt);
       case BallState.caught:
@@ -301,6 +310,7 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
     super.render(canvas);
     switch (state) {
       case BallState.gone:
+      case BallState.teleporting:
         break;
       case BallState.appearing:
         _render_ball(canvas);

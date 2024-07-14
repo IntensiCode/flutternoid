@@ -40,6 +40,7 @@ class Shadows extends Component {
     }
 
     for (final ball in balls()) {
+      if (ball.state != BallState.active) continue;
       _render_pos.setFrom(ball.position);
       _render_pos.x += _shadow_offset;
       _render_pos.y += _shadow_offset;

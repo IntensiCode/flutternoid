@@ -33,6 +33,7 @@ class DohDisc extends Enemy {
   onLoad() async {
     super.onLoad();
     animation = await sheetIWH('doh_disc.png', 16, 16);
+    onMessage<DohVanishing>((_) => explode());
   }
 
   @override

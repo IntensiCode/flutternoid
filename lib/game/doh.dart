@@ -77,9 +77,10 @@ class Doh extends BodyComponent with AutoDispose, ContactCallbacks {
           soundboard.play(Sound.wall_hit);
         }
         other.body.linearVelocity.scale(1.05);
-      } else {
+      } else if (!vanishing) {
         vanishing = true;
         soundboard.play_one_shot_sample('doh_no.ogg');
+        sendMessage(DohVanishing());
       }
     } else {
       contact.isEnabled = false;

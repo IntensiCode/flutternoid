@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
 import 'package:flame/sprite.dart';
@@ -61,14 +60,9 @@ abstract class Enemy extends BodyComponent with AutoDispose, ContactCallbacks {
   }
 
   explode() {
-    if (state == EnemyState.exploding) {
-      logError('already exploding', StackTrace.current);
-      return;
-    }
+    if (state == EnemyState.exploding) return;
 
-    if (scores) {
-      model.state.score += configuration.enemy_score;
-    }
+    if (scores) model.state.score += configuration.enemy_score;
 
     forced_position.setFrom(position);
     body.linearVelocity.setZero();
