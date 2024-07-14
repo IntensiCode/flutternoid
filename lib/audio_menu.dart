@@ -66,9 +66,9 @@ class AudioMenu extends GameScriptComponent {
       ..preselectEntry(preselected));
 
     brick_notes = menu.addEntry(AudioMenuEntry.brick_notes, 'Brick Notes', anchor: Anchor.centerLeft);
-    brick_notes.checked = soundboard.stream_music;
+    brick_notes.checked = soundboard.brick_notes;
 
-    if (kIsWeb) {
+    if (kIsWeb || dev) {
       experimental_audio = menu.addEntry(AudioMenuEntry.experimental, 'Experimental Audio', anchor: Anchor.centerLeft);
       experimental_audio.checked = soundboard.stream_music;
     }
