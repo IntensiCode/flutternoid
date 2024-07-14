@@ -76,6 +76,8 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
     return Vector2(doh.x + doh.width / 3, doh.y - doh.height / 2);
   }
 
+  Iterable<Brick> get active_bricks => bricks.where((it) => !it.destroyed);
+
   Iterable<Brick> get bricks sync* {
     for (final row in brick_rows) {
       for (final brick in row) {

@@ -23,7 +23,16 @@ class EnemyDoor extends PositionComponent with AutoDispose, HasPaint {
 
   DoorState state = DoorState.idle;
 
-  bool get is_blocked => state != DoorState.idle;
+  bool get is_blocked {
+    for (final it in level.active_bricks) {
+      if (it.position.y < 18) {
+        if ((it.position.x - position.x + size.x / 2).abs() < 10) {
+          return true;
+        }
+      }
+    }
+    return state != DoorState.idle;
+  }
 
   Enemy? spawn_target;
   double open_progress = 0.0;
