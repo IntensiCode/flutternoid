@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flame/components.dart';
 
 import 'storage.dart';
@@ -18,6 +19,8 @@ class Hiscore extends Component with HasGameData {
   bool isNewHiscore(int score) => score > entries.first.score;
 
   bool isHiscoreRank(int score) => score > entries.last.score;
+
+  int rank(int score) => entries.indexWhere((it) => it.score < score) + 1;
 
   void insert(int score, int level, String name) {
     final rank = HiscoreRank(score, level, name);

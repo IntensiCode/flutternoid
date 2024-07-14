@@ -14,6 +14,7 @@ import 'game_context.dart';
 import 'hiscore.dart';
 import 'player.dart';
 import 'slow_down_area.dart';
+import 'soundboard.dart';
 
 class Scoreboard extends PositionComponent with AutoDispose, HasVisibility, GameScriptFunctions {
   @override
@@ -79,8 +80,11 @@ class Scoreboard extends PositionComponent with AutoDispose, HasVisibility, Game
         highlight_high_score = 1;
         highlight_good_score = 0;
         toggle_ranked_score = false;
+        if (!show_new_hiscore) {
+          soundboard.play_one_shot_sample('sound/hiscore.ogg');
+        }
         show_new_hiscore = true;
-      } else if (hiscore.isHiscoreRank(display_score!)) {
+      } else if (hiscore.isHiscoreRank(display_score!) && highlight_good_score == 0) {
         highlight_good_score = 1;
       }
     }
@@ -92,6 +96,7 @@ class Scoreboard extends PositionComponent with AutoDispose, HasVisibility, Game
       }
       toggle_high_score = highlight_high_score < 0.5;
       blink_high_score = (highlight_high_score % 0.5) < 0.2;
+      blink_ranked_score = false;
     }
     if (highlight_good_score > 0) {
       highlight_good_score -= min(highlight_good_score, dt / 3);
@@ -139,7 +144,7 @@ class Scoreboard extends PositionComponent with AutoDispose, HasVisibility, Game
       mini_font.drawStringAligned(canvas, size.x / 2, 32, hiscore_, Anchor.topCenter);
     }
 
-    label = toggle_ranked_score ? 'RANKED' : 'SCORE';
+    label = toggle_ranked_score ? 'RANKED #${hiscore.rank(display_score!)}' : 'SCORE';
     mini_font.drawStringAligned(canvas, size.x / 2, 58, label, Anchor.topCenter);
 
     if (!blink_ranked_score) {
