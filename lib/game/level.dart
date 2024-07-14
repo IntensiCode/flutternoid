@@ -22,7 +22,6 @@ import 'brick.dart';
 import 'extra_id.dart';
 import 'game_context.dart';
 import 'game_messages.dart';
-import 'game_object.dart';
 import 'game_phase.dart';
 import 'player.dart';
 import 'wall.dart';
@@ -42,7 +41,7 @@ enum SpawnMode {
   random,
 }
 
-class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
+class Level extends PositionComponent with AutoDispose, GameContext, HasPaint {
   late final SpriteSheet sprites;
 
   final brick_rows = <Row>[];
@@ -408,14 +407,6 @@ class Level extends PositionComponent with AutoDispose, GameObject, HasPaint {
       }
     }
   }
-
-  // HasGameData
-
-  @override
-  void load_state(GameData data) {}
-
-  @override
-  GameData save_state(GameData data) => data;
 }
 
 extension on TiledComponent {

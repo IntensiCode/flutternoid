@@ -29,7 +29,7 @@ extension on Enemy {
   }
 }
 
-class EnemySpawner extends PositionComponent with AutoDispose, HasPaint {
+class EnemySpawner extends PositionComponent with AutoDispose, GameContext, HasPaint {
   late final EnemyDoor left_door;
   late final EnemyDoor right_door;
 

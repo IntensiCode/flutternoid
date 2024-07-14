@@ -35,7 +35,7 @@ class LaserWeapon extends Component with AutoDispose {
   final _pool = <LaserShot>[];
 }
 
-class LaserShot extends SpriteAnimationComponent {
+class LaserShot extends SpriteAnimationComponent with GameContext {
   final Function(LaserShot) _recycle;
 
   LaserShot(this._recycle, {super.animation}) : super(anchor: Anchor.topCenter);

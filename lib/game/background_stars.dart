@@ -5,7 +5,7 @@ import 'package:flame/components.dart';
 import '../core/common.dart';
 import 'game_context.dart';
 
-class BackgroundStars extends PositionComponent with HasPaint {
+class BackgroundStars extends PositionComponent with GameContext, HasPaint {
   BackgroundStars() {
     priority = -5;
   }

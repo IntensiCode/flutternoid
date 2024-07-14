@@ -1,5 +1,4 @@
 import 'package:flame/components.dart';
-import 'package:flutter/foundation.dart';
 
 import '../core/common.dart' as common;
 import 'game_object.dart';

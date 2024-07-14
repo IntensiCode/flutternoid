@@ -7,7 +7,7 @@ import 'package:flutternoid/game/player.dart';
 import 'ball.dart';
 import 'game_context.dart';
 
-class Shadows extends Component {
+class Shadows extends Component with GameContext {
   final Iterable<Ball> Function() balls;
 
   Shadows(this.balls);

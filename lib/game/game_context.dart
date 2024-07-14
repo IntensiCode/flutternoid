@@ -10,9 +10,15 @@ import 'level.dart';
 import 'player.dart';
 import 'visual_configuration.dart';
 
-extension ComponentExtensions on Component {
+mixin GameContext on Component {
+  GameScreen? _model;
+  Level? _level;
+  Player? _player;
+
   GameScreen get model {
-    final it = findParent<GameScreen>(includeSelf: true) ?? findParent<GameController>(includeSelf: true)?.model;
+    final it = _model ??
+        findParent<GameScreen>(includeSelf: true) ?? //
+        findParent<GameController>(includeSelf: true)?.model;
     if (it != null) return it;
     throw 'no game found in $this';
   }
@@ -25,11 +31,11 @@ extension ComponentExtensions on Component {
 
   Keys get keys => model.keys;
 
-  GameState get state => model.state;
+  GameState get game_state => model.state;
 
-  Level get level => model.level;
+  Level get level => _level ??= model.level;
 
-  Player get player => model.player;
+  Player get player => _player ??= model.player;
 
   Iterable<T> top_level_children<T extends Component>() => model.children.whereType<T>();
 

@@ -17,7 +17,6 @@ import 'brick.dart';
 import 'game_configuration.dart';
 import 'game_context.dart';
 import 'game_messages.dart';
-import 'game_object.dart';
 import 'player.dart';
 import 'soundboard.dart';
 import 'wall.dart';
@@ -32,7 +31,7 @@ enum BallState {
   teleporting,
 }
 
-class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks {
+class Ball extends BodyComponent with AutoDispose, GameContext, ContactCallbacks {
   late final Player _player;
   late final double _half_bat_height;
   late final SpriteSheet sprites;
@@ -361,12 +360,4 @@ class Ball extends BodyComponent with AutoDispose, GameObject, ContactCallbacks 
       sprites.getSpriteById(0).render(canvas, anchor: Anchor.center, overridePaint: paint);
     }
   }
-
-  // HasGameData
-
-  @override
-  load_state(GameData data) {}
-
-  @override
-  GameData save_state(GameData data) => throw UnimplementedError();
 }

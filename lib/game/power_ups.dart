@@ -6,7 +6,6 @@ import '../core/common.dart';
 import '../core/functions.dart';
 import '../core/messaging.dart';
 import '../core/random.dart';
-import 'soundboard.dart';
 import '../util/auto_dispose.dart';
 import '../util/extensions.dart';
 import '../util/on_message.dart';
@@ -15,6 +14,7 @@ import 'extra_id.dart';
 import 'game_context.dart';
 import 'game_messages.dart';
 import 'player.dart';
+import 'soundboard.dart';
 
 class SpawnExtra with Message {
   final ExtraId id;
@@ -22,7 +22,7 @@ class SpawnExtra with Message {
   SpawnExtra(this.id);
 }
 
-class PowerUps extends Component with AutoDispose {
+class PowerUps extends Component with AutoDispose, GameContext {
   late final SpriteSheet sprites;
 
   // Component
@@ -88,7 +88,7 @@ class PowerUps extends Component with AutoDispose {
   final _pool = <PowerUp>[];
 }
 
-class PowerUp extends SpriteAnimationComponent {
+class PowerUp extends SpriteAnimationComponent with GameContext {
   final Function(PowerUp) _recycle;
 
   PowerUp(this._recycle) : super(anchor: Anchor.center);

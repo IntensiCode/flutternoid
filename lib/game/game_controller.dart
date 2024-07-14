@@ -17,7 +17,6 @@ import '../util/delayed.dart';
 import '../util/extensions.dart';
 import '../util/fonts.dart';
 import '../util/on_message.dart';
-import 'game_context.dart';
 import 'game_dialog.dart';
 import 'game_messages.dart';
 import 'game_phase.dart';
@@ -27,6 +26,7 @@ import 'level_bonus.dart';
 import 'player.dart';
 import 'scoreboard.dart';
 import 'soundboard.dart';
+import 'visual_configuration.dart';
 
 /// Reminder to self: Controls the top-level game logic (here called [GamePhase]s) in contrast to the [GameScreen]
 /// handling the game-play
@@ -94,7 +94,7 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
         font: mini_font,
       ));
 
-      add(Delayed(1.0, () => player.reset(PlayerState.entering)));
+      add(Delayed(1.0, () => model.player.reset(PlayerState.entering)));
 
       soundboard.play(Sound.vaus_lost, volume_factor: 2);
     }));
@@ -191,7 +191,7 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
         }
 
         // really only for dev
-        final ok = await level.preload_level();
+        final ok = await model.level.preload_level();
         if (ok) {
           model.phase = GamePhase.enter_round;
         } else {

@@ -16,7 +16,9 @@ import 'player.dart';
 import 'slow_down_area.dart';
 import 'soundboard.dart';
 
-class Scoreboard extends PositionComponent with AutoDispose, HasVisibility, GameScriptFunctions {
+// TODO how to use snapshot for this?
+
+class Scoreboard extends PositionComponent with AutoDispose, GameContext, HasVisibility, GameScriptFunctions {
   @override
   onLoad() async {
     super.onLoad();
@@ -65,15 +67,15 @@ class Scoreboard extends PositionComponent with AutoDispose, HasVisibility, Game
   void update(double dt) {
     super.update(dt);
 
-    if (display_score != state.score) {
+    if (display_score != game_state.score) {
       if (display_score != null) {
         final was = display_score;
-        display_score = lerpDouble(display_score!, state.score, 0.1)!.toInt();
-        if (display_score == was && display_score! < state.score) {
+        display_score = lerpDouble(display_score!, game_state.score, 0.1)!.toInt();
+        if (display_score == was && display_score! < game_state.score) {
           display_score = display_score! + 1;
         }
       } else {
-        display_score = state.score;
+        display_score = game_state.score;
       }
 
       if (hiscore.isNewHiscore(display_score!)) {
@@ -107,19 +109,19 @@ class Scoreboard extends PositionComponent with AutoDispose, HasVisibility, Game
       blink_ranked_score = (highlight_good_score % 0.5) < 0.2;
     }
 
-    if (display_round != state.level_number_starting_at_1) {
+    if (display_round != game_state.level_number_starting_at_1) {
       if (display_round != null) highlight_round += 1;
-      display_round = state.level_number_starting_at_1;
+      display_round = game_state.level_number_starting_at_1;
     }
 
-    if (display_lives != state.lives) {
+    if (display_lives != game_state.lives) {
       if (display_lives != null) highlight_lives += 1;
-      display_lives = state.lives;
+      display_lives = game_state.lives;
     }
 
-    if (display_blasts != state.blasts) {
+    if (display_blasts != game_state.blasts) {
       if (display_blasts != null) highlight_blasts += 1;
-      display_blasts = state.blasts;
+      display_blasts = game_state.blasts;
     }
 
     if (highlight_round > 0) highlight_round -= min(highlight_round, dt);
@@ -148,21 +150,21 @@ class Scoreboard extends PositionComponent with AutoDispose, HasVisibility, Game
     mini_font.drawStringAligned(canvas, size.x / 2, 58, label, Anchor.topCenter);
 
     if (!blink_ranked_score) {
-      final score = (display_score ?? state.score).toString().padLeft(7, '0');
+      final score = (display_score ?? game_state.score).toString().padLeft(7, '0');
       mini_font.drawStringAligned(canvas, size.x / 2, 66, score, Anchor.topCenter);
     }
 
-    final round = state.level_number_starting_at_1.toString().padLeft(2, ' ');
+    final round = game_state.level_number_starting_at_1.toString().padLeft(2, ' ');
     if (highlight_round > 0) mini_font.paint.opacity = (highlight_round * 4) % 1;
     mini_font.drawStringAligned(canvas, size.x / 2, 76, 'ROUND $round', Anchor.topCenter);
     mini_font.paint.opacity = 1;
 
-    final lives = state.lives.toString().padLeft(2, ' ');
+    final lives = game_state.lives.toString().padLeft(2, ' ');
     if (highlight_lives > 0) mini_font.paint.opacity = (highlight_lives * 4) % 1;
     mini_font.drawStringAligned(canvas, size.x / 2, 84, 'LIVES $lives', Anchor.topCenter);
     mini_font.paint.opacity = 1;
 
-    final blasts = state.blasts.toString().padLeft(2, ' ');
+    final blasts = game_state.blasts.toString().padLeft(2, ' ');
     if (highlight_blasts > 0) mini_font.paint.opacity = (highlight_blasts * 4) % 1;
     mini_font.drawStringAligned(canvas, size.x / 2, 92, 'BLAST $blasts', Anchor.topCenter);
     mini_font.paint.opacity = 1;

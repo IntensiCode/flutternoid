@@ -23,7 +23,7 @@ enum EnemyState {
   exploding,
 }
 
-abstract class Enemy extends BodyComponent with AutoDispose, ContactCallbacks {
+abstract class Enemy extends BodyComponent with AutoDispose, ContactCallbacks, GameContext {
   Enemy({required this.radius, this.hit_points = 5}) {
     priority = 5;
   }

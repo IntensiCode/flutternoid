@@ -10,7 +10,7 @@ import '../util/on_message.dart';
 import 'game_context.dart';
 import 'game_messages.dart';
 
-class PlasmaBlasts extends Component with AutoDispose, HasPaint {
+class PlasmaBlasts extends Component with AutoDispose, GameContext, HasPaint {
   late final FragmentShader _shader;
 
   final _active = <_Blast>[];

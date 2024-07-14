@@ -1,19 +1,19 @@
 import 'dart:ui';
 
 import 'package:flame/components.dart';
-import 'package:flutternoid/game/game_context.dart';
-import 'package:flutternoid/game/soundboard.dart';
-import 'package:flutternoid/scripting/game_script.dart';
 
 import '../core/common.dart';
 import '../core/functions.dart';
+import '../scripting/game_script.dart';
 import '../scripting/game_script_functions.dart';
 import '../util/auto_dispose.dart';
 import '../util/extensions.dart';
 import '../util/fonts.dart';
 import '../util/nine_patch_image.dart';
+import 'game_context.dart';
+import 'soundboard.dart';
 
-class LevelBonus extends PositionComponent with AutoDispose, GameScriptFunctions, GameScript, HasPaint {
+class LevelBonus extends PositionComponent with AutoDispose, GameScriptFunctions, GameContext, GameScript, HasPaint {
   LevelBonus(this.when_done, {this.game_complete = false});
 
   final Function when_done;
@@ -46,15 +46,15 @@ class LevelBonus extends PositionComponent with AutoDispose, GameScriptFunctions
       at(1.0, () => content.lines.add(''));
       at(0.0, () => content.lines.add('DOH DEFEATED:'));
       at(1.0, () => content.lines.add('*10000 POINTS*'));
-      at(0.0, () => state.score += 10000);
+      at(0.0, () => game_state.score += 10000);
 
-      state.game_complete = true;
+      game_state.game_complete = true;
 
-      if (state.blasts > 0) {
+      if (game_state.blasts > 0) {
         at(1.0, () => content.lines.add(''));
         at(0.0, () => content.lines.add('SAVED PLASMA:'));
 
-        final count = state.blasts;
+        final count = game_state.blasts;
         for (int i = 0; i < count; i++) {
           final extra = (i + 1) * configuration.eog_blast_bonus;
           at(0.1, () {
@@ -62,16 +62,16 @@ class LevelBonus extends PositionComponent with AutoDispose, GameScriptFunctions
               content.lines.removeLast();
             }
             content.lines.add('*$extra POINTS*');
-            state.score += configuration.eog_blast_bonus;
-            state.blasts--;
+            game_state.score += configuration.eog_blast_bonus;
+            game_state.blasts--;
           });
         }
       }
 
-      if (state.lives > 0) {
+      if (game_state.lives > 0) {
         at(1.0, () => content.lines.add(''));
         at(0.0, () => content.lines.add('REMAINING LIVES:'));
-        final count = state.lives;
+        final count = game_state.lives;
         for (int i = 0; i < count; i++) {
           final extra = (i + 1) * configuration.eog_life_bonus;
           at(0.1, () {
@@ -79,8 +79,8 @@ class LevelBonus extends PositionComponent with AutoDispose, GameScriptFunctions
               content.lines.removeLast();
             }
             content.lines.add('*$extra POINTS*');
-            state.score += configuration.eog_life_bonus;
-            state.lives--;
+            game_state.score += configuration.eog_life_bonus;
+            game_state.lives--;
           });
         }
       }
@@ -124,7 +124,7 @@ class LevelBonus extends PositionComponent with AutoDispose, GameScriptFunctions
         final was = counted_seconds.round();
         counted_seconds += dt * 50;
         final now = counted_seconds.round();
-        state.score += (now - was) * 33;
+        game_state.score += (now - was) * 33;
         content.lines.clear();
         content.lines.add('TIME BONUS: $now');
         level.level_time = (time_bonus - now).toDouble();
@@ -147,7 +147,7 @@ class LevelBonus extends PositionComponent with AutoDispose, GameScriptFunctions
         all_enemies += dt;
         if (all_enemies >= 1) {
           content.lines.add('*EXTRA PLASMA BLAST*');
-          state.blasts++;
+          game_state.blasts++;
           soundboard.play_one_shot_sample('sound/extra_blast.ogg');
         }
         return;
@@ -168,7 +168,7 @@ class LevelBonus extends PositionComponent with AutoDispose, GameScriptFunctions
       level_complete += dt;
       if (level_complete >= 1) {
         content.lines.add('*EXTRA PLASMA BLAST*');
-        state.blasts++;
+        game_state.blasts++;
         soundboard.play_one_shot_sample('sound/extra_blast.ogg');
       }
       return;

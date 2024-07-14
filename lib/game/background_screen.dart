@@ -14,7 +14,9 @@ import 'game_context.dart';
 import 'game_messages.dart';
 import 'game_phase.dart';
 
-class BackgroundScreen extends PositionComponent with AutoDispose, GameScriptFunctions, HasPaint, Snapshot {
+class BackgroundScreen extends PositionComponent
+    with AutoDispose, GameScriptFunctions, GameContext, HasPaint, Snapshot {
+  //
   final _stars = BackgroundStars();
 
   late SpriteComponent _frame;

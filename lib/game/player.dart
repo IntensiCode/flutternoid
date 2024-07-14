@@ -18,7 +18,6 @@ import 'enemy.dart';
 import 'game_configuration.dart';
 import 'game_context.dart';
 import 'game_messages.dart';
-import 'game_object.dart';
 import 'game_phase.dart';
 import 'slow_down_area.dart';
 import 'soundboard.dart';
@@ -47,7 +46,7 @@ enum PlayerMode {
   laser3,
 }
 
-class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObject {
+class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameContext {
   late final Keys _keys;
   late final SpriteSheet sprites;
   late final SpriteSheet explosion;
@@ -544,12 +543,4 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameObjec
       sprites.getSpriteById(mode.index).render(canvas, overridePaint: paint, anchor: Anchor.center);
     }
   }
-
-  // HasGameData
-
-  @override
-  void load_state(GameData data) {}
-
-  @override
-  GameData save_state(GameData data) => throw UnimplementedError();
 }

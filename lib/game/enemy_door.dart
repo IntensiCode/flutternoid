@@ -18,7 +18,7 @@ enum DoorState {
   closing,
 }
 
-class EnemyDoor extends PositionComponent with AutoDispose, HasPaint {
+class EnemyDoor extends PositionComponent with AutoDispose, GameContext, HasPaint {
   late final SpriteSheet door;
 
   DoorState state = DoorState.idle;

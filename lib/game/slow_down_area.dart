@@ -10,9 +10,8 @@ import 'ball.dart';
 import 'game_configuration.dart';
 import 'game_context.dart';
 import 'game_messages.dart';
-import 'game_object.dart';
 
-class SlowDownArea extends BodyComponent with AutoDispose, GameObject, ContactCallbacks {
+class SlowDownArea extends BodyComponent with AutoDispose, GameContext, ContactCallbacks {
   late final FragmentShader shader;
 
   late double slow_down_range;
@@ -156,14 +155,6 @@ class SlowDownArea extends BodyComponent with AutoDispose, GameObject, ContactCa
       canvas.drawRect(Rect.fromLTWH(-2, 0, visual.game_pixels.x + 4, slow_down_range), shader_paint);
     }
   }
-
-  // HasGameData
-
-  @override
-  void load_state(GameData data) {}
-
-  @override
-  GameData save_state(GameData data) => data;
 
   // Implementation
 

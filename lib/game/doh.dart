@@ -17,7 +17,7 @@ import 'ball.dart';
 import 'game_messages.dart';
 import 'soundboard.dart';
 
-class Doh extends BodyComponent with AutoDispose, ContactCallbacks {
+class Doh extends BodyComponent with AutoDispose, ContactCallbacks, GameContext {
   Doh(Vector2 center) : _spawn_pos = center;
 
   final Vector2 _spawn_pos;
