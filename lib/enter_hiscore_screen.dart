@@ -2,6 +2,7 @@ import 'core/common.dart';
 import 'core/functions.dart';
 import 'core/screens.dart';
 import 'game/game_state.dart' as gs;
+import 'game/game_state.dart';
 import 'game/hiscore.dart';
 import 'input/shortcuts.dart';
 import 'scripting/game_script.dart';
@@ -39,12 +40,18 @@ class EnterHiscoreScreen extends GameScriptComponent with HasAutoDisposeShortcut
         shortcuts.snoop = (_) {};
         hiscore.insert(gs.state.score, gs.state.level_number_starting_at_1, name);
         showScreen(Screen.hiscore);
+        clear_game_state();
       }
       if (name.length > 10) name = name.substring(0, 10);
 
       input.removeFromParent();
       input = textXY('${name}_', xCenter, lineHeight * 13, scale: 2);
     };
+  }
+
+  Future clear_game_state() async {
+    await state.delete();
+    state.reset();
   }
 
   String name = '';

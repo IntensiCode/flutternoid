@@ -167,6 +167,7 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
     soundboard.play_one_shot_sample('doh_laugh.ogg');
 
     await model.state.delete();
+    model.state.reset();
   }
 
   void _on_game_over_hiscore() async {
@@ -178,8 +179,6 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
     ));
 
     soundboard.play_one_shot_sample('doh_laugh.ogg');
-
-    await model.state.delete();
   }
 
   void _on_game_paused() => _switch_overlay(GameDialog(

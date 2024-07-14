@@ -49,14 +49,20 @@ https://intensicode.github.io/flutternoid/
 
 ### To Do
 
+- [ ] BUG: game completed + ball lost or killed => game not completed OMG
+- [ ] BUG: game completed state not cleared after hiscore
+
 - [ ] PERF: web performance became bad suddenly - why?
 
+- [ ] BUG: extras collected when player destroyed
+- [ ] BUG: multi ball after destroyed is still around
 - [ ] BUG: enemies are invisible at (0,0) when spawning - ball sometimes hits them
 - [ ] BUG: audio switching messed up - music does not turn on sometimes?
 - [ ] BUG: rarely ball with zero x or y speed but no auto speed up?
 - [ ] BUG: plasma appears in center(?) when certain(?) multi ball state?
 - [ ] BUG: disable pause when level complete (or other overlay active)
 
+- [ ] doors should be considered blocked if enemy is blocking it ^^
 - [ ] make vaus pull ball back from void a bit more?
 - [ ] make vaus move one or two pixels more towards the walls?
 - [ ] fix min ball speed (in upper part)

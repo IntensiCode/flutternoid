@@ -6,6 +6,7 @@ import 'core/common.dart';
 import 'core/functions.dart';
 import 'core/screens.dart';
 import 'game/game_state.dart' as gs;
+import 'game/game_state.dart';
 import 'game/hiscore.dart';
 import 'game/soundboard.dart';
 import 'scripting/game_script.dart';
@@ -29,9 +30,15 @@ class TheEnd extends GameScriptComponent {
     if (hiscore.isHiscoreRank(gs.state.score)) {
       softkeys('Hiscore', null, (_) => showScreen(Screen.enter_hiscore));
     } else {
+      clear_game_state();
       softkeys('Back', null, (_) => popScreen());
     }
 
     soundboard.play_music('music/theme.mp3');
+  }
+
+  clear_game_state() async {
+    await state.delete();
+    state.reset();
   }
 }
