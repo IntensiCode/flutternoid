@@ -49,33 +49,30 @@ https://intensicode.github.io/flutternoid/
 
 ### To Do
 
-- [ ] limit enemy speed
 - [ ] PERF: web performance became bad suddenly - why?
 
-- [ ] BUG: multi ball after destroyed is still around
 - [ ] BUG: enemies are invisible at (0,0) when spawning - ball sometimes hits them
 - [ ] BUG: audio switching messed up - music does not turn on sometimes?
 - [ ] BUG: rarely ball with zero x or y speed but no auto speed up?
-- [ ] BUG: plasma appears in center(?) when certain(?) multi ball state?
-- [ ] BUG: disable pause when level complete (or other overlay active)
 
-- [ ] doors should be considered blocked if enemy is blocking it ^^
 - [ ] make vaus pull ball back from void a bit more?
 - [ ] make vaus move one or two pixels more towards the walls?
 - [ ] fix min ball speed (in upper part)
 - [ ] separate options from configuration
 - [ ] shader fix for desktop?
-- [ ] shader for tiled background? or render into an image once?
 - [ ] level defines enemies
 - [ ] forge2D only inside GameScreen? switch world when in GameController?
 - [ ] pause physics via HasTimeScale on Forge2dWorld?
 - [ ] pause physics via custom Forge2DWorld not calling update when paused?
-- [ ] UNLOCK extra levels from ROD with new molecule enemy, reappearing and moving blocks
+- [ ] unlock extra levels from ROD with new molecule enemy, reappearing and moving blocks
 
 - [-] BUG: fix random block selection to not pick first block every time [seems to work after all]
 - [-] BUG: last extra is cut off [cannot reproduce]
 - [-] soLoud + audio_players for Web? [soloud breaks web build]
+- [?] BUG: disable pause when level complete (or other overlay active)
 - [?] BUG: extras collected when player destroyed
+- [?] BUG: multi ball after destroyed is still around [fixed somehow?]
+- [?] BUG: plasma appears in center(?) when certain(?) multi ball state? [was this fixed somehow?]
 - [?] PERF: limit audio players by time
 - [X] BUG: ball jumps behind wall - make wall a solid box?
 - [X] BUG: count down level time in bonus screen
@@ -97,6 +94,7 @@ https://intensicode.github.io/flutternoid/
 - [X] count remaining lives at end of game as score x 1000
 - [X] doh level
 - [X] doh scoring
+- [X] doors should be considered blocked if enemy is blocking it ^^
 - [X] enemies after vaus lost?
 - [X] extras by brick color?
 - [X] fade in background music when audio mode with music selected
@@ -111,6 +109,7 @@ https://intensicode.github.io/flutternoid/
 - [X] level start 'Round X'
 - [X] level time
 - [X] level time -> time bonus
+- [X] limit enemy speed
 - [X] limit laser time and shots
 - [X] note playing
 - [X] notes as samples?
@@ -122,6 +121,7 @@ https://intensicode.github.io/flutternoid/
 - [X] proper reset for new level: player, ball, etc GameObject after all?
 - [X] resume vs new game
 - [X] scoreboard
+- [X] shader for tiled background? or render into an image once?
 - [X] shortcuts only when "active"
 - [X] show rank after RANKED #<x>
 - [X] show status
