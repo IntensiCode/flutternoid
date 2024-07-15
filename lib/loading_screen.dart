@@ -17,9 +17,7 @@ class LoadingScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
     at(0.0, () => fadeIn(textXY('An', xCenter, yCenter - lineHeight), duration: 1));
     at(1.0, () => fadeIn(textXY('IntensiCode', xCenter, yCenter), duration: 1));
     at(1.0, () => fadeIn(textXY('Presentation', xCenter, yCenter + lineHeight), duration: 1));
-    at(0.0, () => soundboard.preload());
-    at(2.0, () => fadeOutAll(1.0));
-
+    at(1.0, () => fadeOutAll(1.0));
     final psychocell = await image('psychocell.png');
     at(1.0, () => fontSelect(menu_font, scale: 0.5));
     at(0.0, () => fadeIn(spriteIXY(psychocell, xCenter, yCenter / 2), duration: 1));
@@ -33,6 +31,7 @@ class LoadingScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
     at(1.0, () => fadeIn(spriteIXY(intro, xCenter, yCenter), duration: 1));
     at(1.0, () => fontSelect(tiny_font, scale: 1));
     at(0.0, () => fadeIn(_press_space_to_continue(), duration: 1));
+    at(0.0, () => soundboard.preload());
     at(10.0, () => fadeOutAll(1.0));
 
     at(1.0, () => _leave());
