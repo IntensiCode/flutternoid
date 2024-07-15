@@ -286,8 +286,8 @@ abstract class Soundboard extends Component with HasGameData {
   @override
   void load_state(Map<String, dynamic> data) {
     logInfo('load soundboard: $data');
-    audio_mode = AudioMode.from_name(data['audio_mode'] ?? audio_mode.name);
-    brick_notes = data['brick_notes'] ?? brick_notes;
+    _audio_mode = AudioMode.from_name(data['audio_mode'] ?? audio_mode.name);
+    _brick_notes = data['brick_notes'] ?? brick_notes;
     _master = data['master'] ?? _master;
     _music = data['music'] ?? _music;
     _muted = data['muted'] ?? _muted;
@@ -300,6 +300,6 @@ abstract class Soundboard extends Component with HasGameData {
     ..['music'] = _music
     ..['muted'] = _muted
     ..['sound'] = _sound
-    ..['audio_mode'] = audio_mode.name
-    ..['brick_notes'] = brick_notes;
+    ..['audio_mode'] = _audio_mode.name
+    ..['brick_notes'] = _brick_notes;
 }
