@@ -123,6 +123,7 @@ abstract class Enemy extends BodyComponent with AutoDispose, ContactCallbacks, G
     onMessage<EnterRound>((_) => removeFromParent());
     // handled by EnemySpawner instead to have teleports
     // onMessage<LevelComplete>((_) => removeFromParent());
+    body.setTransform(forced_position, 0);
   }
 
   @override
