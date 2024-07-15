@@ -52,7 +52,6 @@ https://intensicode.github.io/flutternoid/
 - [ ] revisit soloud with new web support
 - [ ] PERF: web performance became bad suddenly - why?
 
-- [ ] BUG: power-ups not stopped when overlay active!?
 - [ ] BUG: laser should stop at frame
 - [ ] BUG: enemies are invisible at (0,0) when spawning - ball sometimes hits them
 - [ ] BUG: enemies can be hit weirdly "below" during spawn
@@ -97,6 +96,7 @@ https://intensicode.github.io/flutternoid/
 - [X] BUG: game completed + ball lost or killed => game not completed OMG
 - [X] BUG: game completed state not cleared after hiscore
 - [X] BUG: hiscore for web broken completely!? game over without enter hiscore + after, the score is still ranked!?
+- [X] BUG: power-ups not stopped when overlay active!?
 - [X] BUG: vaus explodes multiple times if enemies hit in short sequence
 - [X] PERF: experiment: disable note sounds by default for web (or entirely?)
 - [X] README with screenshots and animated gif

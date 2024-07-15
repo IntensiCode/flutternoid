@@ -162,7 +162,10 @@ class GameScreen extends PositionComponent
   @override
   void updateTree(double dt) {
     if (!isVisible) return;
+    if (phase == GamePhase.confirm_exit) return;
     if (phase == GamePhase.game_paused) return;
+    if (phase == GamePhase.game_over) return;
+    if (phase == GamePhase.game_over_hiscore) return;
     super.updateTree(dt);
   }
 
