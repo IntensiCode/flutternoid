@@ -65,6 +65,7 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
 
     onMessage<GamePhaseUpdate>((it) {
       logInfo('game phase update: ${it.phase}');
+      if (it.phase == GamePhase.game_paused) logError('nono', StackTrace.current);
       _phase_handler(it.phase).call();
     });
 
@@ -142,6 +143,19 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
   }
 
   void _on_enter_round_get_ready() {
+    // if the player paused during pseudo "reenter_round" phase, the _overlay won't be the right one!
+
+    if (_overlay == null || _overlay is! BitmapText) {
+      _switch_overlay(BitmapText(
+        text: 'ROUND ${model.state.level_number_starting_at_1}',
+        position: (visual.game_position + visual.game_pixels / 2)..y += 48,
+        anchor: Anchor.center,
+        font: mini_font,
+      ));
+      _overlay?.add(Delayed(0.5, () => _on_enter_round_get_ready()));
+      return;
+    }
+
     final bt = _overlay as BitmapText;
     bt.add(BitmapText(
       text: 'GET READY',
