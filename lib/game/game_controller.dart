@@ -22,6 +22,7 @@ import 'game_messages.dart';
 import 'game_phase.dart';
 import 'game_screen.dart';
 import 'game_state.dart';
+import 'hiscore.dart';
 import 'level_bonus.dart';
 import 'player.dart';
 import 'scoreboard.dart';
@@ -59,7 +60,7 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
     onMessage<LevelComplete>((_) => model.phase = GamePhase.next_round);
     onMessage<PlayerReady>((_) => _on_enter_round_get_ready());
     onMessage<GameComplete>((_) => model.phase = GamePhase.game_complete);
-    onMessage<GameOver>((_) => model.phase = GamePhase.game_over);
+    onMessage<GameOver>((_) => _show_game_over());
     onMessage<VausLost>((_) => _on_vaus_lost());
 
     onMessage<GamePhaseUpdate>((it) {
@@ -75,7 +76,7 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
   void _on_vaus_lost() {
     state.lives--;
     if (state.lives <= 0) {
-      model.phase = GamePhase.game_over;
+      _show_game_over();
       return;
     }
 
@@ -98,6 +99,14 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
 
       soundboard.play(Sound.vaus_lost, volume_factor: 2);
     }));
+  }
+
+  void _show_game_over() {
+    if (hiscore.isHiscoreRank(state.score)) {
+      model.phase = GamePhase.game_over_hiscore;
+    } else {
+      model.phase = GamePhase.game_over;
+    }
   }
 
   Function _phase_handler(GamePhase it) => switch (it) {
@@ -195,7 +204,7 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
         if (ok) {
           model.phase = GamePhase.enter_round;
         } else {
-          model.phase = GamePhase.game_over;
+          _show_game_over();
         }
       }));
     }));
