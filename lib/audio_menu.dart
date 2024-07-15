@@ -154,7 +154,12 @@ class AudioMenu extends GameScriptComponent {
     }
   }
 
+  int _last_sound_at = 0;
+
   void _make_sound() {
+    final now = DateTime.timestamp().millisecondsSinceEpoch;
+    if (_last_sound_at + 100 > now) return;
+    _last_sound_at = now;
     final which = Sound.values.random().name;
     soundboard.play_one_shot_sample('sound/$which.ogg');
   }
