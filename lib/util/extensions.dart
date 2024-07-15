@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/sprite.dart';
+import 'package:kart/kart.dart';
 
 extension ComponentExtension on Component {
   T added<T extends Component>(T it) {
@@ -70,7 +71,7 @@ extension ListExtensions<T> on List<T> {
   List<R> mapList<R>(R Function(T) f) => map(f).toList();
 
   T? nextAfter(T? it) {
-    if (it == null) return firstOrNull;
+    if (it == null) return firstOrNull();
     final index = indexOf(it);
     if (index == -1) return null;
     return this[(index + 1) % length];
@@ -86,6 +87,8 @@ extension ListExtensions<T> on List<T> {
     if (isEmpty) return null;
     return removeLast();
   }
+
+  List<T> operator-(List<T> other) => whereNot((it) => other.contains(it)).toList();
 }
 
 extension RandomExtensions on Random {
