@@ -342,5 +342,5 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
           font: tiny_font,
           onTap: (_) => model.phase = GamePhase.game_paused,
         )..angle = -pi / 2,
-      ]);
+      ])..fadeInDeep();
 }
