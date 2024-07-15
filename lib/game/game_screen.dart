@@ -146,12 +146,12 @@ class GameScreen extends PositionComponent
         phase = GamePhase.enter_round;
       });
 
-      onKey('<C-j>', () {
+      onKey('<A-j>', () {
         state.level_number_starting_at_1 += 10;
         state.save_checkpoint();
         phase = GamePhase.enter_round;
       });
-      onKey('<C-k>', () {
+      onKey('<A-k>', () {
         state.level_number_starting_at_1 -= 10;
         state.save_checkpoint();
         phase = GamePhase.enter_round;

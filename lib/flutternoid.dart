@@ -61,20 +61,20 @@ class Flutternoid extends Forge2DGame<MainController>
     add(soundboard);
 
     if (dev) {
-      onKey('<C-->', () => _slowDown());
-      onKey('<C-=>', () => _speedUp());
-      onKey('<C-S-+>', () => _speedUp());
-      onKey('<C-a>', () => showScreen(Screen.audio_menu));
-      onKey('<C-c>', () => showScreen(Screen.credits));
-      onKey('<C-e>', () => showScreen(Screen.end));
-      onKey('<C-d>', () => _toggleDebug());
-      onKey('<C-g>', () => showScreen(Screen.game));
-      onKey('<C-h>', () => showScreen(Screen.hiscore));
-      onKey('<C-l>', () => showScreen(Screen.loading));
-      onKey('<C-m>', () => soundboard.toggleMute());
-      onKey('<C-p>', () => showScreen(Screen.help));
-      onKey('<C-t>', () => showScreen(Screen.title));
-      onKey('<C-v>', () => showScreen(Screen.video_menu));
+      onKey('<A-->', () => _slowDown());
+      onKey('<A-=>', () => _speedUp());
+      onKey('<A-S-+>', () => _speedUp());
+      onKey('<A-a>', () => showScreen(Screen.audio_menu));
+      onKey('<A-c>', () => showScreen(Screen.credits));
+      onKey('<A-e>', () => showScreen(Screen.end));
+      onKey('<A-d>', () => _toggleDebug());
+      onKey('<A-g>', () => showScreen(Screen.game));
+      onKey('<A-h>', () => showScreen(Screen.hiscore));
+      onKey('<A-l>', () => showScreen(Screen.loading));
+      onKey('<A-m>', () => soundboard.toggleMute());
+      onKey('<A-p>', () => showScreen(Screen.help));
+      onKey('<A-t>', () => showScreen(Screen.title));
+      onKey('<A-v>', () => showScreen(Screen.video_menu));
     }
   }
 
