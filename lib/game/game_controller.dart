@@ -47,6 +47,9 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
 
   Component? _overlay;
 
+  // hack fix for the pseudo 'reenter round' phase:
+  bool _temp_block_keys = false;
+
   @override
   onLoad() async {
     super.onLoad();
@@ -65,7 +68,7 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
 
     onMessage<GamePhaseUpdate>((it) {
       logInfo('game phase update: ${it.phase}');
-      if (it.phase == GamePhase.game_paused) logError('nono', StackTrace.current);
+      _temp_block_keys = false;
       _phase_handler(it.phase).call();
     });
 
@@ -87,6 +90,8 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
     // enemies are handled via teleport. player is PlayerState.gone.
 
     // here we play Sound.vaus_lost and show a special overlay.
+
+    _temp_block_keys = true;
 
     add(Delayed(0.5, () {
       _switch_overlay(BitmapText(
@@ -166,6 +171,7 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
 
     add(Delayed(2.0, () {
       bt.fadeOutDeep();
+      _temp_block_keys = false;
       model.phase = GamePhase.game_on;
     }));
 
@@ -257,8 +263,12 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
         GamePhase.enter_round => {},
         GamePhase.game_complete => {},
         GamePhase.game_on => {
-            GameKey.soft1: () => model.phase = GamePhase.confirm_exit,
-            GameKey.soft2: () => model.phase = GamePhase.game_paused,
+            GameKey.soft1: () {
+              if (!_temp_block_keys) model.phase = GamePhase.confirm_exit;
+            },
+            GameKey.soft2: () {
+              if (!_temp_block_keys) model.phase = GamePhase.game_paused;
+            },
           },
         GamePhase.game_over => {
             GameKey.soft1: () {
