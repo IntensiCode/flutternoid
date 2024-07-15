@@ -187,7 +187,7 @@ abstract class Soundboard extends Component with HasGameData {
   Future preload() async {
     if (_blocked) return;
     _blocked = true;
-    do_init_and_preload();
+    await do_init_and_preload();
     _blocked = false;
     logInfo('preload done');
   }
