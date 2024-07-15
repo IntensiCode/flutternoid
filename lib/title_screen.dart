@@ -12,6 +12,7 @@ import 'input/game_keys.dart';
 import 'input/shortcuts.dart';
 import 'scripting/game_script.dart';
 import 'util/bitmap_button.dart';
+import 'util/delayed.dart';
 import 'util/effects.dart';
 import 'util/extensions.dart';
 import 'util/fonts.dart';
@@ -96,7 +97,7 @@ class TitleScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
   void onMount() {
     super.onMount();
     if (!seen) music = true;
-    if (!seen) soundboard.play_one_shot_sample('arkanoid.ogg');
+    if (!seen) add(Delayed(0.5, () => soundboard.play_one_shot_sample('arkanoid.ogg')));
     if (!seen) soundboard.play_music('music/theme.mp3');
     // onKey('<Space>', () => _showScreen(Screen.game)); handled by _insert_coin below
     seen = true;
