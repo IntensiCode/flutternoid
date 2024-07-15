@@ -80,7 +80,7 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
       return;
     }
 
-    state.save_checkpoint();
+    // state.save_checkpoint();
 
     // special state: we still want GamePhase.game_on for power ups to drop etc.
     // enemies are handled via teleport. player is PlayerState.gone.
