@@ -59,7 +59,7 @@ class PlayState {
 abstract class Soundboard extends Component with HasGameData {
   void _save() => save('soundboard', this);
 
-  bool _brick_notes = true;
+  bool _brick_notes = !kIsWeb;
 
   bool get brick_notes => _brick_notes;
 
@@ -67,6 +67,12 @@ abstract class Soundboard extends Component with HasGameData {
     if (_brick_notes == value) return;
     _brick_notes = value;
     _save();
+
+    if (value) {
+      do_play_notes();
+    } else {
+      do_not_play_notes();
+    }
   }
 
   AudioMode _audio_mode = AudioMode.music_and_sound;
@@ -161,6 +167,12 @@ abstract class Soundboard extends Component with HasGameData {
   double? get active_music_volume;
 
   set active_music_volume(double? it);
+
+  @protected
+  void do_play_notes() {}
+
+  @protected
+  void do_not_play_notes() {}
 
   @protected
   void do_update_volume();

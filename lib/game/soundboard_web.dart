@@ -38,6 +38,25 @@ class SoundboardImpl extends Soundboard {
   set active_music_volume(double? it) => FlameAudio.bgm.audioPlayer.setVolume(it ?? music);
 
   @override
+  Future do_play_notes() async {
+    super.do_play_notes();
+    logInfo('do play notes');
+    for (int i = 0; i <= 20; i++) {
+      _web_notes.add(await _preload_player('note$i.ogg'));
+    }
+  }
+
+  @override
+  void do_not_play_notes() {
+    super.do_not_play_notes();
+    logInfo('do not play notes');
+    for (final it in _web_notes) {
+      it.dispose();
+    }
+    _web_notes.clear();
+  }
+
+  @override
   Future do_init_and_preload() async {
     if (_sounds.isEmpty) await _preload_sounds();
   }
@@ -57,10 +76,7 @@ class SoundboardImpl extends Soundboard {
         logError('failed loading $it: $e');
       }
     }
-    logInfo('fully preload notes');
-    for (int i = 0; i <= 20; i++) {
-      _web_notes.add(await _preload_player('note$i.ogg'));
-    }
+    if (brick_notes) do_play_notes();
   }
 
   Future<AudioPlayer> _preload_player(String name) async {
