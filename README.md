@@ -53,9 +53,7 @@ https://intensicode.github.io/flutternoid/
 - [ ] PERF: split scoreboard into statics and dynamics - then render statics from BackgroundScreen
 - [ ] PERF: split scoreboard into statics and dynamics - then dirty flag for dynamics? maybe
 
-- [ ] BUG: hiscore for web broken completely!? game over without enter hiscore + after, the score is still ranked!?
 - [ ] BUG: enemy hit should not be a note
-- [ ] BUG: blasts lost after retry level? but lives score etc are there!?
 - [ ] BUG: enemies are invisible at (0,0) when spawning - ball sometimes hits them
 - [ ] BUG: rarely ball with zero x or y speed but no auto speed up?
 
@@ -74,13 +72,14 @@ https://intensicode.github.io/flutternoid/
 - [-] BUG: fix random block selection to not pick first block every time [seems to work after all]
 - [-] BUG: last extra is cut off [cannot reproduce]
 - [-] soLoud + audio_players for Web? [soloud breaks web build]
-- [X] BUG: audio for web messed up
-- [X] BUG: audio switching messed up - music does not turn on sometimes?
+- [?] BUG: blasts lost after retry level? but lives score etc are there!?
 - [?] BUG: disable pause when level complete (or other overlay active)
 - [?] BUG: extras collected when player destroyed
 - [?] BUG: multi ball after destroyed is still around [fixed somehow?]
 - [?] BUG: plasma appears in center(?) when certain(?) multi ball state? [was this fixed somehow?]
 - [?] PERF: limit audio players by time
+- [X] BUG: audio for web messed up
+- [X] BUG: audio switching messed up - music does not turn on sometimes?
 - [X] BUG: ball jumps behind wall - make wall a solid box?
 - [X] BUG: count down level time in bonus screen
 - [X] BUG: door stays open?
@@ -90,6 +89,7 @@ https://intensicode.github.io/flutternoid/
 - [X] BUG: frame shadow and slow down over vaus?
 - [X] BUG: game completed + ball lost or killed => game not completed OMG
 - [X] BUG: game completed state not cleared after hiscore
+- [X] BUG: hiscore for web broken completely!? game over without enter hiscore + after, the score is still ranked!?
 - [X] BUG: vaus explodes multiple times if enemies hit in short sequence
 - [X] README with screenshots and animated gif
 - [X] SHOW HOW TO PLAY AT FIRST START
