@@ -1,7 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flame/sprite.dart';
 
-import '../core/common.dart';
 import '../input/shortcuts.dart';
 import '../util/auto_dispose.dart';
 import '../util/bitmap_font.dart';

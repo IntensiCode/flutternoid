@@ -147,8 +147,6 @@ class SoundboardImpl extends Soundboard {
     return Float32List.fromList(sineWave);
   }
 
-  // TODO isolate, right?
-
   _mix_stream() async {
     const hz = 25;
     const rate = 11025;

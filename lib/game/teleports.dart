@@ -1,4 +1,3 @@
-import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
 import 'package:flame/sprite.dart';

@@ -9,7 +9,6 @@ import '../core/random.dart';
 import '../util/extensions.dart';
 import 'enemy.dart';
 import 'game_configuration.dart';
-import 'game_context.dart';
 
 class EnemyCrystal extends Enemy {
   EnemyCrystal() : super(radius: 7, hit_points: 3);

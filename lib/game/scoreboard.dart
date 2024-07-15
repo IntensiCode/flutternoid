@@ -2,7 +2,6 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:collection/collection.dart';
-import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 import 'package:signals_core/signals_core.dart';
 
@@ -18,8 +17,6 @@ import 'hiscore.dart';
 import 'player.dart';
 import 'slow_down_area.dart';
 import 'soundboard.dart';
-
-// TODO how to use snapshot for this?
 
 class Scoreboard extends PositionComponent with AutoDispose, GameContext, HasPaint, HasVisibility, GameScriptFunctions {
   @override
