@@ -1,13 +1,17 @@
 import 'dart:ui';
 
+import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/extensions.dart';
-import 'package:flutternoid/input/shortcuts.dart';
-import 'package:flutternoid/util/auto_dispose.dart';
 
+import '../core/common.dart';
 import '../core/functions.dart';
+import '../input/shortcuts.dart';
+import '../util/auto_dispose.dart';
 import 'bitmap_font.dart';
+import 'bitmap_text.dart';
+import 'extensions.dart';
 import 'fonts.dart';
 import 'nine_patch_image.dart';
 
@@ -49,6 +53,11 @@ class BitmapButton extends PositionComponent
   final Function(BitmapButton) onTap;
   final List<String> shortcuts;
 
+  late final NinePatchComponent _bg;
+  late final BitmapText _text;
+
+  Image? _snapshot;
+
   BitmapButton({
     Image? bgNinePatch,
     required this.text,
@@ -63,6 +72,8 @@ class BitmapButton extends PositionComponent
     required this.onTap,
   })  : font = font ?? tiny_font,
         background = bgNinePatch != null ? NinePatchImage(bgNinePatch, cornerSize: cornerSize) : null {
+    paint = pixelPaint();
+
     if (position != null) this.position.setFrom(position);
     if (tint != null) this.tint(tint);
     if (size == null) {
@@ -78,6 +89,20 @@ class BitmapButton extends PositionComponent
     final y = a.y * this.size.y;
     this.position.x -= x;
     this.position.y -= y;
+    if (bgNinePatch != null) {
+      add(_bg = NinePatchComponent(
+        image: bgNinePatch,
+        size: this.size,
+        cornerSize: 8,
+      ));
+    }
+    add(_text = BitmapText(
+      text: text,
+      font: this.font,
+      scale: fontScale,
+      position: this.size / 2,
+      anchor: Anchor.center,
+    ));
   }
 
   @override
@@ -87,20 +112,40 @@ class BitmapButton extends PositionComponent
   }
 
   @override
-  render(Canvas canvas) {
-    background?.draw(canvas, 0, 0, size.x, size.y, paint);
+  void onRemove() {
+    super.onRemove();
+    _snapshot?.dispose();
+  }
 
-    font.scale = fontScale;
-    font.paint.color = paint.color;
-    font.paint.colorFilter = paint.colorFilter;
-    font.paint.filterQuality = FilterQuality.none;
-    font.paint.isAntiAlias = false;
-    font.paint.blendMode = paint.blendMode;
-    font.scale = fontScale;
+  @override
+  void renderTree(Canvas canvas) {
+    super.renderTree(canvas);
+    if (size.x == 0 || size.y == 0) {
+      logError('invalid size for $this, size $size, text $text');
+      removeFromParent();
+      return;
+    }
+    try {
+      _snapshot ??= _render_snapshot();
+      canvas.scale(fontScale);
+      canvas.drawImage(_snapshot!, Offset.zero, paint);
+    } catch (it, trace) {
+      logError(size);
+      logError('snapshot failed for $this, size $size, text $text: $it', trace);
+      removeFromParent();
+    }
+  }
 
-    final xOff = (size.x - font.lineWidth(text)) / 2;
-    final yOff = (size.y - font.lineHeight(fontScale)) / 2;
-    font.drawString(canvas, xOff, yOff, text);
+  Image _render_snapshot() {
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder);
+    _bg.paint.opacity = 1;
+    _text.paint.opacity = 1;
+    super.renderTree(canvas);
+    final picture = recorder.endRecording();
+    final result = picture.toImageSync(width.toInt(), height.toInt());
+    picture.dispose();
+    return result;
   }
 
   @override
