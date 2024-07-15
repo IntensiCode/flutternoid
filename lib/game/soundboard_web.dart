@@ -98,7 +98,7 @@ class SoundboardImpl extends Soundboard {
     }
 
     if (it.state != PlayerState.stopped) await it.stop();
-    await it.setVolume(volume_factor * super.sound);
+    await it.setVolume((volume_factor * super.sound).clamp(0, 1));
     await it.resume();
     note_index = 0;
   }
@@ -106,7 +106,7 @@ class SoundboardImpl extends Soundboard {
   @override
   Future do_play_one_shot_sample(String filename, double volume_factor) async {
     await FlameAudio.audioCache.load(filename);
-    final it = await FlameAudio.play(filename, volume: volume_factor * super.sound);
+    final it = await FlameAudio.play(filename, volume: (volume_factor * super.sound).clamp(0, 1));
     it.setReleaseMode(ReleaseMode.release);
   }
 
