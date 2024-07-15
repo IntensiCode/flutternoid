@@ -68,7 +68,10 @@ class AudioMenu extends GameScriptComponent {
       size: Vector2(96, 32),
       key_down: '{',
       key_up: '}',
-      change: (volume) => soundboard.sound = volume,
+      change: (volume) {
+        soundboard.sound = volume;
+        _make_sound();
+      },
       volume: () => soundboard.sound,
     ));
 

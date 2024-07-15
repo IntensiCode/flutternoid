@@ -50,11 +50,14 @@ https://intensicode.github.io/flutternoid/
 ### To Do
 
 - [ ] PERF: web performance became bad suddenly - why?
+- [ ] PERF: experiment: preload only hit sounds - switch source for everything else in single player
+- [ ] PERF: experiment: disable note sounds by default for web (or entirely?)
 - [ ] PERF: split scoreboard into statics and dynamics - then render statics from BackgroundScreen
 - [ ] PERF: split scoreboard into statics and dynamics - then dirty flag for dynamics? maybe
 
-- [ ] BUG: enemy hit should not be a note
+- [ ] BUG: laser should stop at frame
 - [ ] BUG: enemies are invisible at (0,0) when spawning - ball sometimes hits them
+- [ ] BUG: enemies can be hit weirdly "below" during spawn
 - [ ] BUG: rarely ball with zero x or y speed but no auto speed up?
 
 - [ ] extra lives at: 2000 + level * 100 ? play test !
@@ -72,6 +75,7 @@ https://intensicode.github.io/flutternoid/
 - [-] BUG: fix random block selection to not pick first block every time [seems to work after all]
 - [-] BUG: last extra is cut off [cannot reproduce]
 - [-] soLoud + audio_players for Web? [soloud breaks web build]
+- [?] BUG: audio menu still broken: master to zero/low, switch mode, sound still plays loud(?)
 - [?] BUG: blasts lost after retry level? but lives score etc are there!?
 - [?] BUG: disable pause when level complete (or other overlay active)
 - [?] BUG: extras collected when player destroyed
@@ -84,6 +88,7 @@ https://intensicode.github.io/flutternoid/
 - [X] BUG: count down level time in bonus screen
 - [X] BUG: door stays open?
 - [X] BUG: enemy bonus broken? because of the doh handling changes?
+- [X] BUG: enemy hit should not be a note
 - [X] BUG: enter hiscore after game over not working (unless eog)
 - [X] BUG: extra life broken?
 - [X] BUG: frame shadow and slow down over vaus?
