@@ -49,8 +49,8 @@ https://intensicode.github.io/flutternoid/
 
 ### To Do
 
+- [ ] revisit soloud with new web support
 - [ ] PERF: web performance became bad suddenly - why?
-- [ ] PERF: experiment: disable note sounds by default for web (or entirely?)
 - [ ] PERF: split scoreboard into statics and dynamics - then render statics from BackgroundScreen
 - [ ] PERF: split scoreboard into statics and dynamics - then dirty flag for dynamics? maybe
 
@@ -73,6 +73,7 @@ https://intensicode.github.io/flutternoid/
 
 - [-] BUG: fix random block selection to not pick first block every time [seems to work after all]
 - [-] BUG: last extra is cut off [cannot reproduce]
+- [-] PERF: experiment: preload only hit sounds - switch source for everything else in single player [not working well]
 - [-] soLoud + audio_players for Web? [soloud breaks web build]
 - [?] BUG: audio menu still broken: master to zero/low, switch mode, sound still plays loud(?)
 - [?] BUG: blasts lost after retry level? but lives score etc are there!?
@@ -80,7 +81,6 @@ https://intensicode.github.io/flutternoid/
 - [?] BUG: extras collected when player destroyed
 - [?] BUG: multi ball after destroyed is still around [fixed somehow?]
 - [?] BUG: plasma appears in center(?) when certain(?) multi ball state? [was this fixed somehow?]
-- [?] PERF: experiment: preload only hit sounds - switch source for everything else in single player
 - [?] PERF: limit audio players by time
 - [X] BUG: audio for web messed up
 - [X] BUG: audio switching messed up - music does not turn on sometimes?
@@ -96,6 +96,7 @@ https://intensicode.github.io/flutternoid/
 - [X] BUG: game completed state not cleared after hiscore
 - [X] BUG: hiscore for web broken completely!? game over without enter hiscore + after, the score is still ranked!?
 - [X] BUG: vaus explodes multiple times if enemies hit in short sequence
+- [X] PERF: experiment: disable note sounds by default for web (or entirely?)
 - [X] README with screenshots and animated gif
 - [X] SHOW HOW TO PLAY AT FIRST START
 - [X] audio_players for Web?
