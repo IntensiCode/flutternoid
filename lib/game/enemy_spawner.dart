@@ -1,16 +1,15 @@
 import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
-import 'package:flutternoid/core/messaging.dart';
-import 'package:flutternoid/game/doh.dart';
-import 'package:flutternoid/game/doh_disc.dart';
-import 'package:flutternoid/game/soundboard.dart';
-import 'package:flutternoid/util/delayed.dart';
 
+import '../core/messaging.dart';
 import '../core/random.dart';
 import '../util/auto_dispose.dart';
+import '../util/delayed.dart';
 import '../util/extensions.dart';
 import '../util/on_message.dart';
+import 'doh.dart';
+import 'doh_disc.dart';
 import 'enemy.dart';
 import 'enemy_crystal.dart';
 import 'enemy_door.dart';
@@ -19,6 +18,7 @@ import 'game_context.dart';
 import 'game_messages.dart';
 import 'game_phase.dart';
 import 'player.dart';
+import 'soundboard.dart';
 
 extension on Enemy {
   String get id {
@@ -50,24 +50,18 @@ class EnemySpawner extends PositionComponent with AutoDispose, GameContext, HasP
     position.setFrom(visual.background_offset);
     await add(left_door = EnemyDoor()..position.setValues(22, 0));
     await add(right_door = EnemyDoor()..position.setValues(151, 0));
-    onMessage<EnemyDestroyed>((_) {
-      destroyed++;
-      logInfo('on EnemyDestroyed: all enemies destroyed? $all_enemies_destroyed');
-    });
+    onMessage<EnemyDestroyed>((_) => destroyed++);
     onMessage<GameComplete>((_) {
       final active = top_level_children<Enemy>();
       for (final it in active) {
-        logInfo('teleport ${it.id}');
         sendMessage(SpawnTeleport(it.position));
         it.removeFromParent();
       }
       if (active.isNotEmpty) soundboard.play(Sound.teleport);
     });
     onMessage<LevelComplete>((_) {
-      logInfo('on LevelComplete: all enemies destroyed? $all_enemies_destroyed');
       final active = top_level_children<Enemy>();
       for (final it in active) {
-        logInfo('teleport ${it.id}');
         sendMessage(SpawnTeleport(it.position));
         it.removeFromParent();
       }
@@ -82,14 +76,12 @@ class EnemySpawner extends PositionComponent with AutoDispose, GameContext, HasP
     onMessage<VausLost>((_) {
       final active = top_level_children<Enemy>();
       for (final it in active) {
-        logInfo('teleport ${it.id}');
         sendMessage(SpawnTeleport(it.position));
         it.removeFromParent();
         if (it is DohDisc) continue;
         pending_enemies.insert(0, it.id);
       }
       if (active.isNotEmpty) soundboard.play(Sound.teleport);
-      logInfo(pending_enemies);
     });
     onMessage<LevelDataAvailable>((_) {
       pending_enemies.clear();

@@ -222,8 +222,6 @@ class Level extends PositionComponent with AutoDispose, GameContext, HasPaint {
         final id = map.tileByGid(extra)!.localId;
         if (id == -1) continue;
         brick.extra_id = {ExtraId.values[id ~/ 9]};
-
-        logInfo('brick $brick has extra id $id ($extra)');
       }
       brick_rows.add(bricks);
     }
@@ -236,7 +234,6 @@ class Level extends PositionComponent with AutoDispose, GameContext, HasPaint {
       for (final it in by_color.entries) {
         final which = it.value.whereNot((it) => it.extra_id != null).toList().random(rng);
         which.extra_id = it.key.extras;
-        logInfo('brick $which has extra id ${it.key.extras}');
       }
     }
     if (spawn_mode == SpawnMode.random) {
@@ -247,7 +244,6 @@ class Level extends PositionComponent with AutoDispose, GameContext, HasPaint {
         selection.shuffle(rng);
         final count = selection.length * percentage ~/ 100;
         selection.take(count).forEach((it) => it.extra_id = it.id.extras);
-        logInfo('bricks $selection have extra id ${it.key.extras}');
       }
     }
 
@@ -338,7 +334,7 @@ class Level extends PositionComponent with AutoDispose, GameContext, HasPaint {
         if (brick.destroyed && !brick.spawned) {
           model.state.score += (brick.id.score * (1 + level_number_starting_at_1 * 0.2)).round();
           if (brick.extra_id != null) {
-            logInfo('brick destroyed - extra id: ${brick.extra_id}');
+            // logInfo('brick destroyed - extra id: ${brick.extra_id}');
             sendMessage(SpawnExtraFromBrick(brick));
           }
           brick.spawned = true;
