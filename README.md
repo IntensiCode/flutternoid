@@ -50,7 +50,6 @@ https://intensicode.github.io/flutternoid/
 ### To Do
 
 - [ ] PERF: web performance became bad suddenly - why?
-- [ ] PERF: experiment: preload only hit sounds - switch source for everything else in single player
 - [ ] PERF: experiment: disable note sounds by default for web (or entirely?)
 - [ ] PERF: split scoreboard into statics and dynamics - then render statics from BackgroundScreen
 - [ ] PERF: split scoreboard into statics and dynamics - then dirty flag for dynamics? maybe
@@ -81,6 +80,7 @@ https://intensicode.github.io/flutternoid/
 - [?] BUG: extras collected when player destroyed
 - [?] BUG: multi ball after destroyed is still around [fixed somehow?]
 - [?] BUG: plasma appears in center(?) when certain(?) multi ball state? [was this fixed somehow?]
+- [?] PERF: experiment: preload only hit sounds - switch source for everything else in single player
 - [?] PERF: limit audio players by time
 - [X] BUG: audio for web messed up
 - [X] BUG: audio switching messed up - music does not turn on sometimes?
