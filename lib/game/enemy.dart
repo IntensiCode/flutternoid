@@ -54,8 +54,7 @@ abstract class Enemy extends BodyComponent with AutoDispose, ContactCallbacks, G
     if (hit_points <= 0) {
       explode();
     } else {
-      soundboard.note_index = 20;
-      soundboard.trigger(Sound.wall_hit);
+      soundboard.trigger(Sound.enemy_hit);
     }
   }
 

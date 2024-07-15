@@ -17,6 +17,7 @@ enum Sound {
   disruptor,
   doh_ugh,
   enemy_destroyed,
+  enemy_hit,
   expander,
   explosion,
   extra_life,
