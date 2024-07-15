@@ -141,7 +141,7 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameConte
     state_progress = 0;
     soundboard.play(Sound.explosion);
 
-    sendMessage(PlayerExploding());
+    if (balls.isNotEmpty) sendMessage(PlayerExploding());
   }
 
   // BodyComponent
