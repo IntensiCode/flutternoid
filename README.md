@@ -53,6 +53,8 @@ https://intensicode.github.io/flutternoid/
 - [ ] revisit soloud with new web support
 - [ ] PERF: web performance became bad suddenly - why?
 
+- [ ] BUG: DISRUPT 0 still showing!?!?!
+- [ ] BUG: laser does not hit corner bricks somehow!?!?!
 - [ ] BUG: laser should stop at frame
 - [ ] BUG: enemies are invisible at (0,0) when spawning - ball sometimes hits them
 - [ ] BUG: enemies can be hit weirdly "below" during spawn
@@ -84,15 +86,18 @@ https://intensicode.github.io/flutternoid/
 - [?] PERF: split scoreboard into statics and dynamics - then dirty flag for dynamics? maybe
 - [?] PERF: split scoreboard into statics and dynamics - then render statics from BackgroundScreen
 - [?] extra lives at: 2000 + level * 100 ? play test !
+- [X] BUG: 33 fades in twice
 - [X] BUG: audio for web messed up
 - [X] BUG: audio switching messed up - music does not turn on sometimes?
 - [X] BUG: ball jumps behind wall - make wall a solid box?
 - [X] BUG: count down level time in bonus screen
+- [X] BUG: doh bonuses too high
 - [X] BUG: door stays open?
 - [X] BUG: enemy bonus broken? because of the doh handling changes?
 - [X] BUG: enemy hit should not be a note
 - [X] BUG: enter hiscore after game over not working (unless eog)
 - [X] BUG: extra life broken?
+- [X] BUG: extra lives too easy
 - [X] BUG: frame shadow and slow down over vaus?
 - [X] BUG: game completed + ball lost or killed => game not completed OMG
 - [X] BUG: game completed state not cleared after hiscore

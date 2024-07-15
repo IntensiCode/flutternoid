@@ -1,5 +1,6 @@
 import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
+import 'package:flutternoid/game/game_configuration.dart';
 
 import '../core/messaging.dart';
 import '../util/auto_dispose.dart';
@@ -21,8 +22,6 @@ Future save_not_first_time() async {
 
 final state = GameState();
 
-const extra_life_score = 3333;
-
 class GameState extends Component with AutoDispose, HasGameData {
   var level_number_starting_at_1 = 1;
   var _last_extra_at = 0;
@@ -35,11 +34,11 @@ class GameState extends Component with AutoDispose, HasGameData {
 
   set score(int value) {
     if (!game_complete) {
-      final next_extra = _last_extra_at + 3000 + level_number_starting_at_1 * 100;
+      final progressive = level_number_starting_at_1 * configuration.extra_life_mod;
+      final next_extra = _last_extra_at + configuration.extra_life_base + progressive;
       final b4 = _score < next_extra;
       final now = value >= next_extra;
       if (b4 && now) {
-        logInfo('extra life: last_extra_at=$_last_extra_at next_extra=$next_extra score=$_score');
         _last_extra_at = _score;
         sendMessage(ExtraLife());
       }
