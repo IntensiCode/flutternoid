@@ -85,7 +85,7 @@ class BackgroundScreen extends PositionComponent
         final gid = bg.tileData![y][x];
         final tile = map.tileByGid(gid.tile);
         final sprite = tiles.getSpriteById(tile!.localId);
-        (await spriteSXY(sprite, x * 16.0 + 4, y * 16.0 + 9, Anchor.topLeft));
+        (await spriteSXY(sprite, x * 16.0 + 4, y * 16.0 + 9, Anchor.topLeft)).opacity = 0.0;
       }
     }
   }
