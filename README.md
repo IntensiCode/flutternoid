@@ -57,7 +57,6 @@ https://intensicode.github.io/flutternoid/
 - [ ] BUG: enemies can be hit weirdly "below" during spawn
 - [ ] BUG: rarely ball with zero x or y speed but no auto speed up?
 
-- [ ] extra lives at: 2000 + level * 100 ? play test !
 - [ ] make vaus pull ball back from void a bit more?
 - [ ] make vaus move one or two pixels more towards the walls?
 - [ ] fix min ball speed (in upper part)
@@ -83,6 +82,7 @@ https://intensicode.github.io/flutternoid/
 - [?] PERF: limit audio players by time
 - [?] PERF: split scoreboard into statics and dynamics - then dirty flag for dynamics? maybe
 - [?] PERF: split scoreboard into statics and dynamics - then render statics from BackgroundScreen
+- [?] extra lives at: 2000 + level * 100 ? play test !
 - [X] BUG: audio for web messed up
 - [X] BUG: audio switching messed up - music does not turn on sometimes?
 - [X] BUG: ball jumps behind wall - make wall a solid box?

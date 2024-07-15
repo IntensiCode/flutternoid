@@ -25,6 +25,7 @@ const extra_life_score = 3333;
 
 class GameState extends Component with AutoDispose, HasGameData {
   var level_number_starting_at_1 = 1;
+  var _last_extra_at = 0;
   var _score = 0;
   var lives = 5;
   var blasts = 5;
@@ -34,9 +35,14 @@ class GameState extends Component with AutoDispose, HasGameData {
 
   set score(int value) {
     if (!game_complete) {
-      final b4 = _score ~/ extra_life_score;
-      final now = value ~/ extra_life_score;
-      if (b4 < now) sendMessage(ExtraLife());
+      final next_extra = _last_extra_at + 3000 + level_number_starting_at_1 * 100;
+      final b4 = _score < next_extra;
+      final now = value >= next_extra;
+      if (b4 && now) {
+        logInfo('extra life: last_extra_at=$_last_extra_at next_extra=$next_extra score=$_score');
+        _last_extra_at = _score;
+        sendMessage(ExtraLife());
+      }
     }
     _score = value;
   }
@@ -46,6 +52,7 @@ class GameState extends Component with AutoDispose, HasGameData {
   reset() async {
     logInfo('reset game state');
     level_number_starting_at_1 = 1;
+    _last_extra_at = 0;
     _score = 0;
     lives = 5;
     blasts = 5;
@@ -72,6 +79,7 @@ class GameState extends Component with AutoDispose, HasGameData {
   @override
   void load_state(GameData data) {
     level_number_starting_at_1 = data['level_number_starting_at_1'];
+    _last_extra_at = data['last_extra_at'];
     _score = data['score'];
     lives = data['lives'];
     blasts = data['blasts'];
@@ -80,6 +88,7 @@ class GameState extends Component with AutoDispose, HasGameData {
   @override
   GameData save_state(GameData data) => data
     ..['level_number_starting_at_1'] = level_number_starting_at_1
+    ..['last_extra_at'] = _last_extra_at
     ..['score'] = _score
     ..['lives'] = lives
     ..['blasts'] = blasts;
