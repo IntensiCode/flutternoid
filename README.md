@@ -51,9 +51,8 @@ https://intensicode.github.io/flutternoid/
 
 - [ ] revisit soloud with new web support
 - [ ] PERF: web performance became bad suddenly - why?
-- [ ] PERF: split scoreboard into statics and dynamics - then render statics from BackgroundScreen
-- [ ] PERF: split scoreboard into statics and dynamics - then dirty flag for dynamics? maybe
 
+- [ ] BUG: power-ups not stopped when overlay active!?
 - [ ] BUG: laser should stop at frame
 - [ ] BUG: enemies are invisible at (0,0) when spawning - ball sometimes hits them
 - [ ] BUG: enemies can be hit weirdly "below" during spawn
@@ -83,6 +82,8 @@ https://intensicode.github.io/flutternoid/
 - [?] BUG: multi ball after destroyed is still around [fixed somehow?]
 - [?] BUG: plasma appears in center(?) when certain(?) multi ball state? [was this fixed somehow?]
 - [?] PERF: limit audio players by time
+- [?] PERF: split scoreboard into statics and dynamics - then dirty flag for dynamics? maybe
+- [?] PERF: split scoreboard into statics and dynamics - then render statics from BackgroundScreen
 - [X] BUG: audio for web messed up
 - [X] BUG: audio switching messed up - music does not turn on sometimes?
 - [X] BUG: ball jumps behind wall - make wall a solid box?

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
+import 'package:signals_core/signals_core.dart';
 
 /// Generic "disposable" to dispose/cancel/free some wrapped object.
 abstract interface class Disposable {
@@ -50,6 +51,8 @@ Disposable _wrap(something) {
     it = _Disposable(() => something.cancel());
   } else if (something is Function()) {
     it = _Disposable(() => something());
+  } else if (something is Signal) {
+    it = _Disposable(() => something.dispose());
   } else if (something is Disposable) {
     it = something;
   } else {
@@ -98,10 +101,11 @@ mixin AutoDispose on Component {
   /// by inspecting the [Object.runtimeType]. Raises an [ArgumentError] if the given [something]
   /// has an unsupported type. In that case, wrap it into a [Disposable] before passing it to
   /// [autoDispose].
-  void autoDispose(String tag, dynamic something) {
+  T autoDispose<T>(String tag, T something) {
     logVerbose('register $tag on $runtimeType');
     dispose(tag);
     _disposables[tag] = _wrap(something);
+    return something;
   }
 }
 
