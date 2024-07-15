@@ -104,11 +104,11 @@ class GameScreen extends PositionComponent
       onKey('6', () => sendMessage(SpawnExtra(ExtraId.multi_ball)));
       onKey('7', () => sendMessage(SpawnExtra(ExtraId.extra_life)));
       onKey('b', () => add(Ball()));
-      onKey('c', () => sendMessage(LevelComplete()));
+      onKey('d', () => state.lives = 1);
       onKey('g', () => sendMessage(GameComplete()));
-      onKey('n', () => sendMessage(LevelComplete()));
+      onKey('l', () => sendMessage(LevelComplete()));
       onKey('p', () => state.blasts++);
-      onKey('s', () => state.score += 5000);
+      onKey('s', () => state.hack_hiscore());
       onKey('x', () => phase = GamePhase.game_over);
 
       onKey('e', () {
@@ -117,7 +117,7 @@ class GameScreen extends PositionComponent
         phase = GamePhase.enter_round;
       });
       onKey('h', () {
-        state.score = hiscore.entries.last.score + 1;
+        state.hack_hiscore();
         phase = GamePhase.game_over_hiscore;
       });
       onKey('j', () {

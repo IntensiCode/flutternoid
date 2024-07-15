@@ -5,6 +5,7 @@ import '../core/messaging.dart';
 import '../util/auto_dispose.dart';
 import 'game_messages.dart';
 import 'game_object.dart';
+import 'hiscore.dart';
 import 'storage.dart';
 
 Future<bool> first_time() async {
@@ -39,6 +40,8 @@ class GameState extends Component with AutoDispose, HasGameData {
     }
     _score = value;
   }
+
+  hack_hiscore() => _score = hiscore.entries.last.score + 1;
 
   reset() async {
     logInfo('reset game state');

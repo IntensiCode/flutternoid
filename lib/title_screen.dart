@@ -45,15 +45,6 @@ class TitleScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
     at(delta, () async => await add(fadeIn(await _credits())));
     at(delta, () async => await added(await _insert_coin()).add(BlinkEffect()));
 
-    add(FlowText(
-      text: 'Check Audio and Video options if game or sound is laggy.',
-      font: tiny_font,
-      insets: Vector2(5, 6),
-      position: Vector2(xCenter, 66),
-      anchor: Anchor.topCenter,
-      size: Vector2(128 + 16, 24),
-    ));
-
     final cheats = [
       'Laser :: 1',
       'Catcher :: 2',
@@ -62,10 +53,10 @@ class TitleScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
       'Slow Down :: 5',
       'Multi Ball :: 6',
       'Extra Life :: 7',
-      'Add Ball :: b',
-      'Reset Balls :: r',
-      'Level Complete :: c or n',
-      'Game Over :: x',
+      'Add Ball / Reset Balls :: b / r',
+      'End Game :: e',
+      'Game / Level Complete :: g / l',
+      'Extra Plasma Blast :: p',
       'Next Level :: j <S-j> <C-j>',
       'Prev Level :: k <S-k> <C-k>',
       '',
@@ -77,7 +68,7 @@ class TitleScreen extends GameScriptComponent with HasAutoDisposeShortcuts {
       insets: Vector2(5, 5),
       position: Vector2(0, 66),
       anchor: Anchor.topLeft,
-      size: Vector2(120, 112 - 8),
+      size: Vector2(144, 112 - 8),
     ));
     _cheats.isVisible = dev;
 
