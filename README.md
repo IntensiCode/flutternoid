@@ -49,6 +49,7 @@ https://intensicode.github.io/flutternoid/
 
 ### To Do
 
+- [ ] try howl.js for web audio
 - [ ] revisit soloud with new web support
 - [ ] PERF: web performance became bad suddenly - why?
 
