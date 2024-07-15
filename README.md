@@ -78,6 +78,7 @@ https://intensicode.github.io/flutternoid/
 - [?] BUG: audio menu still broken: master to zero/low, switch mode, sound still plays loud(?)
 - [?] BUG: blasts lost after retry level? but lives score etc are there!?
 - [?] BUG: disable pause when level complete (or other overlay active)
+- [?] BUG: doors closing far too soon while enemy still spawning
 - [?] BUG: extras collected when player destroyed
 - [?] BUG: multi ball after destroyed is still around [fixed somehow?]
 - [?] BUG: plasma appears in center(?) when certain(?) multi ball state? [was this fixed somehow?]

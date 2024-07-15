@@ -95,7 +95,7 @@ class EnemyDoor extends PositionComponent with AutoDispose, GameContext, HasPain
           spawn_top_level(spawn_target!);
         }
       case DoorState.spawning:
-        if (spawn_target?.isMounted != true) {
+        if (spawn_target?.isRemoved == true || spawn_target?.isRemoving == true) {
           spawn_target = null;
         }
         if (spawn_target?.state != EnemyState.spawned) {
