@@ -1,12 +1,10 @@
 import 'dart:async';
 import 'dart:ui';
 
-import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
-import 'package:signals_core/signals_core.dart';
 
 import '../core/common.dart';
 import '../core/functions.dart';
@@ -25,20 +23,6 @@ import 'subtitles_component.dart';
 // should be replaced by what you need for your game.
 
 mixin GameScriptFunctions on Component, AutoDispose {
-  int _autoDisposeCount = 0;
-
-  void autoEffect(String hint, void Function() callback) {
-    autoDispose(
-      'autoEffect-$_autoDisposeCount-$hint',
-      effect(
-        () => callback(),
-        debugLabel: hint,
-        onDispose: () => logVerbose('effect disposed: $hint'),
-      ),
-    );
-    _autoDisposeCount++;
-  }
-
   Future<BitmapButton> add_button(
     Image bg,
     String text,
