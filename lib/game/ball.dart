@@ -5,6 +5,7 @@ import 'package:flame/components.dart' hide World;
 import 'package:flame/sprite.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 
 import '../core/common.dart';
 import '../core/functions.dart';
@@ -323,13 +324,15 @@ class Ball extends BodyComponent with AutoDispose, GameContext, ContactCallbacks
     }
   }
 
+  var shaded = pixelPaint();
+
   void _render_exploding(Canvas canvas) {
     const size = 64.0;
     shader.setFloat(0, size);
     shader.setFloat(1, size);
     shader.setFloat(2, state_progress);
 
-    final shaded = pixelPaint();
+    if (kIsWeb) shaded = pixelPaint();
     shaded.shader = shader;
 
     if (visual.pixelate) {
