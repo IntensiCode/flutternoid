@@ -3,7 +3,6 @@ import 'dart:ui';
 
 import 'package:collection/collection.dart';
 import 'package:flame/components.dart';
-import 'package:signals_core/signals_core.dart';
 
 import '../core/common.dart';
 import '../core/functions.dart';
@@ -44,22 +43,16 @@ class Scoreboard extends PositionComponent with AutoDispose, GameContext, HasPai
 
     fontSelect(fancy_font, scale: 1);
     await add(textXY('PLAYER 1', size.x / 2, 45, anchor: Anchor.topCenter));
-
-    final changes = [
-      level_time,
-      show_new_hiscore,
-      blink_high_score,
-      toggle_high_score,
-      blink_ranked_score,
-      toggle_ranked_score,
-      ...stats.values,
-    ];
-
-    final combined = computed(() => changes.map((it) => it.value).join(','));
-    effect(() => dirty = combined.value.isNotEmpty);
   }
 
-  late final level_time = autoDispose('level_time', signal(-1, debugLabel: 'level_time'));
+  int _level_time = -1;
+
+  int get level_time => _level_time;
+
+  set level_time(int value) {
+    _level_time = value;
+    dirty = true;
+  }
 
   int? display_score;
   int? display_round;
@@ -72,19 +65,65 @@ class Scoreboard extends PositionComponent with AutoDispose, GameContext, HasPai
   double highlight_lives = 0;
   double highlight_blasts = 0;
 
-  late final show_new_hiscore = autoDispose('show_new_hiscore', signal(false));
-  late final blink_high_score = autoDispose('blink_high_score', signal(false));
-  late final toggle_high_score = autoDispose('toggle_high_score', signal(false));
-  late final blink_ranked_score = autoDispose('blink_ranked_score', signal(false));
-  late final toggle_ranked_score = autoDispose('toggle_ranked_score', signal(false));
+  bool _show_new_hiscore = false;
 
-  late final stats = <String, Signal<int?>>{
-    'EXPAND ': autoDispose('expand', signal(null)),
-    'DISRUPT': autoDispose('disrupt', signal(null)),
-    'LASER  ': autoDispose('laser', signal(null)),
-    'CATCH  ': autoDispose('catch', signal(null)),
-    'SLOW   ': autoDispose('slow', signal(null)),
+  bool get show_new_hiscore => _show_new_hiscore;
+
+  set show_new_hiscore(bool value) {
+    _show_new_hiscore = value;
+    dirty = true;
+  }
+
+  bool _blink_high_score = false;
+
+  bool get blink_high_score => _blink_high_score;
+
+  set blink_high_score(bool value) {
+    _blink_high_score = value;
+    dirty = true;
+  }
+
+  bool _toggle_high_score = false;
+
+  bool get toggle_high_score => _toggle_high_score;
+
+  set toggle_high_score(bool value) {
+    _toggle_high_score = value;
+    dirty = true;
+  }
+
+  bool _blink_ranked_score = false;
+
+  bool get blink_ranked_score => _blink_ranked_score;
+
+  set blink_ranked_score(bool value) {
+    _blink_ranked_score = value;
+    dirty = true;
+  }
+
+  bool _toggle_ranked_score = false;
+
+  bool get toggle_ranked_score => _toggle_ranked_score;
+
+  set toggle_ranked_score(bool value) {
+    _toggle_ranked_score = value;
+    dirty = true;
+  }
+
+  late final stats = <String, int?>{
+    'EXPAND ': null,
+    'DISRUPT': null,
+    'LASER  ': null,
+    'CATCH  ': null,
+    'SLOW   ': null,
   };
+
+  void set_stat(String key, int? value) {
+    final now = stats[key];
+    if (now == value) return;
+    stats[key] = value;
+    dirty = true;
+  }
 
   bool dirty = true;
 
@@ -92,16 +131,16 @@ class Scoreboard extends PositionComponent with AutoDispose, GameContext, HasPai
   void update(double dt) {
     super.update(dt);
 
-    level_time.value = level.level_time.round();
+    level_time = level.level_time.round();
 
-    stats['EXPAND ']?.value = player.expanded_seconds;
-    stats['LASER  ']?.value = player.laser_seconds;
-    stats['CATCH  ']?.value = player.catcher_seconds;
-    stats['SLOW   ']?.value = model.slow_down_area.slow_down_seconds;
+    set_stat('EXPAND ', player.expanded_seconds);
+    set_stat('LASER  ', player.laser_seconds);
+    set_stat('CATCH  ', player.catcher_seconds);
+    set_stat('SLOW   ', model.slow_down_area.slow_down_seconds);
 
     final balls = top_level_children<Ball>();
     final max_disrupt = balls.map((it) => it.disruptor.round()).maxOrNull;
-    stats['DISRUPT']?.value = ((max_disrupt ?? 0) > 0) ? max_disrupt : null;
+    set_stat('DISRUPT', ((max_disrupt ?? 0) > 0) ? max_disrupt : null);
 
     if (display_score != game_state.score) {
       dirty = true;
@@ -119,11 +158,11 @@ class Scoreboard extends PositionComponent with AutoDispose, GameContext, HasPai
       if (hiscore.isNewHiscore(display_score!)) {
         highlight_high_score = 1;
         highlight_good_score = 0;
-        toggle_ranked_score.value = false;
-        if (!show_new_hiscore.value) {
+        toggle_ranked_score = false;
+        if (!show_new_hiscore) {
           soundboard.play_one_shot_sample('sound/hiscore.ogg');
         }
-        show_new_hiscore.value = true;
+        show_new_hiscore = true;
       } else if (hiscore.isHiscoreRank(display_score!) && highlight_good_score == 0) {
         highlight_good_score = 1;
       }
@@ -134,17 +173,17 @@ class Scoreboard extends PositionComponent with AutoDispose, GameContext, HasPai
       if (highlight_high_score <= 0) {
         highlight_high_score = 1;
       }
-      toggle_high_score.value = highlight_high_score < 0.5;
-      blink_high_score.value = (highlight_high_score % 0.5) < 0.2;
-      blink_ranked_score.value = false;
+      toggle_high_score = highlight_high_score < 0.5;
+      blink_high_score = (highlight_high_score % 0.5) < 0.2;
+      blink_ranked_score = false;
     }
     if (highlight_good_score > 0) {
       highlight_good_score -= min(highlight_good_score, dt / 3);
       if (highlight_good_score <= 0) {
         highlight_good_score = 1;
       }
-      toggle_ranked_score.value = highlight_good_score < 0.5;
-      blink_ranked_score.value = (highlight_good_score % 0.5) < 0.2;
+      toggle_ranked_score = highlight_good_score < 0.5;
+      blink_ranked_score = (highlight_good_score % 0.5) < 0.2;
     }
 
     if (display_round != game_state.level_number_starting_at_1) {
@@ -201,20 +240,20 @@ class Scoreboard extends PositionComponent with AutoDispose, GameContext, HasPai
     mini_font.paint.opacity = 1;
 
     fontSelect(mini_font, scale: 1);
-    var label = toggle_high_score.value ? '*** NEW ***' : 'HIGH SCORE';
+    var label = toggle_high_score ? '*** NEW ***' : 'HIGH SCORE';
     mini_font.drawStringAligned(canvas, size.x / 2, 24, label, Anchor.topCenter);
 
-    if (!blink_high_score.value) {
-      final hiscore_ = show_new_hiscore.value
+    if (!blink_high_score) {
+      final hiscore_ = show_new_hiscore
           ? display_score!.toString().padLeft(7, '0')
           : hiscore.entries.first.score.toString().padLeft(7, '0');
       mini_font.drawStringAligned(canvas, size.x / 2, 32, hiscore_, Anchor.topCenter);
     }
 
-    label = toggle_ranked_score.value ? 'RANKED #${hiscore.rank(display_score!)}' : 'SCORE';
+    label = toggle_ranked_score ? 'RANKED #${hiscore.rank(display_score!)}' : 'SCORE';
     mini_font.drawStringAligned(canvas, size.x / 2, 58, label, Anchor.topCenter);
 
-    if (!blink_ranked_score.value) {
+    if (!blink_ranked_score) {
       final score = (display_score ?? game_state.score).toString().padLeft(7, '0');
       mini_font.drawStringAligned(canvas, size.x / 2, 66, score, Anchor.topCenter);
     }
@@ -241,7 +280,7 @@ class Scoreboard extends PositionComponent with AutoDispose, GameContext, HasPai
 
     var stats_y = 116.0;
     for (final it in stats.entries) {
-      if (it.value.value == null) continue;
+      if (it.value == null) continue;
       final line = '${it.key} ${it.value}';
       mini_font.drawStringAligned(canvas, size.x / 2, stats_y, line, Anchor.topCenter);
       stats_y += 12;
