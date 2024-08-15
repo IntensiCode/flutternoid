@@ -1,8 +1,6 @@
 import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutternoid/components/flow_text.dart';
 
 import 'components/basic_menu.dart';
 import 'components/basic_menu_button.dart';
@@ -110,16 +108,6 @@ class AudioMenu extends GameScriptComponent {
     };
     menu.preselectEntry(preselected);
     _preselected(preselected);
-
-    if (kIsWeb) {
-      add(FlowText(
-        text: 'Brick Notes may degrade performance. Try if it works for you!',
-        font: tiny_font,
-        position: Vector2(112, 174),
-        size: Vector2(192, 24),
-        insets: Vector2(6,6),
-      ));
-    }
   }
 
   late final VolumeComponent _master;
