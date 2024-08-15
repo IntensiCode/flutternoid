@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flame/components.dart';
+import 'package:flutter/foundation.dart';
 
 import '../core/common.dart';
 import '../core/random.dart';
@@ -39,6 +40,8 @@ class PlasmaBlasts extends Component with AutoDispose, GameContext, HasPaint {
     _active.removeWhere((it) => it.expired);
   }
 
+  var shader_paint = pixelPaint();
+
   @override
   void render(Canvas canvas) {
     super.render(canvas);
@@ -50,21 +53,19 @@ class PlasmaBlasts extends Component with AutoDispose, GameContext, HasPaint {
     for (final it in _active) {
       _shader.setFloat(2, it.anim_time);
 
-      final shader_paint = pixelPaint();
+      if (kIsWeb) shader_paint = pixelPaint();
       shader_paint.shader = _shader;
 
-      _render_blast(canvas, it, shader_paint);
+      _render_blast(canvas, it);
     }
   }
 
-  void _render_blast(Canvas canvas, _Blast blast, Paint shader_paint) {
+  void _render_blast(Canvas canvas, _Blast blast) {
     final w = visual.plasma_size.x;
     final h = visual.plasma_size.y;
     final x = blast.center.x - w / 2;
     final y = blast.center.y - h / 2;
 
-    final shader_paint = pixelPaint();
-    shader_paint.shader = _shader;
     shader_paint.opacity = blast.opacity;
 
     if (visual.pixelate) {
