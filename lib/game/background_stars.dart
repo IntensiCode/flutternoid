@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flame/components.dart';
+import 'package:flutter/foundation.dart';
 
 import '../core/common.dart';
 import 'game_context.dart';
@@ -30,6 +31,8 @@ class BackgroundStars extends PositionComponent with GameContext, HasPaint {
     _anim_time += dt;
   }
 
+  var shader_paint = pixelPaint();
+
   @override
   void render(Canvas canvas) {
     super.render(canvas);
@@ -38,7 +41,7 @@ class BackgroundStars extends PositionComponent with GameContext, HasPaint {
     shader.setFloat(1, gameHeight);
     shader.setFloat(2, -_anim_time);
 
-    final shader_paint = pixelPaint();
+    if (kIsWeb) shader_paint = pixelPaint();
     shader_paint.shader = shader;
 
     if (!visual.animate_stars) {
