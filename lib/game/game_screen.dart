@@ -73,20 +73,20 @@ class GameScreen extends PositionComponent
   onLoad() async {
     position.setFrom(visual.game_position);
     await add(state);
-    await add(visual);
-    await add(hiscore);
+    add(visual);
+    add(hiscore);
 
     await add(BackgroundScreen());
-    await add(Shadows(() => children.whereType<Ball>()));
+    add(Shadows(() => children.whereType<Ball>()));
 
     await add(level);
-    await add(enemies);
-    await add(power_ups);
-    await add(laser);
-    await add(slow_down_area);
-    await add(player);
-    await add(plasma_blasts);
-    await add(Teleports());
+    add(enemies);
+    add(power_ups);
+    add(laser);
+    add(slow_down_area);
+    add(player);
+    add(plasma_blasts);
+    add(Teleports());
 
     onMessage<PlayerReady>((it) => add(Ball()));
     onMessage<MultiBall>((_) => _split_ball());
