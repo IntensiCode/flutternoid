@@ -154,7 +154,7 @@ abstract class Soundboard extends Component with HasGameData {
   bool _blocked = false;
 
   // used by [trigger] to play every sound only once per tick
-  final _triggered = <Sound>{};
+  final _triggered = <Sound, bool>{};
 
   // for playing notes instead of Sound.wall_hit
   int? note_index;
@@ -204,7 +204,10 @@ abstract class Soundboard extends Component with HasGameData {
     logInfo('preload done');
   }
 
-  void trigger(Sound sound) => _triggered.add(sound);
+  void trigger(Sound sound) {
+    if (_triggered[sound] == true) return;
+    _triggered[sound] = true;
+  }
 
   Future play(Sound sound, {double volume_factor = 1}) async {
     if (_muted) return;
@@ -259,7 +262,9 @@ abstract class Soundboard extends Component with HasGameData {
     _fade_music(dt);
 
     if (_triggered.isEmpty) return;
-    _triggered.forEach(play);
+    _triggered.entries.forEach((it) {
+      if (it.value) play(it.key);
+    });
     _triggered.clear();
   }
 

@@ -188,7 +188,7 @@ class SoundboardImpl extends Soundboard {
       }
 
       if (compress != null) {
-        logInfo('need compression: $compress');
+        // logInfo('need compression: $compress');
         for (int i = 0; i < mixed.length; i++) {
           mixed[i] /= compress;
         }
