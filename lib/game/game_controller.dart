@@ -303,13 +303,15 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
       super.renderTree(Canvas(recorder));
       final picture = recorder.endRecording();
       final image = picture.toImageSync(gameWidth ~/ 1, gameHeight ~/ 1);
-      canvas.drawImage(image, Offset.zero, pixelPaint());
+      canvas.drawImage(image, Offset.zero, _paint);
       image.dispose();
       picture.dispose();
     } else {
       super.renderTree(canvas);
     }
   }
+
+  final _paint = pixelPaint();
 
   // Implementation
 
