@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:collection/collection.dart' hide IterableExtension;
 import 'package:dart_minilog/dart_minilog.dart';
@@ -6,6 +7,7 @@ import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
 import 'package:flame/sprite.dart';
 import 'package:flame_tiled/flame_tiled.dart';
+import 'package:flutter/foundation.dart';
 import 'package:kart/kart.dart';
 import 'package:supercharged/supercharged.dart';
 
@@ -125,6 +127,8 @@ class Level extends PositionComponent with AutoDispose, GameContext, HasPaint {
     paint = pixelPaint();
 
     sprites = await sheetIWH('game_blocks.png', visual.brick_width, visual.brick_height, spacing: 1);
+
+    _batch = SpriteBatch(sprites.image, useAtlas: !kIsWeb);
 
     onMessage<EnterRound>((_) => _reset());
     onMessage<LevelComplete>((_) => _reset(full_clear: false));
@@ -378,8 +382,8 @@ class Level extends PositionComponent with AutoDispose, GameContext, HasPaint {
   void _render_active(Canvas canvas) {
     paint.opacity = 1;
 
-    for (var row in brick_rows) {
-      for (var brick in row) {
+    for (var (y, row) in brick_rows.indexed) {
+      for (var (x, brick) in row.indexed) {
         if (brick == null) continue;
 
         Sprite sprite;
@@ -392,17 +396,28 @@ class Level extends PositionComponent with AutoDispose, GameContext, HasPaint {
         } else {
           sprite = sprites.getSpriteById(brick.id.index);
         }
-        sprite.render(canvas, position: brick.topLeft, overridePaint: paint);
+
+        final trans = _cached_transforms[x + y * 15] ??= brick.topLeft.transform;
+        _batch.addTransform(source: sprite.src, transform: trans);
 
         if (brick.sweep_progress > 0) {
           final progress = 1 - brick.sweep_progress.clamp(0.0, 1.0);
           final frame = (sprites.columns - 1) * progress;
           sprite = sprites.getSpriteById(25 + frame.round().clamp(0, sprites.columns));
-          sprite.render(canvas, position: brick.topLeft, overridePaint: paint);
+          _batch.addTransform(source: sprite.src, transform: trans);
         }
       }
     }
+
+    _batch.render(canvas, paint: _batch_paint);
+    _batch.clear();
   }
+
+  final _batch_paint = pixelPaint();
+
+  final _cached_transforms = <int, RSTransform>{};
+
+  late final SpriteBatch _batch;
 }
 
 extension on TiledComponent {
@@ -418,4 +433,15 @@ extension on TiledComponent {
     }
     return SpawnMode.values.firstWhere((it) => it.name == spawn_mode);
   }
+}
+
+extension Vector2Extensions on Vector2 {
+  RSTransform get transform => RSTransform.fromComponents(
+        rotation: 0,
+        scale: 1.0,
+        anchorX: 0,
+        anchorY: 0,
+        translateX: x,
+        translateY: y,
+      );
 }
