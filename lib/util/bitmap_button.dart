@@ -3,16 +3,17 @@ import 'dart:ui';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/extensions.dart';
+import 'package:flutternoid/core/common.dart';
 import 'package:flutternoid/input/shortcuts.dart';
 import 'package:flutternoid/util/auto_dispose.dart';
+import 'package:flutternoid/util/extensions.dart';
 
-import '../core/functions.dart';
 import 'bitmap_font.dart';
 import 'fonts.dart';
 import 'nine_patch_image.dart';
 
 Future<BitmapButton> button({
-  Image? bgNinePatch,
+  Sprite? bgNinePatch,
   required String text,
   int cornerSize = 8,
   Vector2? position,
@@ -25,7 +26,7 @@ Future<BitmapButton> button({
   required Function(BitmapButton) onTap,
 }) async =>
     BitmapButton(
-      bgNinePatch: bgNinePatch ?? await image('button_plain.png'),
+      bgNinePatch: bgNinePatch ?? atlas.image('button_plain.png'),
       text: text,
       cornerSize: cornerSize,
       position: position,
@@ -50,7 +51,7 @@ class BitmapButton extends PositionComponent
   final List<String> shortcuts;
 
   BitmapButton({
-    Image? bgNinePatch,
+    Sprite? bgNinePatch,
     required this.text,
     this.cornerSize = 8,
     Vector2? position,

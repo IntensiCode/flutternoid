@@ -13,7 +13,7 @@ class VolumeComponent extends PositionComponent
     with AutoDispose, HasAutoDisposeShortcuts, HasPaint, DragCallbacks, TapCallbacks, HasVisibility {
   //
   VolumeComponent({
-    Image? bg_nine_patch,
+    Sprite? bg_nine_patch,
     String? label,
     super.position,
     super.size,

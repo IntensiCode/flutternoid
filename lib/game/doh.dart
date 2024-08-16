@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:flame/components.dart';
-import 'package:flame/sprite.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:flutternoid/core/random.dart';
 import 'package:flutternoid/game/doh_disc.dart';
@@ -9,7 +8,6 @@ import 'package:flutternoid/game/game_context.dart';
 import 'package:flutternoid/util/on_message.dart';
 
 import '../core/common.dart';
-import '../core/functions.dart';
 import '../core/messaging.dart';
 import '../util/auto_dispose.dart';
 import '../util/extensions.dart';
@@ -22,7 +20,7 @@ class Doh extends BodyComponent with AutoDispose, ContactCallbacks, GameContext 
 
   final Vector2 _spawn_pos;
 
-  late final SpriteSheet _sprites;
+  late final TexturePackerSpriteSheet _sprites;
 
   int hits = 33;
 
@@ -92,7 +90,7 @@ class Doh extends BodyComponent with AutoDispose, ContactCallbacks, GameContext 
   @override
   onLoad() async {
     super.onLoad();
-    _sprites = await sheetIWH('doh.png', 32, 47);
+    _sprites = atlas.sheetIWH('doh.png', 32, 47);
     onMessage<GameComplete>((_) => removeFromParent());
     onMessage<LevelDataAvailable>((_) {
       if (level.doh == null) removeFromParent();

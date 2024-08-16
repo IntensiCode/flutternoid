@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:flame/components.dart';
-import 'package:flutternoid/core/functions.dart';
+import 'package:flutternoid/core/common.dart';
 import 'package:flutternoid/util/nine_patch_image.dart';
 
 import '../scripting/game_script_functions.dart';
@@ -54,7 +54,7 @@ class FlowText extends PositionComponent with AutoDispose, GameScriptFunctions, 
 
   @override
   onLoad() async {
-    add(NinePatchComponent(image: await image('button_plain.png'), size: size));
+    add(NinePatchComponent(image: atlas.image('button_plain.png'), size: size));
     _update_shown_lines();
   }
 

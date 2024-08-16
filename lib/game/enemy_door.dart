@@ -1,10 +1,9 @@
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
-import 'package:flame/sprite.dart';
+import 'package:flutternoid/core/common.dart';
 import 'package:flutternoid/game/game_phase.dart';
 import 'package:flutternoid/util/extensions.dart';
 
-import '../core/functions.dart';
 import '../util/auto_dispose.dart';
 import '../util/on_message.dart';
 import 'enemy.dart';
@@ -19,7 +18,7 @@ enum DoorState {
 }
 
 class EnemyDoor extends PositionComponent with AutoDispose, GameContext, HasPaint {
-  late final SpriteSheet door;
+  late final TexturePackerSpriteSheet door;
 
   DoorState state = DoorState.idle;
 
@@ -55,7 +54,7 @@ class EnemyDoor extends PositionComponent with AutoDispose, GameContext, HasPain
 
   @override
   onLoad() async {
-    door = await sheetIWH('game_door.png', 27, 8);
+    door = atlas.sheetIWH('game_door.png', 27, 8);
     opacity = 0;
     fadeInDeep(seconds: 1);
     onMessage<EnterRound>((_) {

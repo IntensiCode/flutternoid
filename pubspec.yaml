@@ -30,6 +30,7 @@ dependencies:
   supercharged: ^2.1.1
   shared_preferences: ^2.2.3
   tiled: ^0.10.2
+  flame_texturepacker: ^4.0.1
 
 dev_dependencies:
   flutter_test:
@@ -46,7 +47,6 @@ flutter:
     - assets/data/
     - assets/fonts/
     - assets/images/
-    - assets/images/fonts/
     - assets/tiles/
   shaders:
     - assets/shaders/explosion.frag

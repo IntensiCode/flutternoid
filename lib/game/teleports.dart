@@ -1,14 +1,13 @@
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
-import 'package:flame/sprite.dart';
+import 'package:flutternoid/core/common.dart';
 import 'package:flutternoid/game/game_messages.dart';
 import 'package:flutternoid/util/auto_dispose.dart';
+import 'package:flutternoid/util/extensions.dart';
 import 'package:flutternoid/util/on_message.dart';
 
-import '../core/functions.dart';
-
 class Teleports extends Component with AutoDispose {
-  late final SpriteSheet _sheet;
+  late final TexturePackerSpriteSheet _sheet;
 
   final _active = <_Teleport>[];
 
@@ -17,7 +16,7 @@ class Teleports extends Component with AutoDispose {
   @override
   onLoad() async {
     priority = 5;
-    _sheet = await sheetIWH('enemy_teleport.png', 32, 32);
+    _sheet = atlas.sheetIWH('enemy_teleport.png', 32, 32);
     onMessage<SpawnTeleport>((it) => _active.add(_Teleport(it.position)));
   }
 

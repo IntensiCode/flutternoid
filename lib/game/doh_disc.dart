@@ -1,11 +1,12 @@
 import 'package:flame_forge2d/flame_forge2d.dart';
+import 'package:flutternoid/core/common.dart';
 import 'package:flutternoid/core/random.dart';
 import 'package:flutternoid/game/ball.dart';
 import 'package:flutternoid/game/doh.dart';
 import 'package:flutternoid/game/game_messages.dart';
+import 'package:flutternoid/util/extensions.dart';
 import 'package:flutternoid/util/on_message.dart';
 
-import '../core/functions.dart';
 import 'enemy.dart';
 import 'visual_configuration.dart';
 import 'wall.dart';
@@ -32,7 +33,7 @@ class DohDisc extends Enemy {
   @override
   onLoad() async {
     super.onLoad();
-    animation = await sheetIWH('doh_disc.png', 16, 16);
+    animation = atlas.sheetIWH('doh_disc.png', 16, 16);
     onMessage<DohVanishing>((_) => explode());
   }
 

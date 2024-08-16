@@ -5,7 +5,6 @@ import 'package:collection/collection.dart';
 import 'package:flame/components.dart';
 
 import '../core/common.dart';
-import '../core/functions.dart';
 import '../scripting/game_script_functions.dart';
 import '../util/auto_dispose.dart';
 import '../util/extensions.dart';
@@ -25,11 +24,7 @@ class Scoreboard extends PositionComponent with AutoDispose, GameContext, HasPai
     size.setValues(320 - 216, gameHeight);
     position.setValues(216, 0);
 
-    await add(await sprite_comp(
-      'scoreboard_title.png',
-      position: Vector2(size.x / 2, 0),
-      anchor: Anchor.topCenter,
-    ));
+    await add(atlas.spriteXY('scoreboard_title.png', size.x / 2, 0, Anchor.topCenter));
 
     // too much 64 :-D
     // fontSelect(fancy_font, scale: 1);

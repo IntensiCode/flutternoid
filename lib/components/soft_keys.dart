@@ -182,7 +182,7 @@ class SoftKeyButton extends PositionComponent with TapCallbacks {
     if (size == null || size == image.size) {
       return added(SpriteComponent(sprite: Sprite(image)));
     } else {
-      return added(NinePatchComponent(image: image, size: size));
+      return added(NinePatchComponent(image: Sprite(image), size: size));
     }
   }
 

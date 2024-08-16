@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
+import 'package:flutternoid/core/common.dart';
 
 import '../core/functions.dart';
 import '../core/random.dart';
@@ -24,7 +25,7 @@ class EnemyCrystal extends Enemy {
   @override
   onLoad() async {
     super.onLoad();
-    animation = await sheetIWH('enemy_crystal.png', 16, 16);
+    animation = atlas.sheetIWH('enemy_crystal.png', 16, 16);
   }
 
   @override

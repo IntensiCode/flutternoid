@@ -12,7 +12,6 @@ import 'package:kart/kart.dart';
 import 'package:supercharged/supercharged.dart';
 
 import '../core/common.dart';
-import '../core/functions.dart';
 import '../core/messaging.dart';
 import '../core/random.dart';
 import '../util/auto_dispose.dart';
@@ -44,7 +43,7 @@ enum SpawnMode {
 }
 
 class Level extends PositionComponent with AutoDispose, GameContext, HasPaint {
-  late final SpriteSheet sprites;
+  late final TexturePackerSpriteSheet sprites;
 
   final brick_rows = <Row>[];
   final enemies = <String>[];
@@ -126,7 +125,7 @@ class Level extends PositionComponent with AutoDispose, GameContext, HasPaint {
 
     paint = pixelPaint();
 
-    sprites = await sheetIWH('game_blocks.png', visual.brick_width, visual.brick_height, spacing: 1);
+    sprites = atlas.sheetIWH('game_blocks.png', visual.brick_width, visual.brick_height, spacing: 1);
 
     _batch = SpriteBatch(sprites.image, useAtlas: !kIsWeb);
 
@@ -160,6 +159,7 @@ class Level extends PositionComponent with AutoDispose, GameContext, HasPaint {
         'level$which.tmx',
         Vector2(12.0, 6.0),
         layerPaintFactory: (it) => pixelPaint(),
+        bundle: game.assets.bundle,
       );
       _level_data = (level_number_starting_at_1, level_data);
       return true;

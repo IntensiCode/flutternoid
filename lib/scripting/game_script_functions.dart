@@ -24,7 +24,7 @@ import 'subtitles_component.dart';
 
 mixin GameScriptFunctions on Component, AutoDispose {
   Future<BitmapButton> add_button(
-    Image bg,
+    Sprite bg,
     String text,
     double x,
     double y,
@@ -150,7 +150,7 @@ mixin GameScriptFunctions on Component, AutoDispose {
     String? bgNinePatch,
     void Function(BitmapButton)? onTap,
   }) async {
-    final button = await images.load(bgNinePatch ?? 'button_plain.png');
+    final button = atlas.image(bgNinePatch ?? 'button_plain.png');
     final it = BitmapButton(
       bgNinePatch: button,
       text: text,

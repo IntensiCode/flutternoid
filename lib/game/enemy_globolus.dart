@@ -3,8 +3,8 @@ import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
+import 'package:flutternoid/core/common.dart';
 
-import '../core/functions.dart';
 import '../core/random.dart';
 import '../util/extensions.dart';
 import 'enemy.dart';
@@ -21,6 +21,6 @@ class EnemyGlobolus extends Enemy {
   @override
   onLoad() async {
     super.onLoad();
-    animation = await sheetIWH('enemy_globolus.png', 16, 16);
+    animation = atlas.sheetIWH('enemy_globolus.png', 16, 16);
   }
 }

@@ -3,6 +3,7 @@ import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flame/particles.dart';
 import 'package:flame_forge2d/flame_forge2d.dart' hide Particle;
+import 'package:flame_texturepacker/flame_texturepacker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -21,6 +22,7 @@ const fontScale = gameHeight / 500;
 const lineHeight = 24 * fontScale;
 const debugHeight = 12 * fontScale;
 
+late TexturePackerAtlas atlas;
 late Game game;
 late Forge2DWorld world;
 late Images images;

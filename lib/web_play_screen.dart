@@ -16,7 +16,7 @@ class WebPlayScreen extends AutoDisposeComponent with HasAutoDisposeShortcuts {
     final button = await images.load('button_plain.png');
     const scale = 0.5;
     add(BitmapButton(
-      bgNinePatch: button,
+      bgNinePatch: Sprite(button),
       text: 'Start',
       font: menu_font,
       fontScale: scale,

@@ -1,9 +1,7 @@
 import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
-import 'package:flame/sprite.dart';
 
 import '../core/common.dart';
-import '../core/functions.dart';
 import '../core/messaging.dart';
 import '../core/random.dart';
 import '../util/auto_dispose.dart';
@@ -23,14 +21,14 @@ class SpawnExtra with Message {
 }
 
 class PowerUps extends Component with AutoDispose, GameContext {
-  late final SpriteSheet sprites;
+  late final TexturePackerSpriteSheet sprites;
 
   // Component
 
   @override
   onLoad() async {
     priority = 1;
-    sprites = await sheetIWH('game_extras.png', 10, 7);
+    sprites = atlas.sheetIWH('game_extras.png', 10, 7);
   }
 
   @override
@@ -99,7 +97,7 @@ class PowerUp extends SpriteAnimationComponent with GameContext {
 
   var fade_out = 0.0;
 
-  reset(SpriteSheet sprites, ExtraId extra_id, Vector2 start) {
+  reset(TexturePackerSpriteSheet sprites, ExtraId extra_id, Vector2 start) {
     animation = sprites.createAnimation(row: extra_id.index, stepTime: 0.1);
     id = extra_id;
     position.setFrom(start);

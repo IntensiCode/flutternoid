@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/sprite.dart';
+import 'package:flame_texturepacker/flame_texturepacker.dart';
 import 'package:kart/kart.dart';
 
 extension ComponentExtension on Component {
@@ -88,7 +89,7 @@ extension ListExtensions<T> on List<T> {
     return removeLast();
   }
 
-  List<T> operator-(List<T> other) => whereNot((it) => other.contains(it)).toList();
+  List<T> operator -(List<T> other) => whereNot((it) => other.contains(it)).toList();
 }
 
 extension RandomExtensions on Random {
@@ -139,4 +140,119 @@ extension SpriteSheetExtensions on SpriteSheet {
   Sprite by_row(int row, double progress) => getSprite(row, ((columns - 1) * progress).toInt());
 
   Sprite by_progress(double progress) => getSpriteById(((columns - 1) * progress).toInt());
+}
+
+extension TexturePackerAtlasExtensions on TexturePackerAtlas {
+  Sprite image(String name) {
+    final sprite = findSpriteByName(name.replaceFirst('.png', ''));
+    if (sprite == null) throw 'unknown atlas id: $name';
+    return sprite;
+  }
+
+  SpriteComponent spriteXY(String name, double x, double y, Anchor anchor) {
+    final sprite = findSpriteByName(name.replaceFirst('.png', ''));
+    if (sprite == null) throw 'unknown atlas id: $name';
+    return SpriteComponent(sprite: sprite, position: Vector2(x, y), anchor: anchor);
+  }
+
+  TexturePackerSpriteSheet sheetIWH(String name, int width, int height, {int spacing = 0}) {
+    final sprite = findSpriteByName(name.replaceFirst('.png', ''));
+    if (sprite == null) throw 'unknown atlas id: $name';
+    return TexturePackerSpriteSheet.wh(sprite, width, height, spacing: spacing);
+  }
+
+  TexturePackerSpriteSheet sheetI(String name, int columns, int rows) {
+    final sprite = findSpriteByName(name.replaceFirst('.png', ''));
+    if (sprite == null) throw 'unknown atlas id: $name';
+    return TexturePackerSpriteSheet.cr(sprite, columns, rows);
+  }
+}
+
+class TexturePackerSpriteSheet implements SpriteSheet {
+  TexturePackerSpriteSheet.wh(this.sprite, this.tile_width, this.tile_height, {required int spacing})
+      : columns = (sprite.src.width / (tile_width + spacing)).round(),
+        rows = (sprite.src.height / (tile_height + spacing)).round(),
+        _spacing = spacing;
+
+  TexturePackerSpriteSheet.cr(this.sprite, this.columns, this.rows)
+      : tile_width = sprite.src.width ~/ columns,
+        tile_height = sprite.src.height ~/ rows,
+        _spacing = 0;
+
+  final Sprite sprite;
+  final int tile_width;
+  final int tile_height;
+  final int _spacing;
+
+  late final tile_size = Vector2(tile_width.toDouble(), tile_height.toDouble());
+
+  @override
+  final int columns;
+
+  @override
+  final int rows;
+
+  @override
+  Image get image => sprite.image;
+
+  @override
+  double get spacing => _spacing.toDouble();
+
+  final _sprites = <int, Sprite>{};
+
+  @override
+  Sprite getSpriteById(int id) {
+    if (!_sprites.containsKey(id)) {
+      final src = sprite.src;
+      final x = id % columns;
+      final y = id ~/ columns;
+      final xx = src.left + x * (tile_width + _spacing);
+      final yy = src.top + y * (tile_height + _spacing);
+      return Sprite(sprite.image, srcPosition: Vector2(xx, yy), srcSize: tile_size);
+    }
+    return _sprites[id]!;
+  }
+
+  @override
+  Sprite getSprite(int row, int column) => getSpriteById(row * columns + column);
+
+  @override
+  SpriteAnimation createAnimation({
+    required int row,
+    required double stepTime,
+    bool loop = true,
+    int from = 0,
+    int? to,
+  }) {
+    final end = to ?? (columns - 1);
+    final sprites = [for (int i = from; i <= end; i++) getSpriteById(row * columns + i)];
+    return SpriteAnimation.spriteList(sprites, stepTime: stepTime)..loop = loop;
+  }
+
+  @override
+  SpriteAnimation createAnimationWithVariableStepTimes({
+    required int row,
+    required List<double> stepTimes,
+    bool loop = true,
+    int from = 0,
+    int? to,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  SpriteAnimationFrameData createFrameData(int row, int column, {required double stepTime}) {
+    throw UnimplementedError();
+  }
+
+  @override
+  SpriteAnimationFrameData createFrameDataFromId(int spriteId, {required double stepTime}) {
+    throw UnimplementedError();
+  }
+
+  @override
+  double get margin => throw UnimplementedError();
+
+  @override
+  Vector2 get srcSize => throw UnimplementedError();
 }

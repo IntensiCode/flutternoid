@@ -39,7 +39,7 @@ class AudioMenu extends GameScriptComponent {
     textXY('Audio Mode', xCenter, 20, scale: 2, anchor: Anchor.topCenter);
 
     add(_master = VolumeComponent(
-      bg_nine_patch: await image('button_plain.png'),
+      bg_nine_patch: atlas.image('button_plain.png'),
       label: 'Master Volume - / +',
       position: Vector2(16, 46),
       anchor: Anchor.topLeft,
@@ -50,7 +50,7 @@ class AudioMenu extends GameScriptComponent {
       volume: () => soundboard.master,
     ));
     add(_music = VolumeComponent(
-      bg_nine_patch: await image('button_plain.png'),
+      bg_nine_patch: atlas.image('button_plain.png'),
       label: 'Music Volume [ / ]',
       position: Vector2(16, 46 + 34),
       anchor: Anchor.topLeft,
@@ -61,7 +61,7 @@ class AudioMenu extends GameScriptComponent {
       volume: () => soundboard.music,
     ));
     add(_sound = VolumeComponent(
-      bg_nine_patch: await image('button_plain.png'),
+      bg_nine_patch: atlas.image('button_plain.png'),
       label: 'Sound Volume { / }',
       position: Vector2(16, 46 + 34 * 2),
       anchor: Anchor.topLeft,

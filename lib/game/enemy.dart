@@ -2,11 +2,10 @@ import 'dart:ui';
 
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
-import 'package:flame/sprite.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
+import 'package:flutternoid/util/extensions.dart';
 
 import '../core/common.dart';
-import '../core/functions.dart';
 import '../core/messaging.dart';
 import '../util/auto_dispose.dart';
 import '../util/on_message.dart';
@@ -28,8 +27,8 @@ abstract class Enemy extends BodyComponent with AutoDispose, ContactCallbacks, G
     priority = 5;
   }
 
-  late final SpriteSheet animation;
-  late final SpriteSheet explosion;
+  late final TexturePackerSpriteSheet animation;
+  late final TexturePackerSpriteSheet explosion;
 
   EnemyState state = EnemyState.spawned;
 
@@ -119,10 +118,15 @@ abstract class Enemy extends BodyComponent with AutoDispose, ContactCallbacks, G
   @override
   onLoad() async {
     super.onLoad();
-    explosion = await sheetIWH('enemy_explosion.png', 16, 16);
+    explosion = atlas.sheetIWH('enemy_explosion.png', 16, 16);
     onMessage<EnterRound>((_) => removeFromParent());
     // handled by EnemySpawner instead to have teleports
     // onMessage<LevelComplete>((_) => removeFromParent());
+  }
+
+  @override
+  void onMount() {
+    super.onMount();
     body.setTransform(forced_position, 0);
   }
 
@@ -151,7 +155,9 @@ abstract class Enemy extends BodyComponent with AutoDispose, ContactCallbacks, G
           if (anim_time > 1.0) anim_time -= 1.0;
         }
         if (body.linearVelocity.length > 100) {
-          body.linearVelocity..normalize()..scale(100);
+          body.linearVelocity
+            ..normalize()
+            ..scale(100);
         }
 
       case EnemyState.exploding:

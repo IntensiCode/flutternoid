@@ -3,11 +3,9 @@ import 'dart:ui';
 
 import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
-import 'package:flame/sprite.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 
 import '../core/common.dart';
-import '../core/functions.dart';
 import '../core/messaging.dart';
 import '../input/keys.dart';
 import '../util/auto_dispose.dart';
@@ -48,8 +46,8 @@ enum PlayerMode {
 
 class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameContext {
   late final Keys _keys;
-  late final SpriteSheet sprites;
-  late final SpriteSheet explosion;
+  late final TexturePackerSpriteSheet sprites;
+  late final TexturePackerSpriteSheet explosion;
 
   late final SpriteAnimationComponent left_thruster;
   late final SpriteAnimationComponent right_thruster;
@@ -199,10 +197,10 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameConte
     paint.style = PaintingStyle.stroke;
 
     _keys = keys;
-    sprites = await sheetIWH('game_bat.png', 36, 8);
-    explosion = await sheetIWH('game_explosion.png', 32, 32);
+    sprites = atlas.sheetIWH('game_bat.png', 36, 8);
+    explosion = atlas.sheetIWH('game_explosion.png', 32, 32);
 
-    final thrust = await sheetIWH('game_thrust.png', 7, 6);
+    final thrust = atlas.sheetIWH('game_thrust.png', 7, 6);
     add(left_thruster = SpriteAnimationComponent(
       animation: thrust.createAnimation(row: 0, stepTime: 0.05),
       anchor: Anchor.topRight,
@@ -216,8 +214,6 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameConte
     left_thruster.opacity = 0;
     right_thruster.opacity = 0;
 
-    body.setTransform(Vector2(visual.game_pixels.x / 2, visual.game_pixels.y * 0.9), 0);
-    _update_body_fixture();
     renderBody = debug;
 
     onMessage<Catcher>((_) => _on_catcher());
@@ -233,6 +229,13 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameConte
     left_thruster.opacity = 0;
     right_thruster.opacity = 0;
     state = PlayerState.leaving;
+  }
+
+  @override
+  void onMount() {
+    super.onMount();
+    body.setTransform(Vector2(visual.game_pixels.x / 2, visual.game_pixels.y * 0.9), 0);
+    _update_body_fixture();
   }
 
   _update_body_fixture() {

@@ -1,15 +1,13 @@
 import 'package:flame/components.dart';
-import 'package:flame/sprite.dart';
 
 import '../core/common.dart';
-import '../core/functions.dart';
 import '../util/auto_dispose.dart';
 import '../util/extensions.dart';
 import 'enemy.dart';
 import 'game_context.dart';
 
 class LaserWeapon extends Component with AutoDispose {
-  late final SpriteSheet sprites;
+  late final TexturePackerSpriteSheet sprites;
 
   spawn(Vector2 top_center) {
     final it = _pool.removeLastOrNull() ?? LaserShot(_recycle);
@@ -22,7 +20,7 @@ class LaserWeapon extends Component with AutoDispose {
   @override
   onLoad() async {
     priority = 1;
-    sprites = await sheetIWH('game_laser.png', 3, 60);
+    sprites = atlas.sheetIWH('game_laser.png', 3, 60);
   }
 
   // Implementation
@@ -42,7 +40,7 @@ class LaserShot extends SpriteAnimationComponent with GameContext {
 
   double? expire_at;
 
-  reset(SpriteSheet sprites, Vector2 start) {
+  reset(TexturePackerSpriteSheet sprites, Vector2 start) {
     animation = sprites.createAnimation(row: 0, stepTime: 0.05, loop: false);
     animationTicker!.reset();
     position.setFrom(start);

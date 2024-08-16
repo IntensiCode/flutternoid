@@ -53,6 +53,7 @@ https://intensicode.github.io/flutternoid/
 - [ ] revisit soloud with new web support
 - [ ] PERF: web performance became bad suddenly - why?
 
+- [ ] BUG: in-game buttons gone sometimes?
 - [ ] BUG: DISRUPT 0 still showing!?!?!
 - [ ] BUG: laser does not hit corner bricks somehow!?!?!
 - [ ] BUG: laser should stop at frame
@@ -60,6 +61,7 @@ https://intensicode.github.io/flutternoid/
 - [ ] BUG: enemies can be hit weirdly "below" during spawn
 - [ ] BUG: rarely ball with zero x or y speed but no auto speed up?
 
+- [ ] plasma blast vs doh
 - [ ] make vaus pull ball back from void a bit more?
 - [ ] make vaus move one or two pixels more towards the walls?
 - [ ] fix min ball speed (in upper part)

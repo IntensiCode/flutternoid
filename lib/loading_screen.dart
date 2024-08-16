@@ -1,4 +1,5 @@
 import 'package:flame/components.dart';
+import 'package:flutternoid/util/extensions.dart';
 
 import 'core/common.dart';
 import 'core/functions.dart';

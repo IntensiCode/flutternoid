@@ -5,7 +5,6 @@ import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 
 import '../core/common.dart';
-import '../core/functions.dart';
 import '../core/messaging.dart';
 import '../core/screens.dart';
 import '../input/keys.dart';
@@ -42,7 +41,7 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
 
   final _scoreboard = Scoreboard();
 
-  late final Image _button;
+  late final Sprite _button;
   late final model = GameScreen(keys: _keys);
 
   Component? _overlay;
@@ -54,7 +53,7 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
   onLoad() async {
     super.onLoad();
 
-    _button = await image('button_plain.png');
+    _button = atlas.image('button_plain.png');
 
     await add(_keys);
     await add(model);
@@ -344,5 +343,6 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
           font: tiny_font,
           onTap: (_) => model.phase = GamePhase.game_paused,
         )..angle = -pi / 2,
-      ])..fadeInDeep();
+      ])
+        ..fadeInDeep();
 }

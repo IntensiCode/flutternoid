@@ -3,6 +3,7 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
+import 'package:flame_texturepacker/flame_texturepacker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart' hide Image, Shortcuts;
 
@@ -17,7 +18,7 @@ import 'util/fonts.dart';
 import 'util/performance.dart';
 
 class Flutternoid extends Forge2DGame<MainController>
-    with HasKeyboardHandlerComponents, Messaging, Shortcuts, HasPerformanceTracker, ScrollDetector {
+    with HasKeyboardHandlerComponents, Messaging, Shortcuts, HasPerformanceTracker, ScrollDetector, SingleGameInstance {
   //
   Flutternoid() : super(world: MainController()) {
     game = this;
@@ -52,6 +53,8 @@ class Flutternoid extends Forge2DGame<MainController>
   @override
   onLoad() async {
     super.onLoad();
+
+    atlas = await game.atlasFromAssets('flutternoid.atlas');
 
     // soundboard.preload();
     await loadFonts(assets);

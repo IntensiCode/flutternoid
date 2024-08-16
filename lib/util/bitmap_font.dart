@@ -7,6 +7,7 @@ import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/cache.dart';
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
+import 'package:flutternoid/util/mutable_rect.dart';
 
 import '../core/common.dart';
 
@@ -55,18 +56,24 @@ abstract class BitmapFont {
     required int columns,
     required int rows,
   }) async {
-    final image = await images.load(filename);
-    final charWidth = image.width ~/ columns;
-    final charHeight = image.height ~/ rows;
+    final sprite = atlas.findSpriteByName(filename.replaceAll('fonts/', '').replaceAll('.png', ''));
+    if (sprite == null) {
+      for (final it in atlas.sprites) {
+        logInfo('atlas sprite: ${it.name}');
+      }
+      throw 'not found in atlas: $filename';
+    }
+    final charWidth = sprite.src.width ~/ columns;
+    final charHeight = sprite.src.height ~/ rows;
 
     late final Uint8List dst;
     try {
       dst = await _loadDst(assets, filename);
     } catch (e, trace) {
       logError('Failed to load bitmap font dst: $e', trace);
-      dst = await _createDst(image, charWidth, charHeight, columns, rows);
+      dst = await _createDst(sprite, charWidth, charHeight, columns, rows);
     }
-    return DstBitmapFont(image, dst, charWidth, charHeight);
+    return DstBitmapFont(sprite, dst, charWidth, charHeight);
   }
 
   static Future<Uint8List> _loadDst(AssetsCache assets, String filename) async {
@@ -77,7 +84,8 @@ abstract class BitmapFont {
     return Uint8List.fromList(widths.toList());
   }
 
-  static Future<Uint8List> _createDst(Image image, int charWidth, int charHeight, int columns, int rows) async {
+  static Future<Uint8List> _createDst(Sprite sprite, int charWidth, int charHeight, int columns, int rows) async {
+    final image = sprite.toImageSync();
     final pixels = await image.pixelsInUint8();
     final result = List.generate(columns * rows, (i) {
       if (i == 0) return charWidth ~/ 4;
@@ -112,8 +120,6 @@ abstract class BitmapFont {
     final w = lines.map((it) => lineWidth(it)).max;
     return Vector2(w, h);
   }
-
-  Sprite sprite(int charCode);
 
   double charWidth(int charCode, [double scale = 1]);
 
@@ -202,7 +208,7 @@ class MonospacedBitmapFont extends BitmapFont {
 }
 
 class DstBitmapFont extends BitmapFont {
-  final Image _image;
+  final Sprite _sprite;
   final Uint8List _dst;
   final int _charWidth;
   final int _charHeight;
@@ -211,9 +217,13 @@ class DstBitmapFont extends BitmapFont {
   @override
   late double spacing;
 
-  DstBitmapFont(this._image, this._dst, this._charWidth, this._charHeight) : _charsPerRow = _image.width ~/ _charWidth {
-    spacing = (_charWidth * 0.1).roundToDouble();
-  }
+  DstBitmapFont(
+    this._sprite,
+    this._dst,
+    this._charWidth,
+    this._charHeight,
+  )   : _charsPerRow = _sprite.src.width ~/ _charWidth,
+        spacing = (_charWidth * 0.1).roundToDouble();
 
   final _cache = <int, Rect>{};
 
@@ -239,12 +249,6 @@ class DstBitmapFont extends BitmapFont {
       );
 
   @override
-  Sprite sprite(int charCode) {
-    final rect = _cachedSrc(charCode);
-    return Sprite(_image, srcPosition: rect.topLeft.toVector2(), srcSize: rect.size.toVector2());
-  }
-
-  @override
   double charWidth(int charCode, [double scale = 1]) => _cachedSrc(charCode).width * scale;
 
   @override
@@ -260,12 +264,17 @@ class DstBitmapFont extends BitmapFont {
     return x - spacing * scale;
   }
 
+  final _src = MutableRect.fromRect(Rect.zero);
+
   @override
   drawString(Canvas canvas, double x, double y, String string) {
+    final image = _sprite.image;
     for (final c in string.codeUnits) {
       final src = _cachedSrc(c);
       final dst = _dstRect(x, y, src.width);
-      canvas.drawImageRect(_image, src, dst, paint);
+      _src.copy(src);
+      _src.add(_sprite.srcPosition);
+      canvas.drawImageRect(image, _src, dst, paint);
       x += src.width * scale + spacing * scale;
     }
   }

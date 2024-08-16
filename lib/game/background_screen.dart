@@ -1,9 +1,12 @@
+import 'dart:ui';
+
 import 'package:collection/collection.dart';
 import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
+import 'package:flame/extensions.dart';
+import 'package:flutternoid/core/common.dart';
 import 'package:tiled/tiled.dart';
 
-import '../core/functions.dart';
 import '../scripting/game_script_functions.dart';
 import '../util/auto_dispose.dart';
 import '../util/delayed.dart';
@@ -14,12 +17,17 @@ import 'game_context.dart';
 import 'game_messages.dart';
 import 'game_phase.dart';
 
-class BackgroundScreen extends PositionComponent
-    with AutoDispose, GameScriptFunctions, GameContext, HasPaint, Snapshot {
+class BackgroundScreen extends PositionComponent with AutoDispose, GameScriptFunctions, GameContext, HasPaint {
   //
   final _stars = BackgroundStars();
 
   late SpriteComponent _frame;
+
+  bool renderSnapshot = false;
+
+  Image? _snapshot;
+
+  final _paint = pixelPaint();
 
   @override
   onLoad() async {
@@ -78,7 +86,7 @@ class BackgroundScreen extends PositionComponent
   }
 
   Future _make_tiled_background(TileLayer bg) async {
-    final tiles = await sheetIWH('doh_background.png', 16, 16);
+    final tiles = atlas.sheetIWH('doh_background.png', 16, 16);
     final map = level.map!;
     for (var y = 0; y < bg.height; y++) {
       for (var x = 0; x < bg.width; x++) {
@@ -95,13 +103,36 @@ class BackgroundScreen extends PositionComponent
     const number_of_backgrounds = 8;
     final background_index = (level - 1) % number_of_backgrounds;
 
-    final backgrounds = await sheetIWH('game_backgrounds.png', 32, 32);
+    final backgrounds = atlas.sheetIWH('game_backgrounds.png', 32, 32);
     final background = backgrounds.getSpriteById(background_index);
 
     for (var y = 0; y < 6; y++) {
       for (var x = 0; x < 6; x++) {
         (await spriteSXY(background, x * 32.0 + 4, y * 32.0 + 9, Anchor.topLeft)).opacity = 0.0;
       }
+    }
+  }
+
+  @override
+  void renderTree(Canvas canvas) {
+    if (renderSnapshot && _snapshot == null) {
+      final recorder = PictureRecorder();
+      super.renderTree(Canvas(recorder)..translate(-visual.background_offset.x, -visual.background_offset.y));
+      final picture = recorder.endRecording();
+      _snapshot = picture.toImageSync(320, 200);
+      picture.dispose();
+    } else if (!renderSnapshot && _snapshot != null) {
+      _snapshot?.dispose();
+      _snapshot = null;
+    }
+
+    final it = _snapshot;
+    if (it != null) {
+      canvas.translateVector(visual.background_offset);
+      canvas.drawImage(it, Offset.zero, _paint);
+      canvas.translate(-visual.background_offset.x, -visual.background_offset.y);
+    } else {
+      super.renderTree(canvas);
     }
   }
 }

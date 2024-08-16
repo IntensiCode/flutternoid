@@ -15,8 +15,6 @@ class BackgroundStars extends PositionComponent with GameContext, HasPaint {
 
   double _anim_time = 0.0;
 
-  bool split_mode = false;
-
   // Component
 
   @override
@@ -51,9 +49,6 @@ class BackgroundStars extends PositionComponent with GameContext, HasPaint {
         _render(canvas, 0, 319, shader_paint, snapshot: true);
       }
       return;
-    } else if (split_mode) {
-      _render(canvas, 0, 15, shader_paint);
-      _render(canvas, 216, 103, shader_paint);
     } else {
       _render(canvas, 0, 319, shader_paint);
     }

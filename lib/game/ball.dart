@@ -2,13 +2,11 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flame/components.dart' hide World;
-import 'package:flame/sprite.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
 import '../core/common.dart';
-import '../core/functions.dart';
 import '../core/messaging.dart';
 import '../core/random.dart';
 import '../util/auto_dispose.dart';
@@ -35,7 +33,7 @@ enum BallState {
 class Ball extends BodyComponent with AutoDispose, GameContext, ContactCallbacks {
   late final Player _player;
   late final double _half_bat_height;
-  late final SpriteSheet sprites;
+  late final TexturePackerSpriteSheet sprites;
   late final FragmentShader shader;
 
   Ball? _spawn_origin;
@@ -175,7 +173,7 @@ class Ball extends BodyComponent with AutoDispose, GameContext, ContactCallbacks
     _player = player;
     _half_bat_height = _player.bat_height / 2.0;
 
-    sprites = await sheetIWH('game_ball.png', 4, 4, spacing: 2);
+    sprites = atlas.sheetIWH('game_ball.png', 4, 4, spacing: 2);
 
     if (_spawn_origin case Ball origin) {
       body.setTransform(origin.body.transform.p, 0);

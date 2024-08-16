@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'package:flame/components.dart';
 
 import '../core/common.dart';
-import '../core/functions.dart';
 import '../scripting/game_script.dart';
 import '../scripting/game_script_functions.dart';
 import '../util/auto_dispose.dart';
@@ -28,7 +27,7 @@ class LevelBonus extends PositionComponent with AutoDispose, GameScriptFunctions
     position.setValues(16 + 20, 72);
     size.setValues(160, game_complete ? 96 : 64);
 
-    final bg = await image('button_plain.png');
+    final bg = atlas.image('button_plain.png');
     fontSelect(tiny_font, scale: 1);
     add(RectangleComponent(position: -position, size: gameSize, paint: pixelPaint()..color = shadow));
     add(NinePatchComponent(image: bg, size: size));
