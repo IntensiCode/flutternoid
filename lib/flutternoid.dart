@@ -20,6 +20,8 @@ import 'util/performance.dart';
 class Flutternoid extends Forge2DGame<MainController>
     with HasKeyboardHandlerComponents, Messaging, Shortcuts, HasPerformanceTracker, ScrollDetector, SingleGameInstance {
   //
+  final _ticker = Ticker(ticks: tps);
+
   Flutternoid() : super(world: MainController()) {
     game = this;
     world = this.world;
@@ -93,6 +95,9 @@ class Flutternoid extends Forge2DGame<MainController>
   }
 
   double _timeScale = 1;
+
+  @override
+  update(double dt) => _ticker.generateTicksFor(dt * _timeScale, (it) => super.update(it));
 
   @override
   void onScroll(PointerScrollInfo info) {

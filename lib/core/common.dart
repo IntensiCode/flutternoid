@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 bool debug = kDebugMode && !kIsWeb;
 bool dev = kDebugMode;
 
-const tps = 120;
+const tps = kIsWeb ? 60 : 120;
 
 const double gameWidth = 320;
 const double gameHeight = 200;
