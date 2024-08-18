@@ -1,6 +1,8 @@
 import 'dart:ui';
 
 import 'package:flame/components.dart';
+import 'package:flutternoid/core/common.dart';
+import 'package:flutternoid/game/enemy.dart';
 import 'package:flutternoid/game/level.dart';
 import 'package:flutternoid/game/player.dart';
 
@@ -15,6 +17,8 @@ class Shadows extends Component with GameContext {
   late final double _shadow_offset;
 
   final _render_pos = Vector2.zero();
+
+  final _shadow = pixelPaint()..color = shadow;
 
   @override
   onLoad() => _shadow_offset = visual.shadow_offset;
@@ -37,6 +41,13 @@ class Shadows extends Component with GameContext {
           sprite.render(canvas, position: _render_pos, overridePaint: level.paint);
         }
       }
+    }
+
+    for (final it in top_level_children<Enemy>()) {
+      _render_pos.setFrom(it.position);
+      _render_pos.x += _shadow_offset;
+      _render_pos.y += _shadow_offset;
+      canvas.drawCircle(_render_pos.toOffset(), it.radius - 1, _shadow);
     }
 
     for (final ball in balls()) {
