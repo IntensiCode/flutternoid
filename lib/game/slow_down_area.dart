@@ -2,7 +2,6 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flame_forge2d/flame_forge2d.dart';
-import 'package:flutter/foundation.dart';
 
 import '../core/common.dart';
 import '../util/auto_dispose.dart';
@@ -134,7 +133,7 @@ class SlowDownArea extends BodyComponent with AutoDispose, GameContext, ContactC
     }
   }
 
-  var shader_paint = pixelPaint();
+  final shader_paint = pixelPaint();
 
   @override
   void render(Canvas canvas) {
@@ -145,9 +144,6 @@ class SlowDownArea extends BodyComponent with AutoDispose, GameContext, ContactC
     shader.setFloat(1, slow_down_range);
     shader.setFloat(2, _shade_anim);
     shader.setFloat(3, _shade_fade);
-
-    // fix for shader bug. on web we need fresh paint for every frame. oh my... ‾\_('')_/‾
-    if (kIsWeb) shader_paint = pixelPaint();
 
     shader_paint.shader = shader;
 

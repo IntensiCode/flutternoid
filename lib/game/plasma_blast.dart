@@ -39,7 +39,7 @@ class PlasmaBlasts extends Component with AutoDispose, GameContext, HasPaint {
     _active.removeWhere((it) => it.expired);
   }
 
-  var shader_paint = pixelPaint();
+  final shader_paint = pixelPaint();
 
   @override
   void render(Canvas canvas) {
@@ -51,10 +51,7 @@ class PlasmaBlasts extends Component with AutoDispose, GameContext, HasPaint {
 
     for (final it in _active) {
       _shader.setFloat(2, it.anim_time);
-
-      if (kIsWeb) shader_paint = pixelPaint();
       shader_paint.shader = _shader;
-
       _render_blast(canvas, it);
     }
   }
