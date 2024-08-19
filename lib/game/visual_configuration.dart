@@ -13,7 +13,7 @@ class VisualConfiguration extends Component with HasGameData {
 
   bool _pixelate = true;
   bool _pixelate_screen = false;
-  bool _animate_stars = false;
+  bool _animate_stars = true;
 
   bool get pixelate => _pixelate;
 
