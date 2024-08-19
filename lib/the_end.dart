@@ -23,7 +23,7 @@ class TheEnd extends GameScriptComponent {
     add(FlowText(
       text: await game.assets.readFile('data/end.txt'),
       font: tiny_font,
-      position: Vector2(0, 24),
+      position: Vector2(0, 28),
       size: Vector2(256, 64 - 8),
     ));
 
