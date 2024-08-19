@@ -1,4 +1,5 @@
 import 'package:flame/components.dart';
+import 'package:flame_forge2d/body_component.dart';
 
 import '../core/common.dart';
 import 'game_phase.dart';
@@ -56,7 +57,7 @@ class SpawnTeleport with Message {
 }
 
 class TriggerPlasmaBlast with Message {
-  final Vector2 center;
+  final BodyComponent ball;
 
-  TriggerPlasmaBlast(this.center);
+  TriggerPlasmaBlast(this.ball);
 }

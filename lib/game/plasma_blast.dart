@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flame/components.dart';
+import 'package:flame_forge2d/body_component.dart';
 import 'package:flutter/foundation.dart';
 
 import '../core/common.dart';
@@ -20,15 +21,13 @@ class PlasmaBlasts extends Component with AutoDispose, GameContext, HasPaint {
     priority = 10;
   }
 
-  trigger(Vector2 center) => _active.add(_Blast(center));
-
   // Component
 
   @override
   onLoad() async {
     super.onLoad();
     _shader = (await FragmentProgram.fromAsset('assets/shaders/plasma.frag')).fragmentShader();
-    onMessage<TriggerPlasmaBlast>((it) => _active.add(_Blast(it.center)));
+    onMessage<TriggerPlasmaBlast>((it) => _active.add(_Blast(it.ball)));
   }
 
   @override
@@ -63,8 +62,8 @@ class PlasmaBlasts extends Component with AutoDispose, GameContext, HasPaint {
   void _render_blast(Canvas canvas, _Blast blast) {
     final w = visual.plasma_size.x;
     final h = visual.plasma_size.y;
-    final x = blast.center.x - w / 2;
-    final y = blast.center.y - h / 2;
+    final x = blast.ball.position.x - w / 2;
+    final y = blast.ball.position.y - h / 2;
 
     shader_paint.opacity = blast.opacity;
 
@@ -85,12 +84,12 @@ class PlasmaBlasts extends Component with AutoDispose, GameContext, HasPaint {
 }
 
 class _Blast {
-  final Vector2 center;
+  final BodyComponent ball;
   final double anim_base = rng.nextDoubleLimit(10);
   double anim_time = 0;
   bool expired = false;
 
-  _Blast(this.center);
+  _Blast(this.ball);
 
   double get opacity => switch (anim_time) {
         < 0.2 => (anim_time * 5).clamp(0.0, 1.0),
