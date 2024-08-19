@@ -59,7 +59,7 @@ class PlayState {
 abstract class Soundboard extends Component with HasGameData {
   void _save() => save('soundboard', this);
 
-  bool _brick_notes = !kIsWeb;
+  bool _brick_notes = true;
 
   bool get brick_notes => _brick_notes;
 
