@@ -73,16 +73,13 @@ class BackgroundScreen extends PositionComponent with AutoDispose, GameScriptFun
       await _make_default_background();
     }
 
-    add(Delayed(0.5, () {
-      _fade_in();
-      add(Delayed(0.5, () {
-        final sprites = children.whereType<SpriteComponent>();
-        for (final it in sprites) {
-          if (it == sprites.last) continue;
-          it.scale.setAll(1.005);
-        }
-      }));
-    }));
+    final added = children.whereType<SpriteComponent>();
+    for (final it in added) {
+      if (it == _stars || it == _frame) continue;
+      it.scale.setAll(1.005);
+    }
+
+    add(Delayed(0.5, () => _fade_in()));
   }
 
   Future _make_tiled_background(TileLayer bg) async {
@@ -116,23 +113,24 @@ class BackgroundScreen extends PositionComponent with AutoDispose, GameScriptFun
   @override
   void renderTree(Canvas canvas) {
     if (renderSnapshot && _snapshot == null) {
-      final recorder = PictureRecorder();
-      super.renderTree(Canvas(recorder)..translate(-visual.background_offset.x, -visual.background_offset.y));
-      final picture = recorder.endRecording();
-      _snapshot = picture.toImageSync(320, 200);
-      picture.dispose();
+      _snapshot = _render_clean_image();
     } else if (!renderSnapshot && _snapshot != null) {
       _snapshot?.dispose();
       _snapshot = null;
     }
 
-    final it = _snapshot;
-    if (it != null) {
+    final it = _snapshot ?? _render_clean_image();
       canvas.translateVector(visual.background_offset);
       canvas.drawImage(it, Offset.zero, _paint);
       canvas.translate(-visual.background_offset.x, -visual.background_offset.y);
-    } else {
-      super.renderTree(canvas);
-    }
+  }
+
+  Image _render_clean_image() {
+    final recorder = PictureRecorder();
+    super.renderTree(Canvas(recorder)..translate(-visual.background_offset.x, -visual.background_offset.y));
+    final picture = recorder.endRecording();
+    final clean = picture.toImageSync(320, 200);
+    picture.dispose();
+    return clean;
   }
 }
