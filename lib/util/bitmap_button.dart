@@ -50,6 +50,8 @@ class BitmapButton extends PositionComponent
   final Function(BitmapButton) onTap;
   final List<String> shortcuts;
 
+  bool snapshot = true;
+
   BitmapButton({
     Sprite? bgNinePatch,
     required this.text,
@@ -87,9 +89,22 @@ class BitmapButton extends PositionComponent
     onKeys(shortcuts, () => onTap(this));
   }
 
+  Image? _snapshot;
+
   @override
   render(Canvas canvas) {
-    background?.draw(canvas, 0, 0, size.x, size.y, paint);
+    if (snapshot) {
+      if (_snapshot == null) {
+        final recorder = PictureRecorder();
+        _render(Canvas(recorder), pixelPaint());
+        final picture = recorder.endRecording();
+        _snapshot = picture.toImageSync(size.x.round(), size.y.round());
+        picture.dispose();
+      }
+      canvas.drawImage(_snapshot!, Offset.zero, paint);
+    } else {
+      _render(canvas, paint);
+    }
 
     font.scale = fontScale;
     font.paint.color = paint.color;
@@ -102,6 +117,10 @@ class BitmapButton extends PositionComponent
     final xOff = (size.x - font.lineWidth(text)) / 2;
     final yOff = (size.y - font.lineHeight(fontScale)) / 2;
     font.drawString(canvas, xOff, yOff, text);
+  }
+
+  void _render(Canvas canvas, Paint paint) {
+    background?.draw(canvas, 0, 0, size.x, size.y, paint);
   }
 
   @override
