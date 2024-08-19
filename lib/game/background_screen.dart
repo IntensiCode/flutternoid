@@ -73,12 +73,6 @@ class BackgroundScreen extends PositionComponent with AutoDispose, GameScriptFun
       await _make_default_background();
     }
 
-    final added = children.whereType<SpriteComponent>();
-    for (final it in added) {
-      if (it == _stars || it == _frame) continue;
-      it.scale.setAll(1.005);
-    }
-
     add(Delayed(0.5, () => _fade_in()));
   }
 
@@ -120,9 +114,9 @@ class BackgroundScreen extends PositionComponent with AutoDispose, GameScriptFun
     }
 
     final it = _snapshot ?? _render_clean_image();
-      canvas.translateVector(visual.background_offset);
-      canvas.drawImage(it, Offset.zero, _paint);
-      canvas.translate(-visual.background_offset.x, -visual.background_offset.y);
+    canvas.translateVector(visual.background_offset);
+    canvas.drawImage(it, Offset.zero, _paint);
+    canvas.translate(-visual.background_offset.x, -visual.background_offset.y);
   }
 
   Image _render_clean_image() {

@@ -36,10 +36,12 @@ class Brick extends BodyComponent {
 
   double sweep_delay = 0.0;
   double sweep_progress = 0.0;
+  bool clear_after_sweep = false;
 
-  void sweep(double delay) {
+  void sweep(double delay, {bool and_clear = false}) {
     sweep_delay = delay;
     sweep_progress = 0.0;
+    clear_after_sweep = and_clear;
   }
 
   int _hits = 0;
@@ -50,8 +52,11 @@ class Brick extends BodyComponent {
 
   bool spawned = false;
 
-  void hit([bool full_force = false]) {
+  void hit({bool full_force = false}) {
+    if (clear_after_sweep) full_force = true;
+
     soundboard.note_index = BrickId.values.length - id.index;
+    soundboard.play(Sound.wall_hit);
 
     if (indestructible) return;
     hit_highlight += 0.1;

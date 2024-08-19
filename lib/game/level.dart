@@ -4,7 +4,6 @@ import 'package:collection/collection.dart' hide IterableExtension;
 import 'package:dart_minilog/dart_minilog.dart';
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
-import 'package:flame/sprite.dart';
 import 'package:flame_tiled/flame_tiled.dart';
 import 'package:kart/kart.dart';
 import 'package:supercharged/supercharged.dart';
@@ -56,6 +55,8 @@ class Level extends PositionComponent with AutoDispose, GameContext, HasPaint {
   bool boss_level = false;
 
   late double level_time = configuration.level_time;
+
+  bool get out_of_time => !boss_level && level_time <= 0;
 
   double _re_sweep = 10.0;
 
@@ -134,7 +135,9 @@ class Level extends PositionComponent with AutoDispose, GameContext, HasPaint {
   void _sweep_level({bool extras_only = false}) {
     double sweep_delay = 0;
     for (final (idx, row) in brick_rows.indexed) {
-      sweep_delay = idx * 0.04;
+      if (row.any((it) => it?.indestructible == false)) {
+        sweep_delay = idx * 0.04;
+      }
       for (final brick in row) {
         if (brick == null || brick.indestructible) continue;
         if (brick.extra_id?.isNotEmpty == true) {
@@ -143,6 +146,19 @@ class Level extends PositionComponent with AutoDispose, GameContext, HasPaint {
           brick.sweep(sweep_delay);
         }
         sweep_delay += 0.01;
+      }
+    }
+  }
+
+  static const _clear_step = 0.2;
+
+  void _clear_level() {
+    double sweep_delay = _clear_step;
+    for (final row in brick_rows) {
+      for (final brick in row) {
+        if (brick == null || brick.indestructible) continue;
+        brick.sweep(sweep_delay, and_clear: true);
+        sweep_delay += _clear_step;
       }
     }
   }
@@ -311,10 +327,18 @@ class Level extends PositionComponent with AutoDispose, GameContext, HasPaint {
 
   void _on_active(double dt) {
     if (player.state == PlayerState.playing && phase == GamePhase.game_on) {
-      level_time -= min(level_time, dt);
+      if (!boss_level) {
+        final before = level_time.toInt();
+        level_time -= min(level_time, dt);
+        final now = level_time.toInt();
+        if (before != now && now <= 5) {
+          sendMessage(ShowCountDown(now));
+          if (now == 0) _clear_level();
+        }
+      }
     }
     _re_sweep -= min(_re_sweep, dt);
-    if (_re_sweep <= 0) {
+    if (_re_sweep <= 0 && level_time > 5) {
       _re_sweep = 10.0;
       _sweep_level();
     }
@@ -328,11 +352,16 @@ class Level extends PositionComponent with AutoDispose, GameContext, HasPaint {
         }
         if (brick.sweep_progress > 0) {
           brick.sweep_progress -= min(brick.sweep_progress, dt * 4);
+          if (brick.sweep_progress <= 0 && brick.clear_after_sweep) {
+            brick.hit(full_force: true);
+          }
         }
         if (brick.hit_highlight > 0) brick.hit_highlight -= min(brick.hit_highlight, dt);
         if (brick.destroyed && brick.destroy_progress < 1.0) brick.destroy_progress += dt * 4;
         if (brick.destroyed && !brick.spawned) {
-          model.state.score += (brick.id.score * (1 + level_number_starting_at_1 * 0.2)).round();
+          if (level_time > 0) {
+            model.state.score += (brick.id.score * (1 + level_number_starting_at_1 * 0.2)).round();
+          }
           if (brick.extra_id != null) {
             // logInfo('brick destroyed - extra id: ${brick.extra_id}');
             sendMessage(SpawnExtraFromBrick(brick));

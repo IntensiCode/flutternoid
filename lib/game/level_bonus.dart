@@ -39,8 +39,6 @@ class LevelBonus extends PositionComponent with AutoDispose, GameScriptFunctions
       it.fadeInDeep();
     }
 
-    soundboard.play_one_shot_sample('sound/level_complete.ogg');
-
     if (game_complete) {
       at(1.0, () => content.lines.add(''));
       at(0.0, () => content.lines.add('DOH DEFEATED:'));
@@ -87,6 +85,12 @@ class LevelBonus extends PositionComponent with AutoDispose, GameScriptFunctions
       at(1.0, () => when_done());
     } else {
       time_bonus = level.level_time.round();
+
+      if (time_bonus > 0) {
+        soundboard.play_one_shot_sample('sound/level_complete.ogg');
+      } else {
+        soundboard.play_one_shot_sample('doh_laugh.ogg');
+      }
     }
   }
 
@@ -156,7 +160,11 @@ class LevelBonus extends PositionComponent with AutoDispose, GameScriptFunctions
     if (level_complete < 0) {
       level_complete += dt;
       if (level_complete >= 0) {
-        content.lines.add('LEVEL COMPLETED:');
+        if (time_bonus > 0) {
+          content.lines.add('LEVEL COMPLETED');
+        } else {
+          content.lines.add('LEVEL FAILED');
+        }
       }
       return;
     }
@@ -165,7 +173,7 @@ class LevelBonus extends PositionComponent with AutoDispose, GameScriptFunctions
     // }
     if (level_complete < 1) {
       level_complete += dt;
-      if (level_complete >= 1) {
+      if (level_complete >= 1 && time_bonus > 0) {
         content.lines.add('*EXTRA PLASMA BLAST*');
         game_state.blasts++;
         soundboard.play_one_shot_sample('sound/extra_blast.ogg');

@@ -96,7 +96,11 @@ class SlowDownArea extends BodyComponent with AutoDispose, GameContext, ContactC
     super.update(dt);
 
     if (slow_down_time > 0.0) {
-      slow_down_time -= min(dt, slow_down_time);
+      if (level.out_of_time) {
+        slow_down_time -= min(dt * 10, slow_down_time);
+      } else {
+        slow_down_time -= min(dt, slow_down_time);
+      }
       _shade_anim += dt;
     }
 

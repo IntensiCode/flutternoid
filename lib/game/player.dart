@@ -175,6 +175,7 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameConte
         other.body.applyLinearImpulse(Vector2(player.x_speed, 0));
       }
     } else if (other is Enemy) {
+      logInfo('enemy collision explode all');
       explode();
       other.explode();
       for (final it in balls) {
@@ -360,6 +361,8 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameConte
   }
 
   _on_force_hold(double dt) {
+    _force_hold.removeWhere((it, time) => it.state != BallState.caught);
+
     for (final ball in _force_hold.keys) {
       final time = _force_hold[ball];
       if (time == null) continue;
@@ -369,6 +372,7 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameConte
       _force_hold[ball] = new_time;
 
       if (new_time <= 0) {
+        logInfo('force hold ball explode');
         ball.explode();
         soundboard.trigger(Sound.explosion);
       } else {
@@ -397,6 +401,13 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameConte
   void _on_mode_change(double dt) {
     if (mode_time > 0) {
       mode_time -= min(mode_time, dt);
+      if (level.out_of_time) {
+        if (is_actual_catcher) {
+          mode_time = 0;
+        } else {
+          mode_time -= min(mode_time, dt);
+        }
+      }
       if (mode_time <= 0) _on_mode_reset();
     }
     if (_mode_change > 0) {

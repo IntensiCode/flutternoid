@@ -3,9 +3,6 @@
  <editorsettings>
   <export target="level22.tmx" format="tmx"/>
  </editorsettings>
- <properties>
-  <property name="level_time" type="int" value="125"/>
- </properties>
  <tileset firstgid="1" source="game_blocks.tsx"/>
  <tileset firstgid="31" source="game_extras.tsx"/>
  <layer id="1" name="blocks" width="15" height="20">

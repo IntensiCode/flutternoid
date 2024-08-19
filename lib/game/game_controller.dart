@@ -92,6 +92,8 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
 
     _temp_block_keys = true;
 
+    if (model.level.out_of_time) return;
+
     add(Delayed(0.5, () {
       _switch_overlay(BitmapText(
         text: 'ROUND ${model.state.level_number_starting_at_1}',
@@ -333,7 +335,9 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
           position: Vector2(0, 32),
           anchor: Anchor.topLeft,
           font: tiny_font,
-          onTap: (_) => model.phase = GamePhase.confirm_exit,
+          onTap: (_) {
+            if (!_temp_block_keys) model.phase = GamePhase.confirm_exit;
+          },
         )..angle = -pi / 2,
         BitmapButton(
           bgNinePatch: _button,
@@ -341,7 +345,9 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
           position: Vector2(0, gameHeight + 16),
           anchor: Anchor.bottomLeft,
           font: tiny_font,
-          onTap: (_) => model.phase = GamePhase.game_paused,
+          onTap: (_) {
+            if (!_temp_block_keys) model.phase = GamePhase.game_paused;
+          },
         )..angle = -pi / 2,
       ])
         ..fadeInDeep();

@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flame/components.dart';
 import 'package:flame_forge2d/body_component.dart';
+import 'package:flutternoid/game/count_down.dart';
 import 'package:supercharged/supercharged.dart';
 
 import '../core/common.dart';
@@ -87,6 +88,7 @@ class GameScreen extends PositionComponent
     add(player);
     add(plasma_blasts);
     add(Teleports());
+    add(CountDown());
 
     onMessage<PlayerReady>((it) => add(Ball()));
     onMessage<MultiBall>((_) => _split_ball());

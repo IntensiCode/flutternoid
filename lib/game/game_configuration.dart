@@ -7,7 +7,7 @@ class GameConfiguration {
 
   int enemy_score = 200;
 
-  double level_time = 60;
+  double level_time = 90;
 
   double mode_time = 30;
   double expand_time = 30;

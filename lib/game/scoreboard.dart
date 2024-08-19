@@ -270,7 +270,7 @@ class Scoreboard extends PositionComponent with AutoDispose, GameContext, HasPai
 
     if (level.level_time > 0) {
       final bonus = level.level_time.round().toString().padLeft(2, ' ');
-      mini_font.drawStringAligned(canvas, size.x / 2, 104, 'BONUS $bonus', Anchor.topCenter);
+      mini_font.drawStringAligned(canvas, size.x / 2, 104, 'TIME  $bonus', Anchor.topCenter);
     }
 
     var stats_y = 116.0;

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="15" height="20" tilewidth="12" tileheight="6" infinite="0" nextlayerid="3" nextobjectid="1">
  <properties>
-  <property name="level_time" type="int" value="150"/>
   <property name="spawn_mode" value="random"/>
  </properties>
  <tileset firstgid="1" source="game_blocks.tsx"/>

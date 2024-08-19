@@ -130,9 +130,9 @@ class Ball extends BodyComponent with AutoDispose, GameContext, ContactCallbacks
     if (other is Ball && other.state != BallState.active || this.state != BallState.active) {
       contact.isEnabled = false;
     } else if (other is Brick) {
-      other.hit(disruptor > 0);
+      other.hit(full_force: disruptor > 0);
       if (disruptor > 0 && other.destroyed) contact.isEnabled = false;
-      soundboard.trigger(Sound.wall_hit);
+      //soundboard.trigger(Sound.wall_hit); moved into Brick
     } else if (other is Player && other.in_catcher_mode) {
       contact.isEnabled = false;
     } else if (other is Player || other is Wall) {
@@ -195,7 +195,7 @@ class Ball extends BodyComponent with AutoDispose, GameContext, ContactCallbacks
 
   void _on_trigger_plasma_blast() {
     if (state != BallState.active) return;
-    sendMessage(TriggerPlasmaBlast(position));
+    sendMessage(TriggerPlasmaBlast(this));
     body.linearVelocity.x = rng.nextDoublePM(pi / 6);
     body.linearVelocity.y = -1;
     body.linearVelocity.scale(configuration.opt_ball_speed);
@@ -270,6 +270,8 @@ class Ball extends BodyComponent with AutoDispose, GameContext, ContactCallbacks
     _update_position.setFrom(_player.position);
     _update_position.add(_caught_offset);
     body.setTransform(_update_position, 0);
+
+    if (level.out_of_time) push(rng.nextDoublePM(10), -50);
   }
 
   void _on_active(double dt) {
@@ -277,7 +279,12 @@ class Ball extends BodyComponent with AutoDispose, GameContext, ContactCallbacks
     _check_ball_lost();
 
     var current_speed = body.linearVelocity.length;
-    if (current_speed > configuration.max_ball_speed) {
+    var max_speed = configuration.max_ball_speed;
+    if (level.out_of_time) {
+      body.linearVelocity.scale(1.05);
+      max_speed *= 1.75;
+    }
+    if (current_speed > max_speed) {
       body.linearVelocity.normalize();
       body.linearVelocity.scale(configuration.max_ball_speed);
     } else if (body.linearVelocity.y.abs() < configuration.min_ball_y_speed) {

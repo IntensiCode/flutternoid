@@ -56,6 +56,12 @@ class SpawnTeleport with Message {
   SpawnTeleport(this.position);
 }
 
+class ShowCountDown with Message {
+  final int count;
+
+  ShowCountDown(this.count);
+}
+
 class TriggerPlasmaBlast with Message {
   final BodyComponent ball;
 
