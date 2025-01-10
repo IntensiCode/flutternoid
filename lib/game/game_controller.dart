@@ -287,7 +287,7 @@ class GameController extends GameScriptComponent with HasAutoDisposeShortcuts {
         GamePhase.game_paused => {
             GameKey.soft1: () => showScreen(Screen.title),
             GameKey.soft2: () => model.phase = GamePhase.game_on,
-            GameKey.fire1: () => model.phase = GamePhase.game_on,
+            GameKey.a_button: () => model.phase = GamePhase.game_on,
           },
         GamePhase.next_round => {},
       };

@@ -1,17 +1,18 @@
 import 'package:flame/components.dart';
 import 'package:flutter/services.dart';
-
-import '../util/extensions.dart';
+import 'package:flutternoid/util/extensions.dart';
 
 enum GameKey {
   left,
   right,
   up,
   down,
-  fire1,
-  fire2,
-  inventory,
-  useOrExecute,
+  a_button,
+  b_button,
+  x_button,
+  y_button,
+  start,
+  select,
   soft1,
   soft2,
 }
@@ -21,30 +22,34 @@ mixin HasGameKeys on KeyboardHandler {
 
   static final leftKeys = ['Arrow Left', 'A', 'H'];
   static final rightKeys = ['Arrow Right', 'D', 'L'];
-  static final downKeys = ['Arrow Down', 'S'];
-  static final upKeys = ['Arrow Up', 'W'];
-  static final fireKeys1 = ['Space', 'J'];
-  static final fireKeys2 = ['Shift', 'K'];
-  static final inventoryKeys = ['Tab', 'I'];
-  static final useOrExecuteKeys = ['U'];
-  static final softKeys1 = ['Backspace', 'Escape'];
-  static final softKeys2 = ['Delete', 'Enter'];
+  static final downKeys = ['Arrow Down', 'S', 'J'];
+  static final upKeys = ['Arrow Up', 'W', 'K'];
+  static final aKeys = ['V', 'Control', 'M'];
+  static final bKeys = ['C', 'Shift', 'E'];
+  static final xKeys = ['X', 'Space', 'N'];
+  static final yKeys = ['Y', 'Alt', 'Q'];
+  static final selectKeys = ['Tab', 'I'];
+  static final startKeys = ['F1', 'U'];
+  static final softKeys1 = ['Escape'];
+  static final softKeys2 = ['Enter'];
 
   static final mapping = {
     GameKey.left: leftKeys,
     GameKey.right: rightKeys,
     GameKey.up: upKeys,
     GameKey.down: downKeys,
-    GameKey.fire1: fireKeys1,
-    GameKey.fire2: fireKeys2,
-    GameKey.inventory: inventoryKeys,
-    GameKey.useOrExecute: useOrExecuteKeys,
+    GameKey.a_button: aKeys,
+    GameKey.b_button: bKeys,
+    GameKey.x_button: xKeys,
+    GameKey.y_button: yKeys,
+    GameKey.select: selectKeys,
+    GameKey.start: startKeys,
     GameKey.soft1: softKeys1,
     GameKey.soft2: softKeys2,
   };
 
-  void Function(GameKey) onPressed = (_) {};
-  void Function(GameKey) onReleased = (_) {};
+  late void Function(GameKey) onPressed = (it) => held[it] = true;
+  late void Function(GameKey) onReleased = (it) => held[it] = false;
 
   // held states
 
@@ -66,9 +71,17 @@ mixin HasGameKeys on KeyboardHandler {
 
   bool get down => held[GameKey.down] == true;
 
-  bool get fire1 => held[GameKey.fire1] == true;
+  bool get a_button => held[GameKey.a_button] == true;
 
-  bool get fire2 => held[GameKey.fire2] == true;
+  bool get b_button => held[GameKey.b_button] == true;
+
+  bool get x_button => held[GameKey.x_button] == true;
+
+  bool get y_button => held[GameKey.y_button] == true;
+
+  bool get select => held[GameKey.select] == true;
+
+  bool get start => held[GameKey.start] == true;
 
   bool get soft1 => held[GameKey.soft1] == true;
 
@@ -90,7 +103,6 @@ mixin HasGameKeys on KeyboardHandler {
         final key = entry.key;
         final keys = entry.value;
         if (keys.any((it) => labels.contains(it))) {
-          held[key] = true;
           onPressed(key);
         }
       }
@@ -101,7 +113,6 @@ mixin HasGameKeys on KeyboardHandler {
         final key = entry.key;
         final keys = entry.value;
         if (keys.any((it) => labels.contains(it))) {
-          held[key] = false;
           onReleased(key);
         }
       }

@@ -3,16 +3,17 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-
-import '../util/auto_dispose.dart';
+import 'package:flutternoid/util/auto_dispose.dart';
 
 mixin HasAutoDisposeShortcuts on Component, AutoDispose {
-  bool get is_active => true;
+  bool get is_active => isMounted && !isRemoving;
 
   void onKey(String pattern, void Function() callback) {
+    logInfo('onKey $pattern');
     autoDispose(
-      'key-$pattern',
-      shortcuts.onKey(pattern, callback, is_active: () => is_active),);
+      'onKey-$pattern',
+      shortcuts.onKey(pattern, callback, is_active: () => is_active),
+    );
   }
 
   void onKeys(List<String> patterns, void Function() callback) {

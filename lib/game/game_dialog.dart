@@ -80,6 +80,6 @@ class GameDialog extends PositionComponent with AutoDispose, GameScriptFunctions
     super.update(dt);
     if (keys?.check_and_consume(GameKey.soft1) == true) _handlers[GameKey.soft1]!();
     if (keys?.check_and_consume(GameKey.soft2) == true) _handlers[GameKey.soft2]!();
-    if (keys?.check_and_consume(GameKey.fire1) == true) _handlers[GameKey.soft2]!();
+    if (keys?.check_and_consume(GameKey.a_button) == true) _handlers[GameKey.soft2]!();
   }
 }

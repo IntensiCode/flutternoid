@@ -352,7 +352,7 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameConte
     if (model.state.blasts <= 0) return;
 
     if (_plasma_cool_down > 0) _plasma_cool_down -= min(_plasma_cool_down, dt);
-    if (keys.check_and_consume(GameKey.fire2) && _plasma_cool_down <= 0) {
+    if (keys.check_and_consume(GameKey.b_button) && _plasma_cool_down <= 0) {
       _plasma_cool_down = configuration.plasma_cool_down;
       soundboard.trigger(Sound.plasma);
       sendMessage(TriggerPlasmaBlasts());
@@ -472,9 +472,9 @@ class Player extends BodyComponent with AutoDispose, ContactCallbacks, GameConte
   }
 
   void _on_playing_fire(double dt) {
-    _was_holding_fire |= _keys.fire1;
+    _was_holding_fire |= _keys.a_button;
 
-    if (!_was_holding_fire || _keys.fire1) return;
+    if (!_was_holding_fire || _keys.a_button) return;
 
     final caught = balls.where((it) => it.state == BallState.caught).firstOrNull;
     if (caught != null) {

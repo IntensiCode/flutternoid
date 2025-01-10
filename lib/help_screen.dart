@@ -44,7 +44,7 @@ class HelpScreen extends GameScriptComponent {
   @override
   void update(double dt) {
     super.update(dt);
-    if (keys.check_and_consume(GameKey.fire1)) {
+    if (keys.check_and_consume(GameKey.a_button)) {
       popScreen();
     }
   }

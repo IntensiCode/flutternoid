@@ -54,7 +54,7 @@ Future<SpriteAnimation> animCR(
   int rows, [
   double stepTime = 0.1,
   bool loop = true,
-]) async {
+]) async   {
   final image = await images.load(filename);
   final frameWidth = image.width ~/ columns;
   final frameHeight = image.height ~/ rows;

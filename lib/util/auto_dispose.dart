@@ -5,6 +5,8 @@ import 'package:flame/components.dart';
 
 /// Generic "disposable" to dispose/cancel/free some wrapped object.
 abstract interface class Disposable {
+  static final disposed = _Disposable(() {});
+
   /// Dispose the object wrapped by this disposable.
   void dispose();
 
@@ -15,7 +17,7 @@ abstract interface class Disposable {
 /// Holds potentially multiple [Disposable]s to be [dispose]d in one call.
 /// Removes all [Disposable]s when [dispose] is called. Can be reused after
 /// [dispose] has been called.
-class CompositeDisposable implements Disposable {
+mixin CompositeDisposable implements Disposable {
   final _disposables = <Disposable>[];
 
   void add(Disposable disposable) => _disposables.add(disposable);
@@ -82,6 +84,21 @@ mixin AutoDispose on Component {
       it.dispose();
     }
     _disposables.clear();
+  }
+
+  void disposeWhere(bool Function(Disposable disposable) predicate) {
+    final matched = _disposables.entries.where((it) => predicate(it.value));
+    for (final it in matched) {
+      logInfo('dispose ${it.key}');
+      dispose(it.key);
+    }
+  }
+
+  void disposeWhereTag(bool Function(String tag) predicate) {
+    for (final tag in _disposables.keys.where(predicate).toList()) {
+      logInfo('dispose $tag');
+      dispose(tag);
+    }
   }
 
   /// Dispose the [Disposable] associated with the given [tag]. Nop if nothing registered for this

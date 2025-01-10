@@ -31,6 +31,8 @@ dependencies:
   shared_preferences: ^2.2.3
   tiled: ^0.10.2
   flame_texturepacker: ^4.0.1
+  gamepads: ^0.1.4
+  web: ^1.1.0
 
 dev_dependencies:
   flutter_test:
